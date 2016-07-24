@@ -17,13 +17,11 @@ namespace TsinghuaUWP
         public string message { get; set; }
         public Resultlist[] resultList { get; set; }
     }
-
     public class Resultlist
     {
         public Coursehomeworkrecord courseHomeworkRecord { get; set; }
         public Coursehomeworkinfo courseHomeworkInfo { get; set; }
     }
-
     public class Coursehomeworkrecord
     {
         public int seqId { get; set; }
@@ -44,7 +42,6 @@ namespace TsinghuaUWP
         public int groupId { get; set; }
         public object groupName { get; set; }
     }
-
     public class Resourcesmappingbyhomewkaffix
     {
         public string fileId { get; set; }
@@ -62,7 +59,6 @@ namespace TsinghuaUWP
         public int resourcesStatus { get; set; }
         public string userCode { get; set; }
     }
-
     public class Coursehomeworkinfo
     {
         public int homewkId { get; set; }
@@ -90,7 +86,6 @@ namespace TsinghuaUWP
         public int yiPi { get; set; }
         public int jiaoed { get; set; }
     }
-
     public class JSON
     {
 
@@ -121,14 +116,19 @@ namespace TsinghuaUWP
         static string homeUri = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn";
         static HttpClient httpClient = new HttpClient();
         static HttpResponseMessage httpResponse = new HttpResponseMessage();
-        static string httpResponseBody = "";
 
+        static async Task<string> getPageContent(string url)
+        {
+            //getPage
+            httpResponse = await httpClient.GetAsync(new Uri(url));
+            httpResponse.EnsureSuccessStatusCode();
+            return await httpResponse.Content.ReadAsStringAsync();
+        }
 
-        
         static async Task<int> login()
         {
             string username = "lizy14";
-            string password = "i won't commit my password";
+            string password = "I can eat glass, it does not hurt me";
 
             //login to learn.tsinghua.edu.cn
             HttpStringContent stringContent = new HttpStringContent(
@@ -138,7 +138,7 @@ namespace TsinghuaUWP
 
             httpResponse = await httpClient.PostAsync(new Uri(loginUri), stringContent);
             httpResponse.EnsureSuccessStatusCode();
-            httpResponseBody = await httpResponse.Content.ReadAsStringAsync();
+            await httpResponse.Content.ReadAsStringAsync();
 
             //get iframe src
             HtmlDocument htmlDoc = new HtmlDocument();
@@ -151,7 +151,7 @@ namespace TsinghuaUWP
             return 0;
         }
 
-        static List<Deadline> parseHomeworkList(string page)
+        static List<Deadline> parseHomeworkListPage(string page)
         {
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(page);
@@ -188,7 +188,7 @@ namespace TsinghuaUWP
             return deadlines;
         }
 
-        static List<Deadline> parseHomeworkListNew(string page)
+        static List<Deadline> parseHomeworkListPageNew(string page)
         {
 
             List<Deadline> deadlines = new List<Deadline>();
@@ -224,33 +224,7 @@ namespace TsinghuaUWP
             return deadlines;
         }
 
-        static async Task<string> getPageContent(string url)
-        {
-            //getPage
-            httpResponse = await httpClient.GetAsync(new Uri(url));
-            httpResponse.EnsureSuccessStatusCode();
-            httpResponseBody = await httpResponse.Content.ReadAsStringAsync();
-            return httpResponseBody;
-        }
-
-        static async Task<string> getHomeworkList(string courseId)
-        {
-            return await getPageContent($"http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id={courseId}");
-        }
-
-        static async Task<string> getHomeworkListNew(string courseId)
-        {
-            Int32 timestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
-            string url = $"http://learn.cic.tsinghua.edu.cn/b/myCourse/homework/list4Student/{courseId}/0?_={timestamp}";
-            return await getPageContent(url);
-        }
-
-        static async Task<string> getCourses()
-        {
-            return await getPageContent(homeUri);
-        }
-
-        static List<Course> parseCourseList(string page)
+        static List<Course> parseCourseListPage(string page)
         {
             List<Course> courses = new List<Course>();
 
@@ -289,14 +263,36 @@ namespace TsinghuaUWP
             return courses;
         }
 
+        static async Task<string> getHomeworkListPage(string courseId)
+        {
+            return await getPageContent($"http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id={courseId}");
+        }
+
+        static async Task<string> getHomeworkLisPagetNew(string courseId)
+        {
+            Int32 timestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
+            string url = $"http://learn.cic.tsinghua.edu.cn/b/myCourse/homework/list4Student/{courseId}/0?_={timestamp}";
+            return await getPageContent(url);
+        }
+
+        static async Task<string> getCourseListPage()
+        {
+            return await getPageContent(homeUri);
+        }
+
 
         static public async Task<Deadline> getDeadline()
         {
+            return (await getAllDeadlines()).Last();
+        }
 
+        static public async Task<List<Deadline>> getAllDeadlines()
+        {
+            
             await login();
 
             if (courses == null)
-                courses = parseCourseList(await getCourses());
+                courses = parseCourseListPage(await getCourseListPage());
 
             List<Deadline> deadlines = new List<Deadline>();
 
@@ -305,22 +301,13 @@ namespace TsinghuaUWP
                 var id = course.id;
                 List<Deadline> _deadlines;
                 if (course.isNew)
-                    _deadlines = parseHomeworkListNew(await getHomeworkListNew(id));
+                    _deadlines = parseHomeworkListPageNew(await getHomeworkLisPagetNew(id));
                 else
-                    _deadlines = parseHomeworkList(await getHomeworkList(id));
+                    _deadlines = parseHomeworkListPage(await getHomeworkListPage(id));
                 deadlines = deadlines.Concat(_deadlines).ToList();
             }
 
-
-            try { }
-            catch (Exception ex)
-            {
-                httpResponseBody = "Error: " + ex.HResult.ToString("X") + " Message: " + ex.Message;
-            }
-
-            deadlines.Sort();
-
-            return deadlines.Last();
+            return deadlines;
         }
     }
 }
