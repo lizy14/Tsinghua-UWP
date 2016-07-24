@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -81,8 +82,12 @@ namespace TsinghuaUWP
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
+
+            //Tile.update();
+
             RegisterBackgroundTask();
-            Tile.update();
+            
+
         }
 
         /// <summary>
@@ -126,6 +131,7 @@ namespace TsinghuaUWP
                     if (task.Value.Name == taskName)
                     {
                         task.Value.Unregister(true);
+                        Debug.WriteLine("Background task unregistered");
                     }
                 }
 
@@ -134,6 +140,7 @@ namespace TsinghuaUWP
                 taskBuilder.TaskEntryPoint = taskEntryPoint;
                 taskBuilder.SetTrigger(new TimeTrigger(15, false));
                 var registration = taskBuilder.Register();
+                Debug.WriteLine("Background task registered");
             }
         }
 

@@ -22,7 +22,7 @@ namespace TsinghuaUWP
     public class Deadline
     {
         public string name;
-        public string due;
+        public string ddl;
         public string course;
         public string detail;
         public bool hasBeenFinished;
@@ -34,7 +34,7 @@ namespace TsinghuaUWP
         }
         public string timeLeftEnglish()
         {
-            TimeSpan timeDelta = DateTime.Parse(due + " 23:59") - DateTime.Now;
+            TimeSpan timeDelta = DateTime.Parse(ddl + " 23:59") - DateTime.Now;
 
             var daysLeft = timeDelta.TotalDays;
             string timeLeft = "";
@@ -70,7 +70,7 @@ namespace TsinghuaUWP
         }
         public string timeLeftChinese()
         {
-            TimeSpan timeDelta = DateTime.Parse(due + " 23:59") - DateTime.Now;
+            TimeSpan timeDelta = DateTime.Parse(ddl + " 23:59") - DateTime.Now;
 
             var daysLeft = timeDelta.TotalDays;
             string timeLeft = "";

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Windows.Web.Http;
 using System.Runtime.Serialization.Json;
 using System.IO;
+using System.Diagnostics;
 
 namespace TsinghuaUWP
 {
@@ -114,7 +115,7 @@ namespace TsinghuaUWP
 
         static string loginUri = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp";
         static string homeUri = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn";
-        static HttpClient httpClient = new HttpClient();
+        static HttpClient httpClient;
         static HttpResponseMessage httpResponse = new HttpResponseMessage();
 
         static async Task<string> getPageContent(string url)
@@ -128,7 +129,9 @@ namespace TsinghuaUWP
         static async Task<int> login()
         {
             string username = "lizy14";
-            string password = "I can eat glass, it does not hurt me";
+            string password = "2heng1i@ngyu";//"I can eat glass, it does not hurt me";
+
+            httpClient = new HttpClient();
 
             //login to learn.tsinghua.edu.cn
             HttpStringContent stringContent = new HttpStringContent(
@@ -180,7 +183,7 @@ namespace TsinghuaUWP
                 deadlines.Add(new Deadline
                 {
                     name = _name,
-                    due = _due,
+                    ddl = _due,
                     course = _course,
                     hasBeenFinished = _isFinished
                 });
@@ -216,7 +219,7 @@ namespace TsinghuaUWP
                 deadlines.Add(new Deadline
                 {
                     name = _name,
-                    due = _due,
+                    ddl = _due,
                     course = _course,
                     hasBeenFinished = _isFinished
                 });
@@ -224,7 +227,7 @@ namespace TsinghuaUWP
             return deadlines;
         }
 
-        static List<Course> parseCourseListPage(string page)
+        static List<Course> parseCourseList(string page)
         {
             List<Course> courses = new List<Course>();
 
@@ -283,21 +286,35 @@ namespace TsinghuaUWP
 
         static public async Task<Deadline> getDeadline()
         {
-            return (await getAllDeadlines()).Last();
+            var assignments = await getAllDeadlines();
+            var result = (from assignment in assignments
+                             where assignment.hasBeenFinished == false
+                             orderby ((DateTime.Parse(assignment.ddl) - DateTime.Now).TotalDays)
+                             select assignment);
+            return result.Last();
         }
-
+        
         static public async Task<List<Deadline>> getAllDeadlines()
         {
-            
+            Debug.WriteLine("Trying to login");
             await login();
+            Debug.WriteLine("Login successful");
 
             if (courses == null)
-                courses = parseCourseListPage(await getCourseListPage());
+            {
+                courses = parseCourseList(await getCourseListPage());
+                Debug.WriteLine("Get course list successful");
+            }else
+            {
+                Debug.WriteLine("Using local course list");
+            }
+                
 
             List<Deadline> deadlines = new List<Deadline>();
 
             foreach (var course in courses)
             {
+                Debug.WriteLine("Getting assignment list for " + course.name);
                 var id = course.id;
                 List<Deadline> _deadlines;
                 if (course.isNew)
@@ -307,6 +324,7 @@ namespace TsinghuaUWP
                 deadlines = deadlines.Concat(_deadlines).ToList();
             }
 
+            Debug.WriteLine("Returning with assignments");
             return deadlines;
         }
     }

@@ -6,23 +6,37 @@ using System.Threading.Tasks;
 
 using Windows.UI.Notifications;
 using Windows.Data.Xml.Dom;
+using System.Diagnostics;
 
 namespace TsinghuaUWP
 {
     public class Tile
     {
-        static public async void update()
+        static public async Task<int> update()
         {
+            
+            try
+            {
 
-            var deadline = await Remote.getDeadline();
+                Debug.WriteLine("Updating tile");
+
+                var deadline = await Remote.getDeadline();
+                // Create the tile notification
+                var notification = new TileNotification(Tile.getTileXmlForDeadlines(deadline));
+
+                // And send the notification
+                TileUpdateManager.CreateTileUpdaterForApplication().Update(notification);
+                Debug.WriteLine("Tile updated");
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                return 1;
+            }
+            
 
 
-            // Create the tile notification
-            var notification = new TileNotification(Tile.getTileXmlForDeadlines(deadline));
-
-            // And send the notification
-            TileUpdateManager.CreateTileUpdaterForApplication().Update(notification);
-
+            return 0;
         }
 
         static XmlDocument getTileXmlForDeadlines(Deadline deadline)
@@ -30,7 +44,7 @@ namespace TsinghuaUWP
 
             string name = deadline.name;
             string course = deadline.course;
-            string due = deadline.due;
+            string due = deadline.ddl;
             string timeLeft = deadline.timeLeft();
                 
             string xml = $@"

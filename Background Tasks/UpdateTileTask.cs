@@ -1,15 +1,21 @@
 ﻿using Windows.ApplicationModel.Background;
 using TsinghuaUWP;
+using System.Diagnostics;
 
 namespace BackgroundTasks
 {
     public sealed class UpdateTileTask : IBackgroundTask
     {
-        public void Run(IBackgroundTaskInstance taskInstance)
+
+        public async void Run(IBackgroundTaskInstance taskInstance)
         {
+            Debug.WriteLine("UpdateTileTask launched");
+
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
-            Tile.update();
+            await Tile.update();
             deferral.Complete();
+
+            Debug.WriteLine("UpdateTileTask finished");
         }
     }
 }
