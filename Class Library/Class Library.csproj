@@ -109,7 +109,7 @@
   <ItemGroup>
     <Compile Include="Deadline.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Pull.cs" />
+    <Compile Include="Remote.cs" />
     <Compile Include="Tile.cs" />
     <EmbeddedResource Include="Properties\Class_Library.rd.xml" />
   </ItemGroup>
