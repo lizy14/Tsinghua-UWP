@@ -11,15 +11,20 @@ namespace TsinghuaUWP
 {
     public class Tile
     {
-        static public void update()
+        static public async void update()
         {
+
+            var deadline = await Remote.getDeadline();
+
+
             // Create the tile notification
-            var notification = new TileNotification(Tile.getTileXmlForDeadlines(Pull.getDeadline()));
+            var notification = new TileNotification(Tile.getTileXmlForDeadlines(deadline));
 
             // And send the notification
             TileUpdateManager.CreateTileUpdaterForApplication().Update(notification);
 
         }
+
         static XmlDocument getTileXmlForDeadlines(Deadline deadline)
         {
 

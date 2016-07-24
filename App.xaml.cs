@@ -81,7 +81,7 @@ namespace TsinghuaUWP
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
-            this.RegisterBackgroundTask();
+            RegisterBackgroundTask();
             Tile.update();
         }
 
