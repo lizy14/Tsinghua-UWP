@@ -78,7 +78,7 @@ namespace TsinghuaUWP
 
                 if(__calendar != null)
                 {
-                    if(DateTime.Parse(__calendar.currentSemester.endDate + " 23:59") > DateTime.Now)
+                    if(DateTime.Parse(__calendar.currentSemester.endDate + " 23:59") < DateTime.Now)
                     {
                         Debug.WriteLine("[getCalendar] cache dirty");
                         //force a remote update
