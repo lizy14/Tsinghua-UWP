@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Background;
+using Windows.Storage;
 
 namespace TsinghuaUWP
 {
@@ -12,6 +13,7 @@ namespace TsinghuaUWP
     {
         public static async void RegisterBackgroundTask()
         {
+
             var backgroundAccessStatus = await BackgroundExecutionManager.RequestAccessAsync();
             if (backgroundAccessStatus == BackgroundAccessStatus.AllowedMayUseActiveRealTimeConnectivity ||
                 backgroundAccessStatus == BackgroundAccessStatus.AllowedWithAlwaysOnRealTimeConnectivity)
@@ -30,7 +32,6 @@ namespace TsinghuaUWP
                 taskBuilder.TaskEntryPoint = taskEntryPoint;
 
                 taskBuilder.SetTrigger(new TimeTrigger(15, false));
-                //taskBuilder.SetTrigger(new SystemTrigger(SystemTriggerType.PowerStateChange, false));
 
                 taskBuilder.AddCondition(new SystemCondition(SystemConditionType.UserPresent));
                 taskBuilder.AddCondition(new SystemCondition(SystemConditionType.InternetAvailable));

@@ -38,6 +38,26 @@ namespace TsinghuaUWP
             this.Suspending += OnSuspending;
         }
 
+
+
+
+
+        protected override void OnActivated(IActivatedEventArgs args)
+        {
+            // TODO: Initialize root frame just like in OnLaunched
+
+            // Handle toast activation
+            if (args.Kind == ActivationKind.ToastNotification)
+            {
+                Debug.WriteLine("Activated from toast");
+            }
+
+            // TODO: Handle other types of activation
+        }
+
+
+
+
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used such as when the application is launched to open a specific file.
@@ -84,10 +104,10 @@ namespace TsinghuaUWP
                 Window.Current.Activate();
             }
 
-            Tile.update();
+            //TileAndToast.update();
 
             BackgroundTaskRegister.RegisterBackgroundTask();
-
+            
         }
 
         /// <summary>

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace TsinghuaUWP
 {
+
     public class Course
     {
         public string id;
@@ -67,6 +68,11 @@ namespace TsinghuaUWP
         public string timeLeft()
         {
             return timeLeftChinese();
+        }
+
+        public bool isPast()
+        {
+            return DateTime.Parse(ddl + " 23:59") < DateTime.Now;
         }
         public string timeLeftChinese()
         {
