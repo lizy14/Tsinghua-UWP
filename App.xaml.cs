@@ -11,6 +11,7 @@ using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Background;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -83,10 +84,9 @@ namespace TsinghuaUWP
                 Window.Current.Activate();
             }
 
-            //Tile.update();
+            Tile.update();
 
-            RegisterBackgroundTask();
-            
+            BackgroundTaskRegister.RegisterBackgroundTask();
 
         }
 
@@ -113,39 +113,5 @@ namespace TsinghuaUWP
             //TODO: Save application state and stop any background activity
             deferral.Complete();
         }
-
-
-
-
-
-
-
-        private async void RegisterBackgroundTask()
-        {
-            var backgroundAccessStatus = await BackgroundExecutionManager.RequestAccessAsync();
-            if (backgroundAccessStatus == BackgroundAccessStatus.AllowedMayUseActiveRealTimeConnectivity ||
-                backgroundAccessStatus == BackgroundAccessStatus.AllowedWithAlwaysOnRealTimeConnectivity)
-            {
-                foreach (var task in BackgroundTaskRegistration.AllTasks)
-                {
-                    if (task.Value.Name == taskName)
-                    {
-                        task.Value.Unregister(true);
-                        Debug.WriteLine("Background task unregistered");
-                    }
-                }
-
-                BackgroundTaskBuilder taskBuilder = new BackgroundTaskBuilder();
-                taskBuilder.Name = taskName;
-                taskBuilder.TaskEntryPoint = taskEntryPoint;
-                taskBuilder.SetTrigger(new TimeTrigger(15, false));
-                var registration = taskBuilder.Register();
-                Debug.WriteLine("Background task registered");
-            }
-        }
-
-        private const string taskName = "UpdateTileTask";
-        private const string taskEntryPoint = "BackgroundTasks.UpdateTileTask";
-
     }
 }
