@@ -20,7 +20,7 @@ namespace TsinghuaUWP
 
                 Debug.WriteLine("Updating tile");
 
-                var deadline = await Remote.getDeadline();
+                var deadline = await DataAccess.getDeadline();
                 // Create the tile notification
                 var notification = new TileNotification(Tile.getTileXmlForDeadlines(deadline));
 

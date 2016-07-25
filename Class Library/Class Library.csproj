@@ -7,7 +7,7 @@
     <ProjectGuid>{40054F12-52BD-4182-B1CC-8B68D9987B41}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Class_Library</RootNamespace>
+    <RootNamespace>TsinghuaUWP</RootNamespace>
     <AssemblyName>Class Library</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
@@ -109,7 +109,7 @@
   <ItemGroup>
     <Compile Include="Deadline.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Remote.cs" />
+    <Compile Include="DataAccess.cs" />
     <Compile Include="Tile.cs" />
     <EmbeddedResource Include="Properties\Class_Library.rd.xml" />
   </ItemGroup>
