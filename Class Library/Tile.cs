@@ -33,12 +33,11 @@ namespace TsinghuaUWP
                 var deadlines = await DataAccess.getDeadlines();
                 foreach (var deadline in deadlines)
                 {
-                    continue;
                     if(!deadline.hasBeenFinished && !deadline.isPast())
                     {
                         updater.Update(new TileNotification(getTileXmlForDeadline(deadline)));
                         tileCount++;
-                        notifier.Show(new ToastNotification(getToastXmlForDeadline(deadline)));
+                        //notifier.Show(new ToastNotification(getToastXmlForDeadline(deadline)));
                     }
                     
                 }
@@ -114,7 +113,7 @@ $@"<toast>
         <binding template=""TileLarge"">
             <text hint-style=""title"">{name}</text>
             <text hint-style=""bodySubtle"">{course}</text>
-            <text hint-style=""bodySubtle"">{due}</text>
+            <text hint-style=""bodySubtle"">Deadline {due}</text>
             <text hint-style=""body"">{timeLeft}</text>
             <text hint-style=""captionSubtle"">更新于 {DateTime.Now}</text>
         </binding>
@@ -133,7 +132,7 @@ $@"<toast>
 
             var now = DateTime.Now;
             var semester = Regex.Match(calendar.currentSemester.semesterName, @"^(\d+-\d+)-(\w+)$").Groups;
-            var week = $"校历第{calendar.currentTeachingWeek.weekName}周";
+            var week = $"校历第 {calendar.currentTeachingWeek.weekName} 周";
             string xml = $@"
 <tile>
     <visual>
