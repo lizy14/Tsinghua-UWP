@@ -14,16 +14,18 @@ using Windows.Storage;
 namespace TsinghuaUWP
 {
 
-
     static public class DataAccess
     {
-
         static ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-
         static List<Course> courses = null;
         static List<Deadline> deadlines = null;
+        static Calendar calendar = null;
 
-        static async Task<List<Course>> getCourses(bool forceRemote = false)
+        static public async Task<int> update()
+        {
+            return 0;
+        }
+        public static async Task<List<Course>> getCourses(bool forceRemote = false)
         {
             if (!forceRemote)
             {
@@ -43,7 +45,7 @@ namespace TsinghuaUWP
                     return courses;
                 }
             }
-            
+
 
             //fetch from remote
             await login();
@@ -54,7 +56,66 @@ namespace TsinghuaUWP
             return courses;
         }
 
-        static public async Task<Deadline> getDeadline()
+        public static async Task<Calendar> getCalendar(bool forceRemote = false)
+        {
+            if(forceRemote == false)
+            {
+                Calendar __calendar = null;
+                //try memory
+                if (calendar != null)
+                {
+                    Debug.WriteLine("[getCalendar] memory");
+                    __calendar = calendar;
+                }
+
+                //try localSettings
+                var localJSON = localSettings.Values["calendar"];
+                if (localJSON != null)
+                {
+                    Debug.WriteLine("[getCalendar] local settings");
+                    __calendar = JSON.parse<Calendar>((string)localJSON);
+                }
+
+                if(__calendar != null)
+                {
+                    if(DateTime.Parse(__calendar.currentSemester.endDate + " 23:59") > DateTime.Now)
+                    {
+                        Debug.WriteLine("[getCalendar] cache dirty");
+                        //force a remote update
+                        try
+                        {
+
+                            return await getCalendar(true);
+                        }
+                        catch(Exception)
+                        {
+                            var fallback = __calendar;
+                            fallback.currentSemester.semesterName  = __calendar.nextSemester.semesterName;
+                            fallback.currentSemester.semesterEname = __calendar.nextSemester.semesterName;
+                            fallback.currentSemester.id            = __calendar.nextSemester.id;
+                            fallback.currentSemester.startDate     = __calendar.nextSemester.startDate;
+                            fallback.currentSemester.semesterName  = __calendar.nextSemester.semesterName;
+                            fallback.currentTeachingWeek.calculateWeekName(__calendar.nextSemester.startDate);
+                            Debug.WriteLine("[getCalendar] fallen back, returning");
+                            return fallback;
+                        }
+                    }
+                    Debug.WriteLine("[getCalendar] cache good, returning");
+                    return __calendar;
+                }
+            }
+            
+
+            //fetch from remote
+            await login();
+            var _calendar = parseCalendarPage(await getCalendarPage());
+            calendar = _calendar;
+            localSettings.Values["calendar"] = JSON.stringify(calendar);
+            Debug.WriteLine("[getCalendar] remote returning");
+            return calendar;
+        }
+
+        static public async Task<List<Deadline>> getDeadlines()
         {
 
             var assignments = await getAllDeadlines();
@@ -62,7 +123,7 @@ namespace TsinghuaUWP
                           where assignment.hasBeenFinished == false
                           orderby ((DateTime.Parse(assignment.ddl) - DateTime.Now).TotalDays)
                           select assignment);
-            return result.Last();
+            return result.Take(5).ToList();
         }
 
         static public async Task<List<Deadline>> getAllDeadlines(bool forceRemote = false)
@@ -88,7 +149,7 @@ namespace TsinghuaUWP
 
             //fetch from remote
 
-            
+
             await login();
             var courses = await getCourses();
 
@@ -100,7 +161,7 @@ namespace TsinghuaUWP
                 var id = course.id;
                 List<Deadline> __deadlines;
                 if (course.isNew)
-                    __deadlines = parseHomeworkListPageNew(await getHomeworkLisPagetNew(id));
+                    __deadlines = parseHomeworkListPageNew(await getHomeworkListPageNew(id));
                 else
                     __deadlines = parseHomeworkListPage(await getHomeworkListPage(id));
                 _deadlines = _deadlines.Concat(__deadlines).ToList();
@@ -135,7 +196,7 @@ namespace TsinghuaUWP
             return await getPageContent($"http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id={courseId}");
         }
 
-        static async Task<string> getHomeworkLisPagetNew(string courseId)
+        static async Task<string> getHomeworkListPageNew(string courseId)
         {
             Int32 timestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
             string url = $"http://learn.cic.tsinghua.edu.cn/b/myCourse/homework/list4Student/{courseId}/0?_={timestamp}";
@@ -147,7 +208,10 @@ namespace TsinghuaUWP
             return await getPageContent(homeUri);
         }
 
-
+        static async Task<string> getCalendarPage()
+        {
+            return await getPageContent("http://learn.cic.tsinghua.edu.cn/b/myCourse/courseList/getCurrentTeachingWeek");
+        }
 
         static DateTime lastLogin = DateTime.MinValue;
         static int LOGIN_TIMEOUT_MINUTES = 5;
@@ -214,7 +278,7 @@ namespace TsinghuaUWP
                 var tds = node.Descendants("td");
 
                 var _isFinished = (tds.ElementAt(3/*MAGIC*/).InnerText.Trim() == "已经提交");
-                    
+
                 _due = tds.ElementAt(2/*MAGIC*/).InnerText;
                 _name = node.Descendants("a")/*MAGIC*/.First().InnerText;
 
@@ -249,8 +313,8 @@ namespace TsinghuaUWP
 
                 if (_course == "")
                     _course = _courseId;
-                if(_course == _courseId)
-                    foreach(var course in courses)
+                if (_course == _courseId)
+                    foreach (var course in courses)
                         if (course.id == _courseId)
                             _course = course.name;
 
@@ -304,7 +368,10 @@ namespace TsinghuaUWP
             return courses;
         }
 
-
+        static Calendar parseCalendarPage(string page)
+        {
+            return JSON.parse<Calendar>(page);
+        }
 
 
     }
@@ -403,6 +470,52 @@ namespace TsinghuaUWP
         public int yiYue { get; set; }
         public int yiPi { get; set; }
         public int jiaoed { get; set; }
+    }
+
+
+    public class Calendar
+    {
+        public Currentteachingweek currentTeachingWeek { get; set; }
+        public Currentsemester currentSemester { get; set; }
+        public string currentDate { get; set; }
+        public Nextsemester nextSemester { get; set; }
+    }
+
+    public class Currentteachingweek
+    {
+        public int teachingWeekId { get; set; }
+        public string weekName { get; set; }
+        public string beginDate { get; set; }
+        public string endDate { get; set; }
+        public string semesterId { get; set; }
+        public void calculateWeekName(string semesterStartDate)
+        {
+            var semesterStart = DateTime.Parse(semesterStartDate);
+            var delta = DateTime.Now - semesterStart;
+            var days = delta.TotalDays;
+
+            /* 0 ~  6.9 -> 1
+               7 ~ 13.9 -> 2 */
+            weekName = (Math.Floor(days / 7) + 1).ToString();
+        }
+    }
+
+    public class Currentsemester
+    {
+        public string id { get; set; }
+        public string semesterName { get; set; }
+        public string startDate { get; set; }
+        public string endDate { get; set; }
+        public string semesterEname { get; set; }
+    }
+
+    public class Nextsemester
+    {
+        public string id { get; set; }
+        public string semesterName { get; set; }
+        public string startDate { get; set; }
+        public object endDate { get; set; }
+        public string semesterEname { get; set; }
     }
 
 }
