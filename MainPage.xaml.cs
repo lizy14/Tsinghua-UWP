@@ -32,14 +32,16 @@ namespace TsinghuaUWP
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (true || 
-                localSettings.Values["username"] == null ||
-                localSettings.Values["password"] == null)
+            if (localSettings.Values["username"] == null)
             {
-                var d = new PasswordDialog();
-                var password = await d.getPasswordAsyc(noCancel: true);
+                var dialog = new PasswordDialog();
+                var password = await dialog.getCredentialAsyc(noCancel: true, validate: true);
+
                 localSettings.Values["username"] = password.username;
-                localSettings.Values["password"] = password.password;
+
+                var vault = new Windows.Security.Credentials.PasswordVault();
+                vault.Add(new Windows.Security.Credentials.PasswordCredential(
+                    "Tsinghua_Learn_Website", password.username, password.password));
             }
         }
     }

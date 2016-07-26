@@ -64,12 +64,13 @@ namespace TsinghuaUWP
 
             if (useLocalSettings)
             {
-                if (localSettings.Values["username"] == null ||
-                    localSettings.Values["password"] == null) {
+                if (localSettings.Values["username"] == null) {
                     throw new LoginException("没有指定用户名和密码");
                 }
                 username = localSettings.Values["username"].ToString();
-                password = localSettings.Values["password"].ToString();
+
+                var vault = new Windows.Security.Credentials.PasswordVault();
+                password = vault.Retrieve("Tsinghua_Learn_Website", username).Password;
             }
 
             httpClient = new HttpClient();
@@ -89,6 +90,10 @@ namespace TsinghuaUWP
             if (alertInfoGroup.Count > 1)
             {
                 throw new LoginException(alertInfoGroup[1].Value.Replace("\\r\\n", "\n"));
+            }
+            if(loginResponse.IndexOf(@"window.location = ""loginteacher_action.jsp"";") == -1)
+            {
+                throw new ParsePageException("login_redirect");
             }
 
             //get iframe src
