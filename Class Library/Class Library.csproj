@@ -107,6 +107,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions.cs" />
     <Compile Include="Remote.cs" />
     <Compile Include="Record.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

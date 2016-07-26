@@ -13,7 +13,7 @@ using Windows.Storage;
 
 namespace TsinghuaUWP
 {
-    static class Remote
+    public static class Remote
     {
         static ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
@@ -47,7 +47,10 @@ namespace TsinghuaUWP
 
         static DateTime lastLogin = DateTime.MinValue;
         static int LOGIN_TIMEOUT_MINUTES = 5;
-        public static async Task<int> login()
+        public static async Task<int> login(
+            bool useLocalSettings = true,
+            string username = "",
+            string password = "")
         {
 
             //check for last login
@@ -59,8 +62,15 @@ namespace TsinghuaUWP
 
             Debug.WriteLine("[login] begin");
 
-            string username = localSettings.Values["username"].ToString();
-            string password = localSettings.Values["password"].ToString();
+            if (useLocalSettings)
+            {
+                if (localSettings.Values["username"] == null ||
+                    localSettings.Values["password"] == null) {
+                    throw new LoginException("没有指定用户名和密码");
+                }
+                username = localSettings.Values["username"].ToString();
+                password = localSettings.Values["password"].ToString();
+            }
 
             httpClient = new HttpClient();
 
@@ -72,18 +82,32 @@ namespace TsinghuaUWP
 
             httpResponse = await httpClient.PostAsync(new Uri(loginUri), stringContent);
             httpResponse.EnsureSuccessStatusCode();
-            await httpResponse.Content.ReadAsStringAsync();
+            var loginResponse = await httpResponse.Content.ReadAsStringAsync();
+
+            //check if successful
+            var alertInfoGroup = Regex.Match(loginResponse, @"window.alert\(""(.+)""\);").Groups;
+            if (alertInfoGroup.Count > 1)
+            {
+                throw new LoginException(alertInfoGroup[1].Value.Replace("\\r\\n", "\n"));
+            }
 
             //get iframe src
-            HtmlDocument htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(await getPageContent(homeUri));
-            var iframeSrc = htmlDoc.DocumentNode.Descendants("iframe")/*MAGIC*/.First().Attributes["src"].Value;
+            try
+            {
+                HtmlDocument htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(await getPageContent(homeUri));
+                var iframeSrc = htmlDoc.DocumentNode.Descendants("iframe")/*MAGIC*/.First().Attributes["src"].Value;
 
-            //login to learn.cic.tsinghua.edu.cn
-            await getPageContent(iframeSrc);
+                //login to learn.cic.tsinghua.edu.cn
+                await getPageContent(iframeSrc);
 
-            Debug.WriteLine("[login] successful");
-            lastLogin = DateTime.Now;
+                Debug.WriteLine("[login] successful");
+                lastLogin = DateTime.Now;
+            }
+            catch (Exception)
+            {
+                throw new ParsePageException("find_cic_iframe");
+            }
 
             return 0;
         }
@@ -122,39 +146,47 @@ namespace TsinghuaUWP
         }
         static List<Deadline> parseHomeworkListPage(string page)
         {
-            HtmlDocument htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(page);
-
-            string _name, _due, _course;
-
-            _course = htmlDoc.DocumentNode.Descendants("td")/*MAGIC*/.First().InnerText;
-            _course = _course.Trim();
-            _course = _course.Substring(6/*MAGIC*/);
-
-            HtmlNode[] nodes = htmlDoc.DocumentNode.Descendants("tr")/*MAGIC*/.ToArray();
-
-
-            List<Deadline> deadlines = new List<Deadline>();
-            for (int i = 4/*MAGIC*/; i < nodes.Length - 1/*MAGIC*/; i++)
+            try
             {
-                HtmlNode node = nodes[i];
+                HtmlDocument htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(page);
 
-                var tds = node.Descendants("td");
+                string _name, _due, _course;
 
-                var _isFinished = (tds.ElementAt(3/*MAGIC*/).InnerText.Trim() == "已经提交");
+                _course = htmlDoc.DocumentNode.Descendants("td")/*MAGIC*/.First().InnerText;
+                _course = _course.Trim();
+                _course = _course.Substring(6/*MAGIC*/);
 
-                _due = tds.ElementAt(2/*MAGIC*/).InnerText;
-                _name = node.Descendants("a")/*MAGIC*/.First().InnerText;
+                HtmlNode[] nodes = htmlDoc.DocumentNode.Descendants("tr")/*MAGIC*/.ToArray();
 
-                deadlines.Add(new Deadline
+
+                List<Deadline> deadlines = new List<Deadline>();
+                for (int i = 4/*MAGIC*/; i < nodes.Length - 1/*MAGIC*/; i++)
                 {
-                    name = _name,
-                    ddl = _due,
-                    course = _course,
-                    hasBeenFinished = _isFinished
-                });
+                    HtmlNode node = nodes[i];
+
+                    var tds = node.Descendants("td");
+
+                    var _isFinished = (tds.ElementAt(3/*MAGIC*/).InnerText.Trim() == "已经提交");
+
+                    _due = tds.ElementAt(2/*MAGIC*/).InnerText;
+                    _name = node.Descendants("a")/*MAGIC*/.First().InnerText;
+
+                    deadlines.Add(new Deadline
+                    {
+                        name = _name,
+                        ddl = _due,
+                        course = _course,
+                        hasBeenFinished = _isFinished
+                    });
+                }
+                return deadlines;
             }
-            return deadlines;
+            catch (Exception)
+            {
+                throw new ParsePageException("AssignmentList");
+            }
+            
         }
         static async Task<List<Deadline>> parseHomeworkListPageNew(string page)
         {
@@ -193,41 +225,48 @@ namespace TsinghuaUWP
         }
         static List<Course> parseCourseList(string page)
         {
-            List<Course> courses = new List<Course>();
-
-            HtmlDocument htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(page);
-            var links = htmlDoc.DocumentNode.Descendants("table")/*MAGIC*/.Last()/*MAGIC*/.Descendants("a")/*MAGIC*/.ToArray();
-
-            foreach (var link in links)
+            try
             {
-                string _name = link.InnerText.Trim();
-                string _url = link.Attributes["href"].Value;
-                var match = Regex.Match(_name, "(.+?)\\((\\d+)\\)\\((.+?)\\)");
-                string _semester = match.Groups[3].Value;
-                _name = match.Groups[1].Value;
-                bool _isNew = false;
-                string _id = "";
+                List<Course> courses = new List<Course>();
 
-                if (_url.StartsWith("http://learn.cic.tsinghua.edu.cn/"))
+                HtmlDocument htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(page);
+                var links = htmlDoc.DocumentNode.Descendants("table")/*MAGIC*/.Last()/*MAGIC*/.Descendants("a")/*MAGIC*/.ToArray();
+
+                foreach (var link in links)
                 {
-                    _isNew = true;
-                    _id = Regex.Match(_url, "/([-\\d]+)").Groups[1].Value;
+                    string _name = link.InnerText.Trim();
+                    string _url = link.Attributes["href"].Value;
+                    var match = Regex.Match(_name, "(.+?)\\((\\d+)\\)\\((.+?)\\)");
+                    string _semester = match.Groups[3].Value;
+                    _name = match.Groups[1].Value;
+                    bool _isNew = false;
+                    string _id = "";
+
+                    if (_url.StartsWith("http://learn.cic.tsinghua.edu.cn/"))
+                    {
+                        _isNew = true;
+                        _id = Regex.Match(_url, "/([-\\d]+)").Groups[1].Value;
+                    }
+                    else
+                    {
+                        _isNew = false;
+                        _id = Regex.Match(_url, "course_id=(\\d+)").Groups[1].Value;
+                    }
+                    courses.Add(new Course
+                    {
+                        name = _name,
+                        isNew = _isNew,
+                        id = _id,
+                        semester = _semester
+                    });
                 }
-                else
-                {
-                    _isNew = false;
-                    _id = Regex.Match(_url, "course_id=(\\d+)").Groups[1].Value;
-                }
-                courses.Add(new Course
-                {
-                    name = _name,
-                    isNew = _isNew,
-                    id = _id,
-                    semester = _semester
-                });
+                return courses;
             }
-            return courses;
+            catch (Exception)
+            {
+                throw new ParsePageException("CourseList");
+            }
         }
         static CalendarRootObject parseCalendarPage(string page)
         {
@@ -240,9 +279,16 @@ namespace TsinghuaUWP
     {
         public static T parse<T>(string jsonString)
         {
-            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonString)))
+            try
             {
-                return (T)new DataContractJsonSerializer(typeof(T)).ReadObject(ms);
+                using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonString)))
+                {
+                    return (T)new DataContractJsonSerializer(typeof(T)).ReadObject(ms);
+                }
+            }
+            catch (Exception)
+            {
+                throw new ParsePageException("JSON "+typeof(T).ToString());
             }
         }
         public static string stringify(object jsonObject)

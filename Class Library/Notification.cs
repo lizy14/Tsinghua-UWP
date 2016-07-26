@@ -34,9 +34,14 @@ namespace TsinghuaUWP
                 {
                     if(!deadline.hasBeenFinished && !deadline.isPast())
                     {
-                        updater.Update(new TileNotification(getTileXmlForDeadline(deadline)));
+                        var tile = new TileNotification(getTileXmlForDeadline(deadline));
+                        tile.Tag = "deadline";
+                        updater.Update(tile);
                         tileCount++;
-                        notifier.Show(new ToastNotification(getToastXmlForDeadline(deadline)));
+
+                        var toast = new ToastNotification(getToastXmlForDeadline(deadline));
+                        toast.Tag = "deadline";
+                        notifier.Show(toast);
                     }
                 }
 
@@ -48,9 +53,14 @@ namespace TsinghuaUWP
 
                 Debug.WriteLine("[TileAndToast] update finished");
             }
+            catch(ParsePageException e)
+            {
+                Debug.WriteLine("[TileAndToast] parse error: " + e.Message);
+                return 3;
+            }
             catch (Exception e)
             {
-                Debug.WriteLine("[TileAndToast] error updating: " + e.Message);
+                Debug.WriteLine("[TileAndToast] error: " + e.Message);
                 return 1;
             }
 
@@ -127,29 +137,33 @@ $@"<toast>
         {
 
             var now = DateTime.Now;
-            var semNameGroup = Regex.Match(sem.semesterName, @"^(\d+-\d+)-(\w+)$").Groups;
+            var weekday = now.ToString("dddd");
+            var date = now.ToString("d");
+            var nameGroup = Regex.Match(sem.semesterName, @"^(\d+-\d+)-(\w+)$").Groups;
             var week = $"校历第 {sem.getWeekName()} 周";
             string xml = $@"
 <tile>
     <visual>
 
         <binding template=""TileMedium"">
-            <text>{week}</text>
-            <text hint-style=""captionSubtle"">{semNameGroup[2]}</text>
-            <text hint-style=""captionSubtle"">{semNameGroup[1]}</text>
-            <text hint-style=""captionSubtle"">{now.ToString("d")}</text>
+            <text hint-style=""body"">{week}</text>
+            <text hint-style=""captionSubtle"">{nameGroup[2]}</text>
+            <text hint-style=""caption"">{weekday}</text>
+            <text hint-style=""captionSubtle"">{date}</text>
         </binding>
 
         <binding template=""TileWide"">
             <text hint-style=""body"">{week}</text>
-            <text hint-style=""captionSubtle"">{semNameGroup[0]}</text>
-            <text hint-style=""captionSubtle"">{now.ToString("D")}</text>
+            <text hint-style=""captionSubtle"">{nameGroup[0]}</text>
+            <text hint-style=""caption"">{weekday}</text>
+            <text hint-style=""captionSubtle"">{date}</text>
         </binding>
 
         <binding template=""TileLarge"">
             <text hint-style=""title"">{week}</text>
-            <text hint-style=""bodySubtle"">{semNameGroup[0]}</text>
-            <text hint-style=""bodySubtle"">{now.ToString("D")}</text>
+            <text hint-style=""bodySubtle"">{nameGroup[0]}</text>
+            <text hint-style=""body"">{weekday}</text>
+            <text hint-style=""bodySubtle"">{date}</text>
         </binding>
 
     </visual>
