@@ -24,7 +24,6 @@ namespace TsinghuaUWP
     {
 
         public async Task<Password> getCredentialAsyc(
-            bool noCancel = false    /* true: ask again and again; false: throws UserCancelException */,
             bool validate = true        /* true: perform validation, only return validated values */)
         {
             while (true)
@@ -32,19 +31,23 @@ namespace TsinghuaUWP
                 var userResponse = await this.ShowAsync();
                 
                 if (userResponse != ContentDialogResult.Primary) {
-                    if (noCancel)
+
+                    var userRasponseAgain = await (new ContentDialog
                     {
-                        await (new ContentDialog {
-                            Title = "无法继续",
-                            Content = @"
-需要您的用户名和密码，以从网络学堂获取课程公告、作业、校历等信息。
+                        Title = "是否继续",
+                        Content = @"
+如果不提供用户名和密码，将无法从学校服
+务器获取课表、课程公告、作业等信息。
+
+您可以在任何时候选择重新登录。
 ",
-                            PrimaryButtonText = "确定"
-                        }).ShowAsync();
-                        continue;
-                    }
-                    else
+                        PrimaryButtonText = "继续",
+                        SecondaryButtonText = "现在登录"
+                    }).ShowAsync();
+                    if (userRasponseAgain == ContentDialogResult.Primary)
                         throw new UserCancelException();
+                    else
+                        continue;
                 }
                 var username = this.username.Text;
                 var password = this.password.Password;
@@ -53,7 +56,7 @@ namespace TsinghuaUWP
                     await (new ContentDialog
                     {
                         Title = "用户名、密码不能为空",
-                        PrimaryButtonText = "重试"
+                        PrimaryButtonText = "返回"
                     }).ShowAsync();
                     continue;
                 }
@@ -123,6 +126,5 @@ namespace TsinghuaUWP
         {
         }
 
-        
     }
 }

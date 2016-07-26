@@ -15,7 +15,6 @@ namespace TsinghuaUWP
 {
     public static class Remote
     {
-        static ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
         //Remote Access
 
@@ -33,6 +32,10 @@ namespace TsinghuaUWP
         {
             await login();
             return parseCourseList(await getCourseListPage());
+        }
+        public static async Task<Semesters> getHostedSemesters()
+        {
+            return JSON.parse<Semesters>(await getPageContent(hostedCalendarUrl));
         }
         public static async Task<Semesters> getRemoteSemesters()
         {
@@ -64,16 +67,14 @@ namespace TsinghuaUWP
 
             if (useLocalSettings)
             {
-                if (localSettings.Values["username"] == null) {
+                if (DataAccess.credentialAbsent()) {
                     throw new LoginException("没有指定用户名和密码");
                 }
-                username = localSettings.Values["username"].ToString();
+                username = DataAccess.getLocalSettings()["username"].ToString();
 
                 var vault = new Windows.Security.Credentials.PasswordVault();
                 password = vault.Retrieve("Tsinghua_Learn_Website", username).Password;
             }
-
-            httpClient = new HttpClient();
 
             //login to learn.tsinghua.edu.cn
             HttpStringContent stringContent = new HttpStringContent(
@@ -119,8 +120,9 @@ namespace TsinghuaUWP
 
         static string loginUri = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp";
         static string homeUri = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn";
+        static string hostedCalendarUrl = "http://lizy14.github.io/thuCalendar.json";
 
-        static HttpClient httpClient;
+        static HttpClient httpClient = new HttpClient();
         static HttpResponseMessage httpResponse = new HttpResponseMessage();
 
         static async Task<string> getPageContent(string url)

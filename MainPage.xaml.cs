@@ -23,7 +23,6 @@ namespace TsinghuaUWP
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        static ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
 
         public MainPage()
         {
@@ -32,17 +31,29 @@ namespace TsinghuaUWP
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (localSettings.Values["username"] == null)
+            TileAndToast.update();
+
+            if (DataAccess.credentialAbsent())
             {
                 var dialog = new PasswordDialog();
-                var password = await dialog.getCredentialAsyc(noCancel: true, validate: true);
+                try
+                {
+                    var password = await dialog.getCredentialAsyc();
+                    DataAccess.setLocalSettings("username", password.username);
 
-                localSettings.Values["username"] = password.username;
+                    var vault = new Windows.Security.Credentials.PasswordVault();
+                    vault.Add(new Windows.Security.Credentials.PasswordCredential(
+                        "Tsinghua_Learn_Website", password.username, password.password));
 
-                var vault = new Windows.Security.Credentials.PasswordVault();
-                vault.Add(new Windows.Security.Credentials.PasswordCredential(
-                    "Tsinghua_Learn_Website", password.username, password.password));
+                    TileAndToast.update();
+                }
+                catch (UserCancelException)
+                {
+
+                }
             }
+
+            
         }
     }
 }

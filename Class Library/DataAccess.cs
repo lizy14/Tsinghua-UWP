@@ -23,6 +23,18 @@ namespace TsinghuaUWP
         static List<Deadline> deadlines = null;
         static Semesters semesters = null;
 
+        static public Windows.Foundation.Collections.IPropertySet getLocalSettings()
+        {
+            return localSettings.Values;
+        }
+        static public bool credentialAbsent()
+        {
+            return localSettings.Values["username"] == null;
+        }
+        static public void setLocalSettings(string key, string value)
+        {
+            localSettings.Values[key] = value;
+        }
         static async public Task<int> updateAllFromRemote()
         {
             await Remote.login();
@@ -113,7 +125,11 @@ namespace TsinghuaUWP
             }
 
             //fetch from remote
-            var _remoteSemesters = await Remote.getRemoteSemesters();
+            Semesters _remoteSemesters;
+            if (true /*TODO*/|| DataAccess.credentialAbsent())
+                _remoteSemesters = await Remote.getHostedSemesters();
+            else
+                _remoteSemesters = await Remote.getRemoteSemesters();
             semesters = _remoteSemesters;
             localSettings.Values["semesters"] = JSON.stringify(semesters);
             Debug.WriteLine("[getCalendar] Returning remote");
