@@ -28,34 +28,41 @@ namespace TsinghuaUWP
 
                 var notifier = ToastNotificationManager.CreateToastNotifier();
 
-                //deadlines
-                var deadlines = await DataAccess.getDeadlinesFiltered();
-                foreach (var deadline in deadlines)
+                if (! DataAccess.credentialAbsent())
                 {
-                    if(!deadline.hasBeenFinished && !deadline.isPast())
-                    {
-                        var tile = new TileNotification(getTileXmlForDeadline(deadline));
-                        tile.Tag = "deadline";
-                        updater.Update(tile);
-                        tileCount++;
 
-                        var toast = new ToastNotification(getToastXmlForDeadline(deadline));
-                        toast.Tag = "deadline";
-                        notifier.Show(toast);
+                    Debug.WriteLine("[TileAndToast] credential exist");
+
+                    //deadlines
+                    var deadlines = await DataAccess.getDeadlinesFiltered();
+                    foreach (var deadline in deadlines)
+                    {
+                        if (!deadline.hasBeenFinished && !deadline.isPast())
+                        {
+                            var tile = new TileNotification(getTileXmlForDeadline(deadline));
+                            tile.Tag = "deadline";
+                            updater.Update(tile);
+                            tileCount++;
+
+                            var toast = new ToastNotification(getToastXmlForDeadline(deadline));
+                            toast.Tag = "deadline";
+                            notifier.Show(toast);
+                        }
                     }
+
                 }
 
                 //calendar
-                if(tileCount < 5)
+                if (tileCount < 5)
                 {
                     updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getSemester())));
                 }
 
                 Debug.WriteLine("[TileAndToast] update finished");
             }
-            catch(ParsePageException e)
+            catch(ParsePageException)
             {
-                Debug.WriteLine("[TileAndToast] parse error: " + e.Message);
+                Debug.WriteLine("[TileAndToast] parse error");
                 return 3;
             }
             catch (Exception e)
@@ -135,12 +142,23 @@ $@"<toast>
         }
         static XmlDocument getTileXmlForCalendar(Semester sem)
         {
-
             var now = DateTime.Now;
-            var weekday = now.ToString("dddd");
-            var date = now.ToString("d");
-            var nameGroup = Regex.Match(sem.semesterName, @"^(\d+-\d+)-(\w+)$").Groups;
+
+            string[] weekDayNames = {"日", "一", "二", "三", "四", "五", "六"};
+            var weekday = "星期" + weekDayNames[Convert.ToInt32(now.DayOfWeek)];
+
+            var shortdate = now.ToString("M 月 d 日");
+            var date = now.ToString("yyyy 年 M 月 d 日");
+
+            var nameGroup = Regex.Match(
+                sem.semesterEname
+                    .Replace("Summer", "夏季学期")
+                    .Replace("Spring", "春季学期")
+                    .Replace("Autumn", "秋季学期")
+                    , @"^(\d+-\d+)-(\w+)$").Groups;
+
             var week = $"校历第 {sem.getWeekName()} 周";
+
             string xml = $@"
 <tile>
     <visual>
@@ -149,7 +167,7 @@ $@"<toast>
             <text hint-style=""body"">{week}</text>
             <text hint-style=""captionSubtle"">{nameGroup[2]}</text>
             <text hint-style=""caption"">{weekday}</text>
-            <text hint-style=""captionSubtle"">{date}</text>
+            <text hint-style=""captionSubtle"">{shortdate}</text>
         </binding>
 
         <binding template=""TileWide"">
