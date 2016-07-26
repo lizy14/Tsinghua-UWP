@@ -23,7 +23,7 @@ namespace TsinghuaUWP
     public sealed partial class PasswordDialog : ContentDialog
     {
 
-        public async Task<Password> getPasswordAsyc(
+        public async Task<Password> getCredentialAsyc(
             bool noCancel = false    /* true: ask again and again; false: throws UserCancelException */,
             bool validate = true        /* true: perform validation, only return validated values */)
         {
@@ -38,8 +38,7 @@ namespace TsinghuaUWP
                             Title = "无法继续",
                             Content = @"
 需要您的用户名和密码，以从网络学堂获取课程公告、作业、校历等信息。
-
-您的密码仅保存在本地，在传输过程中会被加密。请放心使用。",
+",
                             PrimaryButtonText = "确定"
                         }).ShowAsync();
                         continue;
