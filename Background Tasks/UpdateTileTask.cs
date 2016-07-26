@@ -12,10 +12,10 @@ namespace BackgroundTasks
             Debug.WriteLine("[UpdateTileTask] launched");
 
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
-            await TileAndToast.update();
+            TileAndToast.update();
             deferral.Complete();
-
             Debug.WriteLine("[UpdateTileTask] finished");
+
         }
     }
 }
