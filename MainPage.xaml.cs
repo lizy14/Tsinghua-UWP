@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -22,9 +23,24 @@ namespace TsinghuaUWP
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        static ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+
         public MainPage()
         {
             this.InitializeComponent();
+        }
+
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
+            if (true || 
+                localSettings.Values["username"] == null ||
+                localSettings.Values["password"] == null)
+            {
+                var d = new PasswordDialog();
+                var password = await d.getPasswordAsyc(noCancel: true);
+                localSettings.Values["username"] = password.username;
+                localSettings.Values["password"] = password.password;
+            }
         }
     }
 }

@@ -7,7 +7,11 @@ using System.Threading.Tasks;
 
 namespace TsinghuaUWP
 {
-
+    public class Password
+    {
+        public string username;
+        public string password;
+    }
     public class Course
     {
         public string id;

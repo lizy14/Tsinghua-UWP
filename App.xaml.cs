@@ -105,7 +105,7 @@ namespace TsinghuaUWP
             }
 
             //TileAndToast.update();
-
+            
             BackgroundTaskRegister.RegisterBackgroundTask();
             
         }
