@@ -34,7 +34,7 @@ namespace TsinghuaUWP
                 taskBuilder.SetTrigger(new TimeTrigger(15, false));
 
                 taskBuilder.AddCondition(new SystemCondition(SystemConditionType.UserPresent));
-                taskBuilder.AddCondition(new SystemCondition(SystemConditionType.InternetAvailable));
+                //taskBuilder.AddCondition(new SystemCondition(SystemConditionType.InternetAvailable));
                 var registration = taskBuilder.Register();
 
                 Debug.WriteLine("Background task registered");

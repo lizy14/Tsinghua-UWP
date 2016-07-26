@@ -19,9 +19,8 @@ namespace TsinghuaUWP
             
             try
             {
-                Debug.WriteLine("Updating tile and toast");
-                
-                
+                Debug.WriteLine("[TileAndToast] update begin");
+
                 var updater = TileUpdateManager.CreateTileUpdaterForApplication();
                 updater.EnableNotificationQueue(true);
                 updater.Clear();
@@ -30,33 +29,30 @@ namespace TsinghuaUWP
                 var notifier = ToastNotificationManager.CreateToastNotifier();
 
                 //deadlines
-                var deadlines = await DataAccess.getDeadlines();
+                var deadlines = await DataAccess.getDeadlinesFiltered();
                 foreach (var deadline in deadlines)
                 {
                     if(!deadline.hasBeenFinished && !deadline.isPast())
                     {
                         updater.Update(new TileNotification(getTileXmlForDeadline(deadline)));
                         tileCount++;
-                        //notifier.Show(new ToastNotification(getToastXmlForDeadline(deadline)));
+                        notifier.Show(new ToastNotification(getToastXmlForDeadline(deadline)));
                     }
-                    
                 }
 
                 //calendar
                 if(tileCount < 5)
                 {
-                    updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getCalendar())));
+                    updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getSemester())));
                 }
-                
-                Debug.WriteLine("Tile and toast updated");
+
+                Debug.WriteLine("[TileAndToast] update finished");
             }
             catch (Exception e)
             {
-                Debug.WriteLine("Error updating notifications" + e.Message);
+                Debug.WriteLine("[TileAndToast] error updating: " + e.Message);
                 return 1;
             }
-            
-
 
             return 0;
         }
@@ -127,32 +123,32 @@ $@"<toast>
 
             return doc;
         }
-        static XmlDocument getTileXmlForCalendar(Calendar calendar)
+        static XmlDocument getTileXmlForCalendar(Semester sem)
         {
 
             var now = DateTime.Now;
-            var semester = Regex.Match(calendar.currentSemester.semesterName, @"^(\d+-\d+)-(\w+)$").Groups;
-            var week = $"校历第 {calendar.currentTeachingWeek.weekName} 周";
+            var semNameGroup = Regex.Match(sem.semesterName, @"^(\d+-\d+)-(\w+)$").Groups;
+            var week = $"校历第 {sem.getWeekName()} 周";
             string xml = $@"
 <tile>
     <visual>
 
         <binding template=""TileMedium"">
             <text>{week}</text>
-            <text hint-style=""captionSubtle"">{semester[2]}</text>
-            <text hint-style=""captionSubtle"">{semester[1]}</text>
+            <text hint-style=""captionSubtle"">{semNameGroup[2]}</text>
+            <text hint-style=""captionSubtle"">{semNameGroup[1]}</text>
             <text hint-style=""captionSubtle"">{now.ToString("d")}</text>
         </binding>
 
         <binding template=""TileWide"">
             <text hint-style=""body"">{week}</text>
-            <text hint-style=""captionSubtle"">{semester[0]}</text>
+            <text hint-style=""captionSubtle"">{semNameGroup[0]}</text>
             <text hint-style=""captionSubtle"">{now.ToString("D")}</text>
         </binding>
 
         <binding template=""TileLarge"">
             <text hint-style=""title"">{week}</text>
-            <text hint-style=""bodySubtle"">{semester[0]}</text>
+            <text hint-style=""bodySubtle"">{semNameGroup[0]}</text>
             <text hint-style=""bodySubtle"">{now.ToString("D")}</text>
         </binding>
 

@@ -9,13 +9,13 @@ namespace BackgroundTasks
 
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
-            Debug.WriteLine("UpdateTileTask launched");
+            Debug.WriteLine("[UpdateTileTask] launched");
 
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
             await TileAndToast.update();
             deferral.Complete();
 
-            Debug.WriteLine("UpdateTileTask finished");
+            Debug.WriteLine("[UpdateTileTask] finished");
         }
     }
 }
