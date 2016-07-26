@@ -110,14 +110,10 @@ namespace TsinghuaUWP
                 {
                     if (DateTime.Parse(__semesters.currentSemester.endDate + " 23:59") < DateTime.Now)
                     {
-                        Debug.WriteLine("[getCalendar] cache dirty");
-                        //force a remote update
-                        try{
-                            return await getSemester(true);
-                        } catch (Exception) {
-                            Debug.WriteLine("[getCalendar] Returning fallback");
-                            return __semesters.nextSemester;
-                        }
+                        //perform a remote update
+                        getSemester(true);
+                        Debug.WriteLine("[getCalendar] Returning cache next");
+                        return __semesters.nextSemester;
                     }
                     Debug.WriteLine("[getCalendar] Returning cache");
                     return __semesters.currentSemester;
