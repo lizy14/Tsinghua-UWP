@@ -31,7 +31,7 @@ namespace TsinghuaUWP
         {
             return localSettings.Values["username"] == null;
         }
-        static public void setLocalSettings(string key, string value)
+        static public void setLocalSettings<Type>(string key, Type value)
         {
             localSettings.Values[key] = value;
         }
