@@ -77,7 +77,7 @@ namespace TsinghuaUWP
                 {
                     if (validate)
                     {
-                        await Remote.login(false, username, password);
+                        await Remote.validateCredential(username, password);
                     }
                     return new Password
                     {
