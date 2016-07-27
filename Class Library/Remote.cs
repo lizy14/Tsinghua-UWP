@@ -179,6 +179,7 @@ namespace TsinghuaUWP
 
             Debug.WriteLine("[login] successful");
             lastLogin = DateTime.Now;
+            lastLoginUsername = username;
 
 
             return 0;

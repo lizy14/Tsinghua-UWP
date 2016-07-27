@@ -104,7 +104,7 @@ namespace TsinghuaUWP
                 Window.Current.Activate();
             }
 
-            //TileAndToast.update();
+            //Notification.update();
             
             BackgroundTaskRegister.RegisterBackgroundTask();
             

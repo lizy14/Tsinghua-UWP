@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
@@ -26,33 +27,63 @@ namespace TsinghuaUWP
 
         public MainPage()
         {
-            this.InitializeComponent();
+            if (DataAccess.supposedToWorkAnonymously() == true
+                || DataAccess.credentialAbsent() == false) {
+                this.InitializeComponent();
+                button.Content = "注销并重新登录";
+            }
+                
+
+
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            TileAndToast.update();
+            Notification.update();
 
-            if (DataAccess.credentialAbsent())
-            {
-                var dialog = new PasswordDialog();
-                try
-                {
-                    var password = await dialog.getCredentialAsyc();
-                    DataAccess.setLocalSettings("username", password.username);
-
-                    var vault = new Windows.Security.Credentials.PasswordVault();
-                    vault.Add(new Windows.Security.Credentials.PasswordCredential(
-                        "Tsinghua_Learn_Website", password.username, password.password));
-
-                    TileAndToast.update();
-                    Appointment.update();
-                }
-                catch (UserCancelException)
-                {
-
-                }
+            if (DataAccess.supposedToWorkAnonymously() == false
+                && DataAccess.credentialAbsent() == true) { 
+                await changeAccount();
+                this.InitializeComponent();
+                button.Content = "登录";
             }
+        }
+
+        async Task changeAccount()
+        {
+            var dialog = new PasswordDialog();
+            Password password;
+            try{
+                password = await dialog.getCredentialAsyc();
+            }catch(UserCancelException){
+                //user choose to stay anonymous
+                DataAccess.setLocalSettings("username", "__anonymous");
+                return;
+            }
+
+            //save credential
+            DataAccess.setLocalSettings("username", password.username);
+
+            var vault = new Windows.Security.Credentials.PasswordVault();
+            vault.Add(new Windows.Security.Credentials.PasswordCredential(
+                "Tsinghua_Learn_Website", password.username, password.password));
+
+            //fresh log-in, update everything
+            Notification.update(true);
+            Appointment.update(true);
+            try
+            {
+                button.Content = "注销并重新登录";
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            changeAccount();
         }
     }
 }
