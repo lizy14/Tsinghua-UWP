@@ -12,11 +12,14 @@ namespace TsinghuaUWP
     public static class Appointment
     {
         static string storedKey = "appointmentCalendar";
-        public static async Task update()
+        public static async Task update(bool forceRemote = false)
         {
             Debug.WriteLine("[Appointment] update start");
-            var timetable = await DataAccess.getTimetable();
-            var semester = await DataAccess.getSemester(true);
+
+            //TODO: request calendar access?
+
+            var timetable = await DataAccess.getTimetable(forceRemote);
+
             var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
 
             //delete previously created

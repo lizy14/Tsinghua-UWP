@@ -6,13 +6,12 @@ namespace BackgroundTasks
 {
     public sealed class UpdateTileTask : IBackgroundTask
     {
-
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
             Debug.WriteLine("[UpdateTileTask] launched");
 
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
-            TileAndToast.update();
+            Notification.update();
             deferral.Complete();
             Debug.WriteLine("[UpdateTileTask] finished");
 

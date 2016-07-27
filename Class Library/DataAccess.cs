@@ -29,7 +29,15 @@ namespace TsinghuaUWP
         }
         static public bool credentialAbsent()
         {
-            return localSettings.Values["username"] == null;
+            var username = localSettings.Values["username"];
+            return username == null
+                || username.ToString() == "__anonymous";
+        }
+        static public bool supposedToWorkAnonymously()
+        {
+            var username = localSettings.Values["username"];
+            return username != null
+                && username.ToString() == "__anonymous";
         }
         static public bool isDemo()
         {

@@ -12,14 +12,14 @@ using System.Text.RegularExpressions;
 
 namespace TsinghuaUWP
 {
-    public class TileAndToast
+    public class Notification
     {
-        static public async Task<int> update()
+        static public async Task<int> update(bool forceRemote = false)
         {
             
             try
             {
-                Debug.WriteLine("[TileAndToast] update begin");
+                Debug.WriteLine("[Notification] update begin");
 
                 var updater = TileUpdateManager.CreateTileUpdaterForApplication();
                 updater.EnableNotificationQueue(true);
@@ -31,10 +31,10 @@ namespace TsinghuaUWP
                 if (! DataAccess.credentialAbsent())
                 {
 
-                    Debug.WriteLine("[TileAndToast] credential exist");
+                    Debug.WriteLine("[Notification] credential exist");
 
                     //deadlines
-                    var deadlines = await DataAccess.getDeadlinesFiltered();
+                    var deadlines = await DataAccess.getDeadlinesFiltered(forceRemote); 
                     foreach (var deadline in deadlines)
                     {
                         if (!deadline.hasBeenFinished && !deadline.isPast())
@@ -49,25 +49,24 @@ namespace TsinghuaUWP
                             notifier.Show(toast);
                         }
                     }
-
                 }
 
                 //calendar
                 if (tileCount < 5)
                 {
-                    updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getSemester())));
+                    updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getSemester(forceRemote))));
                 }
 
-                Debug.WriteLine("[TileAndToast] update finished");
+                Debug.WriteLine("[Notification] update finished");
             }
             catch(ParsePageException)
             {
-                Debug.WriteLine("[TileAndToast] parse error");
+                Debug.WriteLine("[Notification] parse error");
                 return 3;
             }
             catch (Exception e)
             {
-                Debug.WriteLine("[TileAndToast] error: " + e.Message);
+                Debug.WriteLine("[Notification] error: " + e.Message);
                 return 1;
             }
 

@@ -45,11 +45,12 @@ namespace TsinghuaUWP
 
     public class Exceptions
     {
-        const string NONSENSE = "The text associated with this error code could not be found.";
         public static string getFriendlyMessage(Exception e)
         {
-            return e.Message.Replace(NONSENSE, "").Trim();
+            return e.Message
+                .Replace("无法找到与此错误代码关联的文本。", "")
+                .Replace("The text associated with this error code could not be found.", "")
+                .Trim();
         }
     }
-    
 }
