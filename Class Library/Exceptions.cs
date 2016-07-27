@@ -10,6 +10,11 @@ namespace TsinghuaUWP
     {
     }
 
+
+    public class NeedCampusNetworkException : Exception
+    {
+    }
+
     public class LoginException : Exception
     {
         public new string Message;

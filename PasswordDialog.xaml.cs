@@ -36,7 +36,7 @@ namespace TsinghuaUWP
                     {
                         Title = "是否继续",
                         Content = @"
-如果不提供用户名和密码，将无法从学校服
+如果不提供学号和密码，将无法从学校服
 务器获取课表、课程公告、作业等信息。
 
 您可以在任何时候选择重新登录。
@@ -51,11 +51,23 @@ namespace TsinghuaUWP
                 }
                 var username = this.username.Text;
                 var password = this.password.Password;
-                if(username.Length == 0 || password.Length == 0)
+
+                int n;
+                bool isNumeric = int.TryParse(username, out n);
+                if (!isNumeric)
                 {
                     await (new ContentDialog
                     {
-                        Title = "用户名、密码不能为空",
+                        Title = "学号应为纯数字",
+                        PrimaryButtonText = "返回"
+                    }).ShowAsync();
+                    continue;
+                }
+                if (username.Length == 0 || password.Length == 0)
+                {
+                    await (new ContentDialog
+                    {
+                        Title = "学号、密码不能为空",
                         PrimaryButtonText = "返回"
                     }).ShowAsync();
                     continue;

@@ -63,7 +63,7 @@ namespace TsinghuaUWP
                 var d = (-timeDelta.Days);
                 timeLeft = d.ToString() + "+ day" + f(d) + " ago";
             }
-                
+
 
             return timeLeft;
         }
@@ -208,7 +208,7 @@ namespace TsinghuaUWP
         public int yiPi { get; set; }
         public int jiaoed { get; set; }
     }
-    public class CalendarRootObject
+    public class SemestersRootObject
     {
         public Currentteachingweek currentTeachingWeek { get; set; }
         public Semester currentSemester { get; set; }
@@ -224,5 +224,24 @@ namespace TsinghuaUWP
         public string semesterId { get; set; }
     }
 
-    
+
+    public class Timetable : List<Event>
+    {
+        
+    }
+
+    public class Event
+    {
+        public string dd { get; set; }
+        public string fl { get; set; }
+        public int grrlID { get; set; }
+        public string jssj { get; set; }
+        public string kssj { get; set; }
+        public string nq { get; set; }
+        public string nr { get; set; }
+        public string sfSjtz { get; set; }
+        public string skjc { get; set; }
+        public string sm { get; set; }
+    }
+
 }
