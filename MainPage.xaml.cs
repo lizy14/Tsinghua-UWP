@@ -46,14 +46,13 @@ namespace TsinghuaUWP
                         "Tsinghua_Learn_Website", password.username, password.password));
 
                     TileAndToast.update();
+                    Appointment.update();
                 }
                 catch (UserCancelException)
                 {
 
                 }
             }
-
-            
         }
     }
 }

@@ -17,7 +17,49 @@ namespace TsinghuaUWP
     {
 
         //Remote Access
+        public static async Task<Timetable> getRemoteTimetable()
+        {
 
+            await login();
+
+
+            HttpStringContent stringContent = new HttpStringContent(
+                $"appId = ALL_ZHJW", Windows.Storage.Streams.UnicodeEncoding.Utf8, "application/x-www-form-urlencoded");
+            httpResponse = await m_httpClient.PostAsync(new Uri("http://learn.cic.tsinghua.edu.cn:80/gnt"), stringContent);
+            httpResponse.EnsureSuccessStatusCode();
+            var ticket = await httpResponse.Content.ReadAsStringAsync();
+
+
+            Int32 timestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
+            var year_ago = DateTime.Now.AddYears(-1).ToString("yyyyMMdd");
+            var year_later = DateTime.Now.AddYears(+1).ToString("yyyyMMdd");
+
+            try
+            {
+                var zhjw = await getPageContent($"http://zhjw.cic.tsinghua.edu.cn/j_acegi_login.do?url=/&ticket={ticket}");
+            }
+            catch (System.Runtime.InteropServices.COMException e)
+            {
+                if (e.Message.IndexOf("403") == -1)
+                    throw e;
+                Debug.WriteLine("[getRemoteTimetable] outside campus network");
+
+                //connect via sslvpn
+                await loginSSLVPN();
+                var ticketPage = await getPageContent(
+                    $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn+j_acegi_login.do?url=/&ticket={ticket}");
+                string pageSslvpn = await getPageContent(
+                    $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn,CT=js+jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_");
+                logoutSSLVPN();
+                return parseTimetablePage(pageSslvpn);
+            }
+
+            //connect directly
+            string page = await getPageContent(
+                $"http://zhjw.cic.tsinghua.edu.cn/jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_&_={timestamp}");
+            return parseTimetablePage(page);
+
+        }
         public static async Task<List<Deadline>> getRemoteHomeworkList(string courseId)
         {
             await login();
@@ -40,7 +82,7 @@ namespace TsinghuaUWP
         public static async Task<Semesters> getRemoteSemesters()
         {
             await login();
-            var _remoteCalendar = parseCalendarPage(await getCalendarPage());
+            var _remoteCalendar = parseSemestersPage(await getCalendarPage());
             return new Semesters
             {
                 currentSemester = _remoteCalendar.currentSemester,
@@ -48,9 +90,11 @@ namespace TsinghuaUWP
             };
         }
 
-        static DateTime lastLogin = DateTime.MinValue;
-        static int LOGIN_TIMEOUT_MINUTES = 5;
-        public static async Task<int> login(
+
+
+
+        // deal with m_httpClient, m_cic_ticket
+        public static async Task<int> login( 
             bool useLocalSettings = true,
             string username = "",
             string password = "")
@@ -82,7 +126,7 @@ namespace TsinghuaUWP
                 Windows.Storage.Streams.UnicodeEncoding.Utf8,
                 "application/x-www-form-urlencoded");
 
-            httpResponse = await httpClient.PostAsync(new Uri(loginUri), stringContent);
+            httpResponse = await m_httpClient.PostAsync(new Uri(loginUri), stringContent);
             httpResponse.EnsureSuccessStatusCode();
             var loginResponse = await httpResponse.Content.ReadAsStringAsync();
 
@@ -98,41 +142,93 @@ namespace TsinghuaUWP
             }
 
             //get iframe src
-            try
-            {
-                HtmlDocument htmlDoc = new HtmlDocument();
-                htmlDoc.LoadHtml(await getPageContent(homeUri));
-                var iframeSrc = htmlDoc.DocumentNode.Descendants("iframe")/*MAGIC*/.First().Attributes["src"].Value;
 
-                //login to learn.cic.tsinghua.edu.cn
-                await getPageContent(iframeSrc);
+            HtmlDocument htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(await getPageContent(homeUri));
 
-                Debug.WriteLine("[login] successful");
-                lastLogin = DateTime.Now;
-            }
-            catch (Exception)
-            {
+            string iframeSrc;
+            try {
+                iframeSrc = htmlDoc.DocumentNode.Descendants("iframe")/*MAGIC*/.First().Attributes["src"].Value;
+            } catch (Exception) {
                 throw new ParsePageException("find_cic_iframe");
             }
+
+
+            //login to learn.cic.tsinghua.edu.cn
+            await getPageContent(iframeSrc);
+
+
+            Debug.WriteLine("[login] successful");
+            lastLogin = DateTime.Now;
+
+
+            return 0;
+        }
+        static public async Task logoutSSLVPN()
+        {
+            await getPageContent("https://sslvpn.tsinghua.edu.cn/dana-na/auth/logout.cgi");
+        }
+        static public async Task<int> loginSSLVPN()
+        {
+            if (DataAccess.credentialAbsent())
+            {
+                throw new LoginException("没有指定用户名和密码");
+            }
+            var username = DataAccess.getLocalSettings()["username"].ToString();
+
+            var vault = new Windows.Security.Credentials.PasswordVault();
+            var password = vault.Retrieve("Tsinghua_Learn_Website", username).Password;
+
+            HttpStringContent stringContent = new HttpStringContent(
+                $"tz_offset=480&username={username/*should be numeral ID*/}&password={password}&realm=ldap&btnSubmit=登录",
+                Windows.Storage.Streams.UnicodeEncoding.Utf8,
+                "application/x-www-form-urlencoded");
+
+            httpResponse = await m_httpClient.PostAsync(new Uri(loginSslvpnUri), stringContent);
+            httpResponse.EnsureSuccessStatusCode();
+            var loginResponse = await httpResponse.Content.ReadAsStringAsync();
+
+
+            var xsauthGroups = Regex.Match(loginResponse, @"name=""xsauth"" value=""([^""]+)""").Groups;
+            if (xsauthGroups.Count < 2)
+                throw new ParsePageException("find_xsauth_from_sslvpn");
+            var xsauth = xsauthGroups[1];
+            var time = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; 
+            stringContent = new HttpStringContent(
+                $"xsauth={xsauth}&tz_offset=480&clienttime={time}&url=&activex_enabled=0&java_enabled=0&power_user=0&grab=1&browserproxy=&browsertype=&browserproxysettings=&check=yes",
+                Windows.Storage.Streams.UnicodeEncoding.Utf8,
+                "application/x-www-form-urlencoded");
+
+            httpResponse = await m_httpClient.PostAsync(new Uri(loginSslvpnCheckUri), stringContent);
+            httpResponse.EnsureSuccessStatusCode();
+            loginResponse = await httpResponse.Content.ReadAsStringAsync();
 
             return 0;
         }
 
+        static DateTime lastLogin = DateTime.MinValue;
+        static int LOGIN_TIMEOUT_MINUTES = 5;
+
+        static HttpClient m_httpClient = new HttpClient();
+        static HttpResponseMessage httpResponse = new HttpResponseMessage();
+
+
+
+
+        static string loginSslvpnUri = "https://sslvpn.tsinghua.edu.cn/dana-na/auth/url_default/login.cgi";
+        static string loginSslvpnCheckUri = "https://sslvpn.tsinghua.edu.cn/dana/home/starter0.cgi";
         static string loginUri = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp";
         static string homeUri = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn";
         static string hostedCalendarUrl = "http://lizy14.github.io/thuCalendar.json";
 
-        static HttpClient httpClient = new HttpClient();
-        static HttpResponseMessage httpResponse = new HttpResponseMessage();
 
         static async Task<string> getPageContent(string url)
         {
             //getPage
-            httpResponse = await httpClient.GetAsync(new Uri(url));
+            httpResponse = await m_httpClient.GetAsync(new Uri(url));
             httpResponse.EnsureSuccessStatusCode();
             return await httpResponse.Content.ReadAsStringAsync();
         }
-
         static async Task<string> getHomeworkListPage(string courseId)
         {
             return await getPageContent($"http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id={courseId}");
@@ -275,9 +371,16 @@ namespace TsinghuaUWP
                 throw new ParsePageException("CourseList");
             }
         }
-        static CalendarRootObject parseCalendarPage(string page)
+        static SemestersRootObject parseSemestersPage(string page)
         {
-            return JSON.parse<CalendarRootObject>(page);
+            return JSON.parse<SemestersRootObject>(page);
+        }
+        static Timetable parseTimetablePage(string page)
+        {
+            if (page.Length < "_([])".Length)
+                throw new ParsePageException("timetable_javascript");
+            string json = page.Substring(2, page.Length - 3);
+            return JSON.parse<Timetable>(json);
         }
     }
 

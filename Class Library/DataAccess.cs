@@ -31,13 +31,18 @@ namespace TsinghuaUWP
         {
             return localSettings.Values["username"] == null;
         }
+        static public bool isDemo()
+        {
+            return 
+                localSettings.Values["username"] != null &&
+                localSettings.Values["username"].ToString() == "_demo";
+        }
         static public void setLocalSettings<Type>(string key, Type value)
         {
             localSettings.Values[key] = value;
         }
         static async public Task<int> updateAllFromRemote()
         {
-            await Remote.login();
             await getCourses(true);
             await getSemester(true);
             await getAllDeadlines(true);
@@ -82,6 +87,26 @@ namespace TsinghuaUWP
             localSettings.Values["courses"] = JSON.stringify(_courses);
             Debug.WriteLine("[getCourses] Returning remote");
             return courses;
+        }
+
+
+        public static async Task<Timetable> getTimetable(bool forceRemote = false)
+        {
+            if (forceRemote == false)
+            {
+                var localJSON = localSettings.Values["timetable"];
+                if (localJSON != null)
+                {
+                    Debug.WriteLine("[getTimetable] Returning local settings");
+                    return JSON.parse<Timetable>((string)localJSON);
+                }
+            }
+
+            //fetch from remote
+            var _remoteTimetable = await Remote.getRemoteTimetable();
+            localSettings.Values["timetable"] = JSON.stringify(_remoteTimetable);
+            Debug.WriteLine("[getTimetable] Returning remote");
+            return _remoteTimetable;
         }
 
         public static async Task<Semester> getSemester(bool forceRemote = false)
