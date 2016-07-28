@@ -36,37 +36,6 @@ namespace TsinghuaUWP
         {
             return digit == 1 ? "" : "s";
         }
-        public string timeLeftEnglish()
-        {
-            TimeSpan timeDelta = DateTime.Parse(ddl + " 23:59") - DateTime.Now;
-
-            var daysLeft = timeDelta.TotalDays;
-            string timeLeft = "";
-
-            if (daysLeft > 1)
-            {
-                var d = timeDelta.Days + 1;
-                timeLeft = d.ToString() + "- day" + f(d) + " left";
-            }
-            else if (daysLeft > 0)
-            {
-                var d = timeDelta.Hours + 1;
-                timeLeft = d.ToString() + "- hour" + f(d) + " left";
-            }
-            else if (daysLeft > -1)
-            {
-                var d = (-timeDelta.Hours);
-                timeLeft = d.ToString() + "+ hour" + f(d) + " ago";
-            }
-            else
-            {
-                var d = (-timeDelta.Days);
-                timeLeft = d.ToString() + "+ day" + f(d) + " ago";
-            }
-
-
-            return timeLeft;
-        }
         public string timeLeft()
         {
             return timeLeftChinese();
@@ -82,15 +51,23 @@ namespace TsinghuaUWP
             var daysLeft = timeDelta.TotalDays;
             string timeLeft = "";
 
+            if (daysLeft > 7)
+            {
+                var d = Math.Round(daysLeft / 7);
+                timeLeft = "还有 " + d.ToString() + " 周";
+            }
             if (daysLeft > 1)
             {
-                var d = timeDelta.Days + 1;
+                var d = Math.Round(daysLeft);
                 timeLeft = "只剩 " + d.ToString() + " 天";
             }
             else if (daysLeft > 0)
             {
-                var d = timeDelta.Hours + 1;
-                timeLeft = "只剩 " + d.ToString() + " 小时";
+                var d = timeDelta.Hours;
+                if (d > 0) 
+                    timeLeft = "只剩 " + d.ToString() + " 小时";
+                else
+                    timeLeft = "即将到期！";
             }
             else if (daysLeft > -1)
             {
