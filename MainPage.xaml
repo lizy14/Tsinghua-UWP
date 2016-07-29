@@ -15,7 +15,7 @@
                 </ProgressRing.RenderTransform>
             </ProgressRing>
 
-            <Button x:Name="btnRefreshTimetable" Content="将课程表导入系统日历" Width="203" Click="btnRefreshTimetable_Click" Margin="19,377,0,231" Height="33" VerticalAlignment="Top"/>
+            <Button x:Name="btnRefreshTimetable" Content="刷新课程表" Width="203" Click="btnRefreshTimetable_Click" Margin="19,377,0,231" Height="33" VerticalAlignment="Top"/>
             <Image x:Name="errorRefreshTimetable" HorizontalAlignment="Left" Height="32" Margin="227,377,0,0" VerticalAlignment="Top" Width="32" Source="Assets/LockScreenLogo.png" Visibility="Collapsed"/>
             <ProgressRing x:Name="progressRefreshTimetable" HorizontalAlignment="Left" Margin="227,377,0,0" VerticalAlignment="Top" Height="22" Width="22" RenderTransformOrigin="0.5,0.5">
                 <ProgressRing.RenderTransform>

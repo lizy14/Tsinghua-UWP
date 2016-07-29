@@ -28,7 +28,7 @@ namespace TsinghuaUWP
 
                 var notifier = ToastNotificationManager.CreateToastNotifier();
 
-                if (! DataAccess.credentialAbsent())
+                if (calendarOnly == false && ! DataAccess.credentialAbsent())
                 {
 
                     Debug.WriteLine("[Notification] credential exist");

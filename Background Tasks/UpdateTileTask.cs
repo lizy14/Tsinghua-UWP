@@ -12,6 +12,7 @@ namespace BackgroundTasks
 
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
             Notification.update(true);
+            Appointment.updateDeadlines();
             deferral.Complete();
             Debug.WriteLine("[UpdateTileTask] finished");
 
