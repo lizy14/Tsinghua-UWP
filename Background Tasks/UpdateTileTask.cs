@@ -11,7 +11,7 @@ namespace BackgroundTasks
             Debug.WriteLine("[UpdateTileTask] launched");
 
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
-            Notification.update();
+            Notification.update(true);
             deferral.Complete();
             Debug.WriteLine("[UpdateTileTask] finished");
 

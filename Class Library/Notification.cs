@@ -14,7 +14,7 @@ namespace TsinghuaUWP
 {
     public class Notification
     {
-        static public async Task<int> update(bool forceRemote = false)
+        static public async Task<int> update(bool forceRemote = false, bool calendarOnly = false)
         {
             
             try
@@ -34,27 +34,34 @@ namespace TsinghuaUWP
                     Debug.WriteLine("[Notification] credential exist");
 
                     //deadlines
-                    var deadlines = await DataAccess.getDeadlinesFiltered(forceRemote); 
+                    var deadlines = await DataAccess.getDeadlinesFiltered(forceRemote, limit: 3); 
                     foreach (var deadline in deadlines)
                     {
-                        if (!deadline.hasBeenFinished && !deadline.isPast())
+                        if (true)
                         {
                             var tile = new TileNotification(getTileXmlForDeadline(deadline));
-                            tile.Tag = "deadline";
                             updater.Update(tile);
                             tileCount++;
-
-                            var toast = new ToastNotification(getToastXmlForDeadline(deadline));
-                            toast.Tag = "deadline";
-                            notifier.Show(toast);
                         }
+
+                        if (! deadline.hasBeenFinished)
+                        {
+                            if (! deadline.hasBeenToasted())
+                            {
+                                deadline.mark_as_toasted();
+                                var toast = new ToastNotification(getToastXmlForDeadline(deadline));
+                                notifier.Show(toast);
+                            }
+                        }
+
+
                     }
                 }
 
                 //calendar
                 if (tileCount < 5)
                 {
-                    updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getSemester(forceRemote))));
+                    updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getSemester())));
                 }
 
                 Debug.WriteLine("[Notification] update finished");
@@ -82,7 +89,6 @@ namespace TsinghuaUWP
 <visual>
   <binding template='ToastGeneric'>
     <text>{deadline.name}</text>
-    <text>{deadline.timeLeft()}</text>
     <text>{deadline.ddl}, {deadline.course}</text>
 </binding>
 </visual>";

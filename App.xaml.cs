@@ -20,6 +20,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.UI.ViewManagement;
 
 namespace TsinghuaUWP
 {
@@ -63,7 +64,7 @@ namespace TsinghuaUWP
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        async protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
@@ -103,8 +104,6 @@ namespace TsinghuaUWP
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
-
-            //Notification.update();
             
             BackgroundTaskRegister.RegisterBackgroundTask();
             
