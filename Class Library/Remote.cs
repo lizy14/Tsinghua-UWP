@@ -28,9 +28,8 @@ namespace TsinghuaUWP
 
             await login();
 
-
             HttpStringContent stringContent = new HttpStringContent(
-                $"appId = ALL_ZHJW", Windows.Storage.Streams.UnicodeEncoding.Utf8, "application/x-www-form-urlencoded");
+                $"appId=ALL_ZHJW", Windows.Storage.Streams.UnicodeEncoding.Utf8, "application/x-www-form-urlencoded");
             httpResponse = await m_httpClient.PostAsync(new Uri("http://learn.cic.tsinghua.edu.cn:80/gnt"), stringContent);
             httpResponse.EnsureSuccessStatusCode();
             var ticket = await httpResponse.Content.ReadAsStringAsync();
@@ -49,9 +48,11 @@ namespace TsinghuaUWP
                 if (e.Message.IndexOf("403") == -1)
                     throw e;
                 Debug.WriteLine("[getRemoteTimetable] outside campus network");
+                //throw new NeedCampusNetworkException();
 
                 //connect via sslvpn
                 await loginSSLVPN();
+
                 var ticketPage = await getPageContent(
                     $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn+j_acegi_login.do?url=/&ticket={ticket}");
                 string pageSslvpn = await getPageContent(
@@ -187,7 +188,7 @@ namespace TsinghuaUWP
         static async Task logoutSSLVPN()
         {
             await getPageContent("https://sslvpn.tsinghua.edu.cn/dana-na/auth/logout.cgi");
-            Debug.WriteLine("[loginSSLVPN] finish");
+            Debug.WriteLine("[logoutSSLVPN] finish");
         }
         static async Task<int> loginSSLVPN()
         {
@@ -215,16 +216,34 @@ namespace TsinghuaUWP
             var loginResponse = await httpResponse.Content.ReadAsStringAsync();
 
 
-            //get xsauth token
+            //another sslvpn session exist?
+            if (loginResponse.IndexOf("btnContinue") != -1)
+            {
+                Debug.WriteLine("[loginSSLVPN] another sslvpn session exist");
+
+                HtmlDocument htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(loginResponse);
+                string formDataStr = htmlDoc.GetElementbyId("DSIDFormDataStr").Attributes["value"].Value;
+                HttpStringContent encoded = new HttpStringContent(
+                    $"btnContinue={Uri.EscapeDataString("继续会话")}&FormDataStr={Uri.EscapeDataString(formDataStr)}",
+                    Windows.Storage.Streams.UnicodeEncoding.Utf8,
+                    "application/x-www-form-urlencoded");
+
+                httpResponse = await m_httpClient.PostAsync(new Uri(loginSslvpnUri), encoded);
+                httpResponse.EnsureSuccessStatusCode();
+                loginResponse = await httpResponse.Content.ReadAsStringAsync();
+            }
+            
+            //get xauth token
             var xsauthGroups = Regex.Match(loginResponse, @"name=""xsauth"" value=""([^""]+)""").Groups;
-            if (xsauthGroups.Count < 2){
-                //TODO: create error message on login failure
+            if (xsauthGroups.Count < 2)
+            {
                 throw new ParsePageException("find_xsauth_from_sslvpn");
             }
             var xsauth = xsauthGroups[1];
 
             //second step, invoking xsauth token
-            var time = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; 
+            var time = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
             stringContent = new HttpStringContent(
                 $"xsauth={xsauth}&tz_offset=480&clienttime={time}&url=&activex_enabled=0&java_enabled=0&power_user=0&grab=1&browserproxy=&browsertype=&browserproxysettings=&check=yes",
                 Windows.Storage.Streams.UnicodeEncoding.Utf8,
@@ -233,6 +252,8 @@ namespace TsinghuaUWP
             httpResponse = await m_httpClient.PostAsync(new Uri(loginSslvpnCheckUri), stringContent);
             httpResponse.EnsureSuccessStatusCode();
             loginResponse = await httpResponse.Content.ReadAsStringAsync();
+            
+
 
             Debug.WriteLine("[loginSSLVPN] finish");
             return 0;
@@ -244,6 +265,7 @@ namespace TsinghuaUWP
 
         static string loginSslvpnUri = "https://sslvpn.tsinghua.edu.cn/dana-na/auth/url_default/login.cgi";
         static string loginSslvpnCheckUri = "https://sslvpn.tsinghua.edu.cn/dana/home/starter0.cgi";
+        static string loginSslvpnCheckUriCheck = "https://sslvpn.tsinghua.edu.cn/dana/home/starter0.cgi?check=yes";
         static string loginUri = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp";
 
 
@@ -309,14 +331,20 @@ namespace TsinghuaUWP
                     var _isFinished = (tds.ElementAt(3/*MAGIC*/).InnerText.Trim() == "已经提交");
 
                     _due = tds.ElementAt(2/*MAGIC*/).InnerText;
-                    _name = node.Descendants("a")/*MAGIC*/.First().InnerText;
+
+                    var link_to_detail = node.Descendants("a")/*MAGIC*/.First();
+                    _name = link_to_detail.InnerText;
+
+                    var _href = link_to_detail.Attributes["href"].Value;
+                    var _id = Regex.Match(_href, @"[^_]id=(\d+)").Groups[1].Value;
 
                     deadlines.Add(new Deadline
                     {
                         name = _name,
                         ddl = _due,
                         course = _course,
-                        hasBeenFinished = _isFinished
+                        hasBeenFinished = _isFinished,
+                        id = "@" + _id
                     });
                 }
                 return deadlines;
@@ -357,7 +385,8 @@ namespace TsinghuaUWP
                     name = _name,
                     ddl = _due,
                     course = _course,
-                    hasBeenFinished = _isFinished
+                    hasBeenFinished = _isFinished,
+                    id = "_" + item.courseHomeworkInfo.homewkId
                 });
             }
             return deadlines;

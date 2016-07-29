@@ -36,8 +36,8 @@ namespace TsinghuaUWP
                     {
                         Title = "是否继续",
                         Content = @"
-如果不提供学号和密码，将无法从学校服
-务器获取课表、课程公告、作业等信息。
+如果不提供学号和密码，课程表、
+作业 ddl 提醒功能将不可用。
 
 您可以在任何时候选择重新登录。
 ",
@@ -118,7 +118,6 @@ namespace TsinghuaUWP
                         PrimaryButtonText = "重试"
                     }).ShowAsync();
                 }
-
 
             }
 

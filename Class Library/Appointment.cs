@@ -18,16 +18,14 @@ namespace TsinghuaUWP
 
             //TODO: request calendar access?
 
-            var timetable = await DataAccess.getTimetable(forceRemote);
+            Timetable timetable;
+
+            try { timetable = await DataAccess.getTimetable(forceRemote); } catch(Exception)
+            { timetable = await DataAccess.getTimetable(forceRemote); }
 
             var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
 
             //delete previously created
-            var storedId = DataAccess.getLocalSettings()[storedKey];
-            if(storedId != null)
-            {
-                await store.GetAppointmentCalendarAsync(storedId.ToString());
-            }
             foreach (var old_cal in await store.FindAppointmentCalendarsAsync())
             {
                 await old_cal.DeleteAsync();
@@ -35,10 +33,12 @@ namespace TsinghuaUWP
 
             //create new
             var cal = await store.CreateAppointmentCalendarAsync("清华课表");
-            DataAccess.getLocalSettings()[storedKey] = cal.LocalId;
 
-            foreach(var ev in timetable)
-                await cal.SaveAppointmentAsync(getAppointment(ev));
+            foreach (var ev in timetable)
+            {
+                var appointment = getAppointment(ev);
+                await cal.SaveAppointmentAsync(appointment);
+            }
             Debug.WriteLine("[Appointment] update finished");
         }
 

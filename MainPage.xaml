@@ -6,9 +6,65 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+    <ScrollViewer >
+        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
+            <Button x:Name="btnLogin" Content="注销登录" Click="button_Click" Width="203" Margin="19,576,0,32" VerticalAlignment="Top" />
+            <ProgressRing x:Name="progressLogin" HorizontalAlignment="Left" Margin="227,576,0,0" VerticalAlignment="Top" Height="22" Width="22" RenderTransformOrigin="0.5,0.5">
+                <ProgressRing.RenderTransform>
+                    <CompositeTransform TranslateX="5" TranslateY="5"/>
+                </ProgressRing.RenderTransform>
+            </ProgressRing>
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
-        <TextBlock x:Name="textBlock" Margin="10,10,0,0" TextWrapping="Wrap" Text="这里是主界面ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" FontSize="80" />
-        <Button x:Name="button" Content="注销并重新登录" Margin="10,10,0,598" Click="button_Click"/>
-    </Grid>
+            <Button x:Name="btnRefreshTimetable" Content="将课程表导入系统日历" Width="203" Click="btnRefreshTimetable_Click" Margin="19,377,0,231" Height="33" VerticalAlignment="Top"/>
+            <Image x:Name="errorRefreshTimetable" HorizontalAlignment="Left" Height="32" Margin="227,377,0,0" VerticalAlignment="Top" Width="32" Source="Assets/LockScreenLogo.png" Visibility="Collapsed"/>
+            <ProgressRing x:Name="progressRefreshTimetable" HorizontalAlignment="Left" Margin="227,377,0,0" VerticalAlignment="Top" Height="22" Width="22" RenderTransformOrigin="0.5,0.5">
+                <ProgressRing.RenderTransform>
+                    <CompositeTransform TranslateX="5" TranslateY="5"/>
+                </ProgressRing.RenderTransform>
+            </ProgressRing>
+
+
+            <Button x:Name="btnUpdate" Content="刷新作业" Width="203" Margin="19,490,0,118" Click="btnUpdate_Click" VerticalAlignment="Top"/>
+            <Image x:Name="errorUpdate" HorizontalAlignment="Left" Height="32" Margin="227,490,0,0" VerticalAlignment="Top" Width="32" Source="Assets/LockScreenLogo.png" Visibility="Collapsed"/>
+            <ProgressRing x:Name="progressUpdate" HorizontalAlignment="Left" Margin="227,490,0,0" VerticalAlignment="Top" Height="22" Width="22" RenderTransformOrigin="0.5,0.5">
+                <ProgressRing.RenderTransform>
+                    <CompositeTransform TranslateX="5" TranslateY="5"/>
+                </ProgressRing.RenderTransform>
+            </ProgressRing>
+            <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="11,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="282" Width="348">
+		            <Run Text="这个应用本身并没有什么界面(￣(工)￣)"/>
+		            <LineBreak/>
+		            <Run/>
+		            <LineBreak/>
+		            <Run Text="校历，在动态磁贴上显示。"/>
+		            <LineBreak/>
+		            <Run Text="作业截止提醒，在动态磁贴上显示。"/>
+		            <LineBreak/>
+		            <Run Text="课程表，在系统“日历”应用中显示。"/>
+		            <LineBreak/>
+		            <Run/>
+		            <LineBreak/>
+		            <Run Text="为了体验本应用的功能，请您"/>
+		            <LineBreak/>
+		            <Run Text=" • 将“清华磁贴”固定到“开始”屏幕。"/>
+		            <Run/>
+		            <LineBreak/>
+		            <Run/>
+		            <LineBreak/>
+		            <Run Text="同时还建议您"/>
+		            <LineBreak/>
+		            <Run Text=" • 将“日历”固定到开始屏幕；"/>
+		            <LineBreak/>
+		            <Run Text=" • “设置&gt;个性化&gt;锁屏界面&gt;显示详细状态的应用”，选择“日历”。"/>
+		            <LineBreak/>
+		        </TextBlock>
+            <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Margin="10,312,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="378">
+            <Run Text="若学期发生了变化，或者您进行了选课、退课操作，您需要手动点击以下按钮。系统日历中已有的课程表会被清除。"/>
+            </TextBlock>
+            <TextBlock x:Name="textBlock1_Copy" HorizontalAlignment="Left" Margin="10,425,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="378">
+            <Run Text="作业截止日期在后台自动更新。如果等不及（比如刚提交了一份作业，再也不想看见它），您可以手动点击以下按钮。"/>
+            </TextBlock>
+
+        </Grid>
+    </ScrollViewer>
 </Page>

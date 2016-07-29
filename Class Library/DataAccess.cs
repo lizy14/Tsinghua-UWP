@@ -51,22 +51,42 @@ namespace TsinghuaUWP
         }
         static async public Task<int> updateAllFromRemote()
         {
-            await getCourses(true);
             await getSemester(true);
+            await getCourses(true);
+            await getTimetable(true);
             await getAllDeadlines(true);
             return 0;
         }
-
-        static public async Task<List<Deadline>> getDeadlinesFiltered(bool forceRemote = false)
+        static public async Task<List<Deadline>> getDeadlinesFiltered(bool forceRemote = false, int limit = -1)
         {
             var assignments = await getAllDeadlines(forceRemote);
-            var result = (from assignment in assignments
-                          where assignment.hasBeenFinished == false
-                          orderby ((DateTime.Parse(assignment.ddl) - DateTime.Now).TotalDays)
-                          select assignment);
-            return result.Take(5).ToList();
-        }
 
+            var future = (from assignment in assignments
+                          where assignment.hasBeenFinished == false && assignment.isPast() == false
+                          orderby assignment.daysFromNow() ascending
+                          select assignment);
+
+            int futureCount = future.Count();
+
+            if (futureCount > limit && limit >= 0)
+            {
+                return future.Take(limit).ToList();
+            }
+
+
+            var past = (from assignment in assignments
+                        where assignment.hasBeenFinished == false && assignment.isPast() == true
+                        orderby assignment.daysFromNow() descending
+                        select assignment);
+
+
+            if (limit < 0)
+            {
+                return future.Concat(past).ToList();
+            }
+
+            return future.Concat(past.Take(limit - futureCount)).ToList();
+        }
         public static async Task<List<Course>> getCourses(bool forceRemote = false)
         {
             if (!forceRemote)
@@ -96,27 +116,13 @@ namespace TsinghuaUWP
             Debug.WriteLine("[getCourses] Returning remote");
             return courses;
         }
-
-
         public static async Task<Timetable> getTimetable(bool forceRemote = false)
         {
-            if (forceRemote == false)
-            {
-                var localJSON = localSettings.Values["timetable"];
-                if (localJSON != null)
-                {
-                    Debug.WriteLine("[getTimetable] Returning local settings");
-                    return JSON.parse<Timetable>((string)localJSON);
-                }
-            }
-
             //fetch from remote
             var _remoteTimetable = await Remote.getRemoteTimetable();
-            localSettings.Values["timetable"] = JSON.stringify(_remoteTimetable);
             Debug.WriteLine("[getTimetable] Returning remote");
             return _remoteTimetable;
         }
-
         public static async Task<Semester> getSemester(bool forceRemote = false)
         {
             if (forceRemote == false)
@@ -155,7 +161,7 @@ namespace TsinghuaUWP
 
             //fetch from remote
             Semesters _remoteSemesters;
-            if (true /*TODO*/|| DataAccess.credentialAbsent())
+            if (true || DataAccess.credentialAbsent())
                 _remoteSemesters = await Remote.getHostedSemesters();
             else
                 _remoteSemesters = await Remote.getRemoteSemesters();
@@ -164,9 +170,9 @@ namespace TsinghuaUWP
             Debug.WriteLine("[getCalendar] Returning remote");
             return semesters.currentSemester;
         }
-
         static public async Task<List<Deadline>> getAllDeadlines(bool forceRemote = false)
         {
+
             if (!forceRemote)
             {
                 //try session memory

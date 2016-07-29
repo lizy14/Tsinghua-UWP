@@ -26,15 +26,34 @@ namespace TsinghuaUWP
     }
     public class Deadline
     {
+        public string id;
         public string name;
         public string ddl;
         public string course;
         public string detail;
         public bool hasBeenFinished;
-
-        private string f(int digit)
+        public bool hasBeenToasted()
         {
-            return digit == 1 ? "" : "s";
+            string toasted = "";
+            if(DataAccess.getLocalSettings()["toasted_assignments"] != null)
+            {
+                toasted = DataAccess.getLocalSettings()["toasted_assignments"].ToString();
+            }
+            return toasted.IndexOf(this.id) != -1;
+        }
+        public void mark_as_toasted()
+        {
+            string toasted = "";
+            if (DataAccess.getLocalSettings()["toasted_assignments"] != null)
+            {
+                toasted = DataAccess.getLocalSettings()["toasted_assignments"].ToString();
+            }
+            toasted += "," + this.id;
+            DataAccess.setLocalSettings("toasted_assignments", toasted);
+        }
+        public double daysFromNow()
+        {
+            return (DateTime.Parse(ddl + " 23:59") - DateTime.Now).TotalDays;
         }
         public string timeLeft()
         {
@@ -51,7 +70,7 @@ namespace TsinghuaUWP
             var daysLeft = timeDelta.TotalDays;
             string timeLeft = "";
 
-            if (daysLeft > 7)
+            if (daysLeft > 10)
             {
                 var d = Math.Round(daysLeft / 7);
                 timeLeft = "还有 " + d.ToString() + " 周";
@@ -72,12 +91,17 @@ namespace TsinghuaUWP
             else if (daysLeft > -1)
             {
                 var d = (-timeDelta.Hours);
-                timeLeft = "已经过去" + d.ToString() + " 小时";
+                timeLeft = "已经过去 " + d.ToString() + " 小时";
             }
-            else
+            else if (daysLeft > -10)
             {
                 var d = (-timeDelta.Days);
                 timeLeft = "已经过去 " + d.ToString() + " 天";
+            }
+            else
+            {
+                var d = Math.Round(timeDelta.TotalDays / -7);
+                timeLeft = "已经过去 " + d.ToString() + " 周";
             }
 
 
