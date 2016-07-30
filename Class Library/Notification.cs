@@ -37,7 +37,7 @@ namespace TsinghuaUWP
                     var deadlines = await DataAccess.getDeadlinesFiltered(forceRemote, limit: 3); 
                     foreach (var deadline in deadlines)
                     {
-                        if (true)
+                        if (! deadline.isPast() && ! deadline.shouldBeIgnored())
                         {
                             var tile = new TileNotification(getTileXmlForDeadline(deadline));
                             updater.Update(tile);
@@ -61,7 +61,7 @@ namespace TsinghuaUWP
                 //calendar
                 if (tileCount < 5)
                 {
-                    updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getSemester())));
+                    updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getSemester(forceRemote))));
                 }
 
                 Debug.WriteLine("[Notification] update finished");

@@ -41,6 +41,18 @@ namespace TsinghuaUWP
             }
             return toasted.IndexOf(this.id) != -1;
         }
+        public bool shouldBeIgnored()
+        {
+            string[] keywords = {
+                "补交"
+            };
+            foreach(var keyword in keywords)
+            {
+                if (name.IndexOf(keyword) != -1)
+                    return true;
+            }
+            return false;
+        }
         public void mark_as_toasted()
         {
             string toasted = "";

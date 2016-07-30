@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Appointments;
+using Windows.UI;
 
 namespace TsinghuaUWP
 {
@@ -24,11 +25,17 @@ namespace TsinghuaUWP
         }
         public static async Task updateDeadlines()
         {
-            //do deadlines
+            Debug.WriteLine("[Appointment] deadlines begin");
+
+
             var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
-            Debug.WriteLine("[Appointment] doing assignments");
+            
             try
             {
+                var deadlines = await DataAccess.getAllDeadlines();
+                if (deadlines.Count == 0)
+                    throw new Exception();
+
                 AppointmentCalendar ddl_cal;
                 if (DataAccess.getLocalSettings()[ddl_storedKey] != null)
                 {
@@ -40,6 +47,7 @@ namespace TsinghuaUWP
                     ddl_cal = await store.CreateAppointmentCalendarAsync("课程作业");
                     DataAccess.setLocalSettings(ddl_storedKey, ddl_cal.LocalId);
                 }
+                var color = ddl_cal.DisplayColor;
 
                 var aps = await ddl_cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
                 foreach (var ddl_ap in aps)
@@ -47,7 +55,7 @@ namespace TsinghuaUWP
                     await ddl_cal.DeleteAppointmentAsync(ddl_ap.LocalId);
                 }
                 
-                foreach (var ev in await DataAccess.getAllDeadlines())
+                foreach (var ev in deadlines)
                 {
                     var appointment = getAppointment(ev);
 
@@ -55,8 +63,10 @@ namespace TsinghuaUWP
                 }
             }
             catch (Exception) { }
+
+            Debug.WriteLine("[Appointment] deadlines finish");
         }
-        public static async Task update(bool forceRemote = false)
+        public static async Task updateTimetable(bool forceRemote = false)
         {
             Debug.WriteLine("[Appointment] update start");
 
@@ -64,22 +74,32 @@ namespace TsinghuaUWP
 
             Timetable timetable;
             
-            try { timetable = await DataAccess.getTimetable(forceRemote); } catch(Exception)
-            { timetable = await DataAccess.getTimetable(forceRemote); }
+            try{
+                timetable = await DataAccess.getTimetable(forceRemote);
+            }catch(Exception){
+                try{
+                    timetable = await DataAccess.getTimetable(forceRemote);
+                }catch(Exception e){
+                    throw e;
+                }
+            }
+
+            if (timetable.Count == 0)
+                throw new Exception();
 
             var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
 
 
             AppointmentCalendar cal;
-            if (DataAccess.getLocalSettings()[ddl_storedKey] != null)
+            if (DataAccess.getLocalSettings()[class_storedKey] != null)
             {
                 cal = await store.GetAppointmentCalendarAsync(
-                    DataAccess.getLocalSettings()[ddl_storedKey].ToString());
+                    DataAccess.getLocalSettings()[class_storedKey].ToString());
             }
             else
             {
                 cal = await store.CreateAppointmentCalendarAsync("课程表");
-                DataAccess.setLocalSettings(ddl_storedKey, cal.LocalId);
+                DataAccess.setLocalSettings(class_storedKey, cal.LocalId);
             }
 
 
