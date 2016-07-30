@@ -160,11 +160,22 @@ namespace TsinghuaUWP
             }
 
             //fetch from remote
-            Semesters _remoteSemesters;
-            if (true || DataAccess.credentialAbsent())
+            Semesters _remoteSemesters = null;
+
+            try {
                 _remoteSemesters = await Remote.getHostedSemesters();
-            else
+            } catch (Exception) { }
+
+            if (_remoteSemesters == null)
+            {
+                Debug.WriteLine("[getCalendar] hosted fail, falling back");
+
+                if (DataAccess.credentialAbsent() == true)
+                    throw new LoginException("calendar_fall_back");
+
                 _remoteSemesters = await Remote.getRemoteSemesters();
+            }
+
             semesters = _remoteSemesters;
             localSettings.Values["semesters"] = JSON.stringify(semesters);
             Debug.WriteLine("[getCalendar] Returning remote");

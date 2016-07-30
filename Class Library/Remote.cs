@@ -25,7 +25,7 @@ namespace TsinghuaUWP
 
         public static async Task<Timetable> getRemoteTimetable()
         {
-
+            Debug.WriteLine("[getRemoteTimetable] start");
             await login();
 
 
@@ -58,12 +58,16 @@ namespace TsinghuaUWP
                 string pageSslvpn = await GET(
                     $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn,CT=js+jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_");
                 logoutSSLVPN();
+
+                Debug.WriteLine("[getRemoteTimetable] returning sslvpn");
                 return parseTimetablePage(pageSslvpn);
             }
 
             //connect directly
             string page = await GET(
                 $"http://zhjw.cic.tsinghua.edu.cn/jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_&_={timestamp}");
+
+            Debug.WriteLine("[getRemoteTimetable] returning direct");
             return parseTimetablePage(page);
 
         }
@@ -170,6 +174,7 @@ namespace TsinghuaUWP
 
 
             //login to learn.cic.tsinghua.edu.cn
+            await Task.Delay(TimeSpan.FromSeconds(1));
             await GET(iframeSrc);
 
 
