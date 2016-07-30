@@ -42,6 +42,7 @@ namespace TsinghuaUWP
 
             if(DataAccess.credentialAbsent() == false) {
                 updateNotificationsAsyc();
+                updateTimetableAsync();
             }
         }
         async Task changeAccountAsync()
@@ -104,6 +105,7 @@ namespace TsinghuaUWP
             try
             {
                 await Notification.update(true);
+                await Appointment.updateDeadlines();
                 this.errorUpdate.Visibility = Visibility.Collapsed;
             }
             catch (Exception)
@@ -125,7 +127,7 @@ namespace TsinghuaUWP
             this.btnRefreshTimetable.IsEnabled = false;
             this.errorRefreshTimetable.Visibility = Visibility.Collapsed;
             try {
-                await Appointment.update(true);
+                await Appointment.updateTimetable(true);
                 this.errorRefreshTimetable.Visibility = Visibility.Collapsed;
             } catch (Exception) {
                 this.errorRefreshTimetable.Visibility = Visibility.Visible;
