@@ -12,8 +12,13 @@ namespace TsinghuaUWP
 {
     public static class Appointment
     {
+
+        static string ddl_cal_name = "作业";
+        static string class_cal_name = "课程表";
+
         static string ddl_storedKey = "appointmentCalendarForDeadlines";
         static string class_storedKey = "appointmentCalendarForClasses";
+
         public static async Task deleteAllCalendars()
         {
             var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
@@ -36,6 +41,7 @@ namespace TsinghuaUWP
                 if (deadlines.Count == 0)
                     throw new Exception();
 
+                //get Calendar object
                 AppointmentCalendar ddl_cal;
                 if (DataAccess.getLocalSettings()[ddl_storedKey] != null)
                 {
@@ -44,11 +50,12 @@ namespace TsinghuaUWP
                 }
                 else
                 {
-                    ddl_cal = await store.CreateAppointmentCalendarAsync("课程作业");
+                    ddl_cal = await store.CreateAppointmentCalendarAsync(ddl_cal_name);
                     DataAccess.setLocalSettings(ddl_storedKey, ddl_cal.LocalId);
                 }
                 var color = ddl_cal.DisplayColor;
 
+                //TODO: don't delete all and re-insert all
                 var aps = await ddl_cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
                 foreach (var ddl_ap in aps)
                 {
@@ -57,9 +64,7 @@ namespace TsinghuaUWP
                 
                 foreach (var ev in deadlines)
                 {
-                    var appointment = getAppointment(ev);
-
-                    await ddl_cal.SaveAppointmentAsync(appointment);
+                    await ddl_cal.SaveAppointmentAsync(getAppointment(ev));
                 }
             }
             catch (Exception) { }
@@ -78,6 +83,8 @@ namespace TsinghuaUWP
                 timetable = await DataAccess.getTimetable(forceRemote);
             }catch(Exception){
                 try{
+                    //TODO: prettier retry
+                    await Task.Delay(TimeSpan.FromSeconds(1));
                     timetable = await DataAccess.getTimetable(forceRemote);
                 }catch(Exception e){
                     throw e;
@@ -98,18 +105,23 @@ namespace TsinghuaUWP
             }
             else
             {
-                cal = await store.CreateAppointmentCalendarAsync("课程表");
+                cal = await store.CreateAppointmentCalendarAsync(class_cal_name);
                 DataAccess.setLocalSettings(class_storedKey, cal.LocalId);
             }
 
+
+            //TODO: don't delete all and re-insert all
+            var aps = await cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
+            foreach (var ddl_ap in aps)
+            {
+                await cal.DeleteAppointmentAsync(ddl_ap.LocalId);
+            }
 
             foreach (var ev in timetable)
             {
                 var appointment = getAppointment(ev);
                 await cal.SaveAppointmentAsync(appointment);
             }
-
-            
 
             Debug.WriteLine("[Appointment] update finished");
         }
@@ -119,6 +131,7 @@ namespace TsinghuaUWP
             var a = new Windows.ApplicationModel.Appointments.Appointment();
             a.Subject = e.nr;
             a.Location = e.dd;
+            //TODO: probably doesn't work for exam events, which may be something like "2:30", "7:00"
             a.StartTime = DateTime.Parse(e.nq + " " + e.kssj);
             a.Duration = DateTime.Parse(e.nq + " " + e.jssj) - a.StartTime;
             a.AllDay = false;

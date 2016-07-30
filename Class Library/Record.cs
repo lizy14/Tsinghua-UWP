@@ -7,6 +7,18 @@ using System.Threading.Tasks;
 
 namespace TsinghuaUWP
 {
+
+    /*
+     用词对照
+
+        课程：Course
+        作业：Deadline, assignment
+        学期：Semester
+        校历：Semesters, calendar
+        课表：Timetable, AppointmentCalendar
+        课表项：Event, Appointment
+
+         */
     public class Password
     {
         public string username;
@@ -16,7 +28,7 @@ namespace TsinghuaUWP
     {
         public string id;
         public string name;
-        public bool isNew;
+        public bool isNew; //uses (`learn.cic` or `learn`?) .tsinghua.edu.cn
         public string semester;
 
         override public string ToString()
@@ -146,7 +158,8 @@ namespace TsinghuaUWP
         }
     }
 
-    // generated from JSON by Visual Studio, for JSON parser
+    // the following classes are generated from JSON by Visual Studio, 
+    // for JSON parser only
     public class CourseAssignmentsRootobject
     {
         public string message { get; set; }

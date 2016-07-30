@@ -16,25 +16,25 @@ namespace TsinghuaUWP
     {
         static public async Task<int> update(bool forceRemote = false, bool calendarOnly = false)
         {
-            
+            Debug.WriteLine("[Notification] update begin");
+
+            var updater = TileUpdateManager.CreateTileUpdaterForApplication();
+            updater.EnableNotificationQueue(true);
+            updater.Clear(); //TODO: should always clear?
+
+            int tileCount = 0;
+
+            var notifier = ToastNotificationManager.CreateToastNotifier();
+
             try
             {
-                Debug.WriteLine("[Notification] update begin");
-
-                var updater = TileUpdateManager.CreateTileUpdaterForApplication();
-                updater.EnableNotificationQueue(true);
-                updater.Clear();
-                int tileCount = 0;
-
-                var notifier = ToastNotificationManager.CreateToastNotifier();
-
                 if (calendarOnly == false && ! DataAccess.credentialAbsent())
                 {
-
                     Debug.WriteLine("[Notification] credential exist");
 
                     //deadlines
                     var deadlines = await DataAccess.getDeadlinesFiltered(forceRemote, limit: 3); 
+
                     foreach (var deadline in deadlines)
                     {
                         if (! deadline.isPast() && ! deadline.shouldBeIgnored())
@@ -53,30 +53,31 @@ namespace TsinghuaUWP
                                 notifier.Show(toast);
                             }
                         }
-
-
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("[Notification] error dealing with deadlines: " + e.Message);
+                throw e;
+            }
 
-                //calendar
+            //calendar
+            try
+            {
                 if (tileCount < 5)
                 {
                     updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getSemester(forceRemote))));
                 }
-
-                Debug.WriteLine("[Notification] update finished");
             }
-            catch(ParsePageException)
+            catch(Exception e)
             {
-                Debug.WriteLine("[Notification] parse error");
-                return 3;
+                Debug.WriteLine("[Notification] error dealing with calendar: " + e.Message);
+                throw e;
             }
-            catch (Exception e)
-            {
-                Debug.WriteLine("[Notification] error: " + e.Message);
-                return 1;
-            }
+            
 
+            Debug.WriteLine("[Notification] update finished");
             return 0;
         }
         static XmlDocument getToastXmlForDeadline(Deadline deadline)

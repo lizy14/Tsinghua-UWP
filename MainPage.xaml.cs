@@ -102,17 +102,19 @@ namespace TsinghuaUWP
         {
             this.progressUpdate.IsActive = true;
             this.btnUpdate.IsEnabled = false;
-            try
-            {
+            this.errorUpdate.Visibility = Visibility.Collapsed;
+
+            //TODO: simplify update logic of local being fall-back
+            try {
                 await Notification.update(true);
                 await Appointment.updateDeadlines();
-                this.errorUpdate.Visibility = Visibility.Collapsed;
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 this.errorUpdate.Visibility = Visibility.Visible;
+                try {
+                    await Notification.update();
+                } catch (Exception) { }
             }
-            
+
             this.progressUpdate.IsActive = false;
             this.btnUpdate.IsEnabled = ! DataAccess.credentialAbsent();
         }
@@ -128,7 +130,6 @@ namespace TsinghuaUWP
             this.errorRefreshTimetable.Visibility = Visibility.Collapsed;
             try {
                 await Appointment.updateTimetable(true);
-                this.errorRefreshTimetable.Visibility = Visibility.Collapsed;
             } catch (Exception) {
                 this.errorRefreshTimetable.Visibility = Visibility.Visible;
             }

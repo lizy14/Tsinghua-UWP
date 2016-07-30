@@ -27,9 +27,13 @@
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
       <Extensions>
-        <Extension Category="windows.backgroundTasks" EntryPoint="BackgroundTasks.UpdateTileTask">
+        <Extension Category="windows.backgroundTasks" EntryPoint="BackgroundTasks.LocalUpdateTask">
           <BackgroundTasks>
-            <Task Type="systemEvent" />
+            <Task Type="timer" />
+          </BackgroundTasks>
+        </Extension>
+        <Extension Category="windows.backgroundTasks" EntryPoint="BackgroundTasks.RemoteUpdateTask">
+          <BackgroundTasks>
             <Task Type="timer" />
           </BackgroundTasks>
         </Extension>

@@ -28,20 +28,20 @@ namespace TsinghuaUWP
 
             await login();
 
-            HttpStringContent stringContent = new HttpStringContent(
-                $"appId=ALL_ZHJW", Windows.Storage.Streams.UnicodeEncoding.Utf8, "application/x-www-form-urlencoded");
-            httpResponse = await m_httpClient.PostAsync(new Uri("http://learn.cic.tsinghua.edu.cn:80/gnt"), stringContent);
-            httpResponse.EnsureSuccessStatusCode();
-            var ticket = await httpResponse.Content.ReadAsStringAsync();
+
+            var ticket = await POST(
+                "http://learn.cic.tsinghua.edu.cn:80/gnt", 
+                "appId=ALL_ZHJW");
 
 
-            Int32 timestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
+            var timestamp = UnixTime().TotalMilliseconds;
             var year_ago = DateTime.Now.AddYears(-1).ToString("yyyyMMdd");
             var year_later = DateTime.Now.AddYears(+1).ToString("yyyyMMdd");
 
             try
             {
-                var zhjw = await getPageContent($"http://zhjw.cic.tsinghua.edu.cn/j_acegi_login.do?url=/&ticket={ticket}");
+                var zhjw = await GET(
+                    $"http://zhjw.cic.tsinghua.edu.cn/j_acegi_login.do?url=/&ticket={ticket}");
             }
             catch (System.Runtime.InteropServices.COMException e)
             {
@@ -53,16 +53,16 @@ namespace TsinghuaUWP
                 //connect via sslvpn
                 await loginSSLVPN();
 
-                var ticketPage = await getPageContent(
+                var ticketPage = await GET(
                     $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn+j_acegi_login.do?url=/&ticket={ticket}");
-                string pageSslvpn = await getPageContent(
+                string pageSslvpn = await GET(
                     $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn,CT=js+jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_");
                 logoutSSLVPN();
                 return parseTimetablePage(pageSslvpn);
             }
 
             //connect directly
-            string page = await getPageContent(
+            string page = await GET(
                 $"http://zhjw.cic.tsinghua.edu.cn/jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_&_={timestamp}");
             return parseTimetablePage(page);
 
@@ -84,7 +84,7 @@ namespace TsinghuaUWP
         }
         public static async Task<Semesters> getHostedSemesters()
         {
-            return JSON.parse<Semesters>(await getPageContent(hostedCalendarUrl));
+            return JSON.parse<Semesters>(await GET(hostedCalendarUrl));
         }
         public static async Task<Semesters> getRemoteSemesters()
         {
@@ -142,14 +142,9 @@ namespace TsinghuaUWP
 
 
             //login to learn.tsinghua.edu.cn
-            HttpStringContent stringContent = new HttpStringContent(
-                $"leixin1=student&userid={username}&userpass={password}",
-                Windows.Storage.Streams.UnicodeEncoding.Utf8,
-                "application/x-www-form-urlencoded");
-
-            httpResponse = await m_httpClient.PostAsync(new Uri(loginUri), stringContent);
-            httpResponse.EnsureSuccessStatusCode();
-            var loginResponse = await httpResponse.Content.ReadAsStringAsync();
+            var loginResponse = await POST(
+                loginUri, 
+                $"leixin1=student&userid={username}&userpass={password}");
 
             //check if successful
             var alertInfoGroup = Regex.Match(loginResponse, @"window.alert\(""(.+)""\);").Groups;
@@ -164,7 +159,7 @@ namespace TsinghuaUWP
 
             //get iframe src
             HtmlDocument htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(await getPageContent(courseListUrl));
+            htmlDoc.LoadHtml(await GET(courseListUrl));
 
             string iframeSrc;
             try {
@@ -175,7 +170,7 @@ namespace TsinghuaUWP
 
 
             //login to learn.cic.tsinghua.edu.cn
-            await getPageContent(iframeSrc);
+            await GET(iframeSrc);
 
 
             Debug.WriteLine("[login] successful");
@@ -187,7 +182,7 @@ namespace TsinghuaUWP
         }
         static async Task logoutSSLVPN()
         {
-            await getPageContent("https://sslvpn.tsinghua.edu.cn/dana-na/auth/logout.cgi");
+            await GET("https://sslvpn.tsinghua.edu.cn/dana-na/auth/logout.cgi");
             Debug.WriteLine("[logoutSSLVPN] finish");
         }
         static async Task<int> loginSSLVPN()
@@ -206,14 +201,9 @@ namespace TsinghuaUWP
 
 
             //login to sslvpn.tsinghua.edu.cn
-            HttpStringContent stringContent = new HttpStringContent(
-                $"tz_offset=480&username={username/*should be numeral ID*/}&password={password}&realm=ldap&btnSubmit=登录",
-                Windows.Storage.Streams.UnicodeEncoding.Utf8,
-                "application/x-www-form-urlencoded");
-
-            httpResponse = await m_httpClient.PostAsync(new Uri(loginSslvpnUri), stringContent);
-            httpResponse.EnsureSuccessStatusCode();
-            var loginResponse = await httpResponse.Content.ReadAsStringAsync();
+            var loginResponse = await POST(
+                loginSslvpnUri,
+                $"tz_offset=480&username={username/*should be numeral ID*/}&password={password}&realm=ldap&btnSubmit=登录");
 
 
             //another sslvpn session exist?
@@ -224,14 +214,10 @@ namespace TsinghuaUWP
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(loginResponse);
                 string formDataStr = htmlDoc.GetElementbyId("DSIDFormDataStr").Attributes["value"].Value;
-                HttpStringContent encoded = new HttpStringContent(
-                    $"btnContinue={Uri.EscapeDataString("继续会话")}&FormDataStr={Uri.EscapeDataString(formDataStr)}",
-                    Windows.Storage.Streams.UnicodeEncoding.Utf8,
-                    "application/x-www-form-urlencoded");
 
-                httpResponse = await m_httpClient.PostAsync(new Uri(loginSslvpnUri), encoded);
-                httpResponse.EnsureSuccessStatusCode();
-                loginResponse = await httpResponse.Content.ReadAsStringAsync();
+                loginResponse = await POST(
+                    loginSslvpnUri,
+                    $"btnContinue=继续会话&FormDataStr={Uri.EscapeDataString(formDataStr)}");
             }
             
             //get xauth token
@@ -243,15 +229,11 @@ namespace TsinghuaUWP
             var xsauth = xsauthGroups[1];
 
             //second step, invoking xsauth token
-            var time = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-            stringContent = new HttpStringContent(
-                $"xsauth={xsauth}&tz_offset=480&clienttime={time}&url=&activex_enabled=0&java_enabled=0&power_user=0&grab=1&browserproxy=&browsertype=&browserproxysettings=&check=yes",
-                Windows.Storage.Streams.UnicodeEncoding.Utf8,
-                "application/x-www-form-urlencoded");
+            var timestamp = UnixTime().TotalSeconds;
 
-            httpResponse = await m_httpClient.PostAsync(new Uri(loginSslvpnCheckUri), stringContent);
-            httpResponse.EnsureSuccessStatusCode();
-            loginResponse = await httpResponse.Content.ReadAsStringAsync();
+            loginResponse = await POST(
+                loginSslvpnCheckUri, 
+                $"xsauth={xsauth}&tz_offset=480&clienttime={timestamp}&url=&activex_enabled=0&java_enabled=0&power_user=0&grab=1&browserproxy=&browsertype=&browserproxysettings=&check=yes");
             
 
 
@@ -279,21 +261,21 @@ namespace TsinghuaUWP
         static string hostedCalendarUrl = "http://lizy14.github.io/thuCalendar.json";
         static async Task<string> getHomeworkListPage(string courseId)
         {
-            return await getPageContent($"http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id={courseId}");
+            return await GET($"http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id={courseId}");
         }
         static async Task<string> getHomeworkListPageNew(string courseId)
         {
-            Int32 timestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
+            var timestamp = UnixTime().TotalMilliseconds;
             string url = $"http://learn.cic.tsinghua.edu.cn/b/myCourse/homework/list4Student/{courseId}/0?_={timestamp}";
-            return await getPageContent(url);
+            return await GET(url);
         }
         static async Task<string> getCourseListPage()
         {
-            return await getPageContent(courseListUrl);
+            return await GET(courseListUrl);
         }
         static async Task<string> getCalendarPage()
         {
-            return await getPageContent("http://learn.cic.tsinghua.edu.cn/b/myCourse/courseList/getCurrentTeachingWeek");
+            return await GET("http://learn.cic.tsinghua.edu.cn/b/myCourse/courseList/getCurrentTeachingWeek");
         }
 
 
@@ -458,12 +440,27 @@ namespace TsinghuaUWP
 
         static HttpClient m_httpClient = new HttpClient();
         static HttpResponseMessage httpResponse = new HttpResponseMessage();
-        static async Task<string> getPageContent(string url)
+        static async Task<string> GET(string url)
         {
             //getPage
             httpResponse = await m_httpClient.GetAsync(new Uri(url));
             httpResponse.EnsureSuccessStatusCode();
             return await httpResponse.Content.ReadAsStringAsync();
+        }
+        static async Task<string> POST(string url, string form_string)
+        {
+            HttpStringContent stringContent = new HttpStringContent(
+                form_string, 
+                Windows.Storage.Streams.UnicodeEncoding.Utf8,
+                "application/x-www-form-urlencoded");
+
+            httpResponse = await m_httpClient.PostAsync(new Uri(url), stringContent);
+            httpResponse.EnsureSuccessStatusCode();
+            return await httpResponse.Content.ReadAsStringAsync();
+        }
+        static TimeSpan UnixTime()
+        {
+            return (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)));
         }
 
     }
