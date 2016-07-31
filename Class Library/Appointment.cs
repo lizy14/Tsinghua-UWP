@@ -75,6 +75,9 @@ namespace TsinghuaUWP
 
             Debug.WriteLine("[Appointment] deadlines finish");
         }
+
+
+        static string semester_in_system_calendar = "__";
         public static async Task updateCalendar()
         {
             Debug.WriteLine("[Appointment] calendar begin");
@@ -82,37 +85,38 @@ namespace TsinghuaUWP
 
             var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
 
-            try
+            var semester = await DataAccess.getSemester();
+
+            if (semester.semesterEname == semester_in_system_calendar)
+                return;
+
+            var weeks = getAppointments(semester);
+
+            //get Calendar object
+            AppointmentCalendar cal;
+            if (DataAccess.getLocalSettings()[cal_storedKey] != null)
             {
-                var weeks = getAppointments(await DataAccess.getSemester());
-
-                //get Calendar object
-                AppointmentCalendar cal;
-                if (DataAccess.getLocalSettings()[cal_storedKey] != null)
-                {
-                    cal = await store.GetAppointmentCalendarAsync(
-                        DataAccess.getLocalSettings()[cal_storedKey].ToString());
-                }
-                else
-                {
-                    cal = await store.CreateAppointmentCalendarAsync(cal_cal_name);
-                    DataAccess.setLocalSettings(cal_storedKey, cal.LocalId);
-                }
-
-
-                //TODO: don't delete all and re-insert all
-                var aps = await cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
-                foreach (var a in aps)
-                {
-                    await cal.DeleteAppointmentAsync(a.LocalId);
-                }
-
-                foreach (var ev in weeks)
-                {
-                    await cal.SaveAppointmentAsync(ev);
-                }
+                cal = await store.GetAppointmentCalendarAsync(
+                    DataAccess.getLocalSettings()[cal_storedKey].ToString());
             }
-            catch (Exception) { }
+            else
+            {
+                cal = await store.CreateAppointmentCalendarAsync(cal_cal_name);
+                DataAccess.setLocalSettings(cal_storedKey, cal.LocalId);
+            }
+
+            var aps = await cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
+            foreach (var a in aps)
+            {
+                await cal.DeleteAppointmentAsync(a.LocalId);
+            }
+
+            foreach (var ev in weeks)
+            {
+                await cal.SaveAppointmentAsync(ev);
+            }
+
+            semester_in_system_calendar = semester.semesterEname;
 
             Debug.WriteLine("[Appointment] calendar finish");
         }
