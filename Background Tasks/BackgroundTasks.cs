@@ -2,14 +2,13 @@
 using TsinghuaUWP;
 using System.Diagnostics;
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Background;
-using Windows.Storage;
 
+using Windows.Storage;
+using System.Net.NetworkInformation;
 
 namespace BackgroundTasks
 {
@@ -44,80 +43,95 @@ namespace BackgroundTasks
         }
     }
 
-    public sealed class Management
+    public sealed class UnifiedUpdateTask : IBackgroundTask
+    {
+        public async void Run(IBackgroundTaskInstance taskInstance)
+        {
+            
+            BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
+            Debug.WriteLine("[UnifiedUpdateTask] launched at " + DateTime.Now);
+
+            Debug.WriteLine("[UnifiedUpdateTask] local");
+            Notification.update();
+            Appointment.updateDeadlines();
+
+            bool goRemote = false;
+            string key = "last_successful_remote_task";
+            if (NetworkInterface.GetIsNetworkAvailable())
+            {
+                if (DataAccess.getLocalSettings()[key] == null)
+                    goRemote = true;
+                else {
+                    var delta = DateTime.Now - DateTime.Parse(DataAccess.getLocalSettings()[key].ToString());
+                    if (delta.TotalHours > .5 /*TODO: MAGIC*/)
+                        goRemote = true;
+                }
+                if (goRemote) {
+                    Debug.WriteLine("[UnifiedUpdateTask] remote");
+                    await DataAccess.getAllDeadlines(forceRemote: true); //hope this can finish in 30 seconds
+                    Notification.update();
+                    Appointment.updateDeadlines();
+                }
+            }
+
+            deferral.Complete();
+
+            if(goRemote)
+                DataAccess.setLocalSettings(key, DateTime.Now.ToString());
+
+            Debug.WriteLine("[UnifiedUpdateTask] finished");
+        }
+    }
+
+    public sealed class TaskManager
     {
         const int LOCAL_INTERVAL = 15; //minutes
         const int REMOTE_INTERVAL = 120; //minutes
 
-        public static void register()
-        {
-            //local
-            RegisterBackgroundTask(
-                local_task_entry,
-                local_task_name,
+        public static async void register()
+        {   
+            await RegisterBackgroundTask(
+                unified_task_entry,
+                unified_task_name,
                 new TimeTrigger(LOCAL_INTERVAL, false),
                 new SystemCondition(SystemConditionType.UserPresent));
 
-            //remote
-            RegisterBackgroundTask(
-                remote_task_entry,
-                remote_task_name,
-                new TimeTrigger(REMOTE_INTERVAL, false),
-                new SystemCondition(SystemConditionType.InternetAvailable));
-
+            return;
         }
 
-        private const string local_task_name = "LocalUpdateTask";
-        private const string local_task_entry = "BackgroundTasks.LocalUpdateTask";
+        private const string unified_task_name = "UnifiedUpdateTask";
+        private const string unified_task_entry = "BackgroundTasks.UnifiedUpdateTask";
 
-        private const string remote_task_name = "RemoteUpdateTask";
-        private const string remote_task_entry = "BackgroundTasks.RemoteUpdateTask";
-
-
-
-
-        //helper function, reference: https://msdn.microsoft.com/en-us/windows/uwp/launch-resume/register-a-background-task
-
-        static BackgroundTaskRegistration RegisterBackgroundTask(
+        static async Task<BackgroundTaskRegistration> RegisterBackgroundTask(
             string taskEntryPoint,
             string taskName,
             IBackgroundTrigger trigger,
             IBackgroundCondition condition)
         {
-            //
-            // Check for existing registrations of this background task.
-            //
 
             Debug.WriteLine("[BackgroundTasks] registering " + taskName);
+
+            var backgroundAccessStatus = await BackgroundExecutionManager.RequestAccessAsync();
+            if (!(backgroundAccessStatus == BackgroundAccessStatus.AllowedMayUseActiveRealTimeConnectivity ||
+                backgroundAccessStatus == BackgroundAccessStatus.AllowedWithAlwaysOnRealTimeConnectivity))
+                throw new Exception();
+
             foreach (var cur in BackgroundTaskRegistration.AllTasks)
             {
-
                 if (cur.Value.Name == taskName)
                 {
-                    //
-                    // The task is already registered.
-                    //
                     Debug.WriteLine("[BackgroundTasks] already registered");
-                    return (BackgroundTaskRegistration)(cur.Value);
+                    cur.Value.Unregister(true);
                 }
             }
-
-            //
-            // Register the background task.
-            //
 
             var builder = new BackgroundTaskBuilder();
 
             builder.Name = taskName;
             builder.TaskEntryPoint = taskEntryPoint;
             builder.SetTrigger(trigger);
-
             if (condition != null)
-            {
-
                 builder.AddCondition(condition);
-            }
-
             BackgroundTaskRegistration task = builder.Register();
 
             Debug.WriteLine("[BackgroundTasks] successfully registered");

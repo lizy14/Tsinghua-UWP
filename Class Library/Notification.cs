@@ -132,7 +132,7 @@ $@"<toast>
         <binding template=""TileLarge"">
             <text hint-style=""title"">{name}</text>
             <text hint-style=""bodySubtle"">{course}</text>
-            <text hint-style=""bodySubtle"">Deadline {due}</text>
+            <text hint-style=""bodySubtle"">截止于 {due}</text>
             <text hint-style=""body"">{timeLeft}</text>
             <text hint-style=""captionSubtle"">更新于 {DateTime.Now}</text>
         </binding>
@@ -188,6 +188,7 @@ $@"<toast>
             <text hint-style=""bodySubtle"">{nameGroup[0]}</text>
             <text hint-style=""body"">{weekday}</text>
             <text hint-style=""bodySubtle"">{date}</text>
+            <text hint-style=""captionSubtle"">更新于 {DateTime.Now}</text>
         </binding>
 
     </visual>

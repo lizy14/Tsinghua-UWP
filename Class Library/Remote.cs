@@ -32,7 +32,7 @@ namespace TsinghuaUWP
             var ticket = await POST(
                 "http://learn.cic.tsinghua.edu.cn:80/gnt", 
                 "appId=ALL_ZHJW");
-
+            await Task.Delay(TimeSpan.FromSeconds(1)); //cross-domain tickets needs some time to take effect
 
             var timestamp = UnixTime().TotalMilliseconds;
             var year_ago = DateTime.Now.AddYears(-1).ToString("yyyyMMdd");
