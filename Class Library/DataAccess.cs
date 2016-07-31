@@ -57,12 +57,11 @@ namespace TsinghuaUWP
             await getAllDeadlines(true);
             return 0;
         }
-        static public async Task<List<Deadline>> getDeadlinesFiltered(bool forceRemote = false, int limit = -1)
+        static public List<Deadline> sortDeadlines(List<Deadline> assignments, int limit = -1)
         {
-            var assignments = await getAllDeadlines(forceRemote);
 
             var future = (from assignment in assignments
-                          where assignment.hasBeenFinished == false && assignment.isPast() == false
+                          where assignment.isPast() == false
                           orderby assignment.daysFromNow() ascending
                           select assignment);
 
@@ -75,7 +74,7 @@ namespace TsinghuaUWP
 
 
             var past = (from assignment in assignments
-                        where assignment.hasBeenFinished == false && assignment.isPast() == true
+                        where assignment.isPast() == true
                         orderby assignment.daysFromNow() descending
                         select assignment);
 

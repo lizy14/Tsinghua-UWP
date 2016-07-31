@@ -34,23 +34,31 @@ namespace TsinghuaUWP
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            Notification.update(calendarOnly: true);
-            Appointment.updateCalendar();
-
+            
             if (DataAccess.supposedToWorkAnonymously() == true)
             {
                 btnLogin.Content = "登录";
                 btnRefreshTimetable.IsEnabled = false;
                 btnUpdate.IsEnabled = false;
-            }
-
-            if (DataAccess.supposedToWorkAnonymously() == false
+                update_without_credential();
+            }else if (DataAccess.supposedToWorkAnonymously() == false
                 && DataAccess.credentialAbsent() == true) {
+                update_without_credential();
                 await changeAccountAsync();
-            }else if(DataAccess.credentialAbsent() == false) {
-                updateNotificationsAsyc();
-                updateTimetableAsync();
+            }else if (DataAccess.credentialAbsent() == false) {
+                update_with_credential();
             }
+        }
+
+        void update_with_credential()
+        {
+            Notification.update();
+            Appointment.updateCalendar();
+        }
+        void update_without_credential()
+        {
+            Notification.update(calendarOnly: true);
+            Appointment.updateCalendar();
         }
         async Task changeAccountAsync()
         {
@@ -58,20 +66,23 @@ namespace TsinghuaUWP
             this.btnRefreshTimetable.IsEnabled = false;
             this.btnUpdate.IsEnabled = false;
             this.btnLogin.IsEnabled = false;
-            if (await changeAccountWithoutModifyingUI())
+            if (await changeAccountHelper())
             {
                 this.btnLogin.Content = "注销登录";
                 this.btnRefreshTimetable.IsEnabled = true;
                 this.btnUpdate.IsEnabled = true;
+                update_with_credential();
             }
             else
             {
                 this.btnLogin.Content = "登录";
+                update_without_credential();
             }
             this.progressLogin.IsActive = false;
             this.btnLogin.IsEnabled = true;
         }
-        async Task<bool> changeAccountWithoutModifyingUI()
+
+        async Task<bool> changeAccountHelper() //false for anonymous
         {
             var dialog = new PasswordDialog();
             Password password;
@@ -92,23 +103,16 @@ namespace TsinghuaUWP
 
             var vault = new Windows.Security.Credentials.PasswordVault();
             vault.Add(new Windows.Security.Credentials.PasswordCredential(
-                "Tsinghua_Learn_Website", password.username, password.password));
-
-            //fresh log-in, update everything
-            
-            updateNotificationsAsyc();
-            updateTimetableAsync();
-            
+                "Tsinghua_Learn_Website", password.username, password.password));          
 
             return true;
         }
 
-        private void button_Click(object sender, RoutedEventArgs e)
-        {
-            changeAccountAsync();
-        }
+        int updateNotificationsCounter = 0;
         private async Task updateNotificationsAsyc()
         {
+            updateNotificationsCounter++;
+
             this.progressUpdate.IsActive = true;
             this.btnUpdate.IsEnabled = false;
             this.errorUpdate.Visibility = Visibility.Collapsed;
@@ -124,16 +128,18 @@ namespace TsinghuaUWP
                 } catch (Exception) { }
             }
 
-            this.progressUpdate.IsActive = false;
-            this.btnUpdate.IsEnabled = ! DataAccess.credentialAbsent();
+            if (--updateNotificationsCounter == 0)
+            {
+                this.progressUpdate.IsActive = false;
+                this.btnUpdate.IsEnabled = !DataAccess.credentialAbsent();
+            }
         }
         
-        private void btnRefreshTimetable_Click(object sender, RoutedEventArgs e)
-        {
-            updateTimetableAsync();
-        }
+        int updateTimetableCounter = 0;
         private async Task updateTimetableAsync()
         {
+            updateTimetableCounter++;
+
             this.progressRefreshTimetable.IsActive = true;
             this.btnRefreshTimetable.IsEnabled = false;
             this.errorRefreshTimetable.Visibility = Visibility.Collapsed;
@@ -141,24 +147,35 @@ namespace TsinghuaUWP
                 await Appointment.updateTimetable(true);
             } catch (Exception e) {
                 this.errorRefreshTimetable.Visibility = Visibility.Visible;
-            } 
-            this.progressRefreshTimetable.IsActive = false;
-            this.btnRefreshTimetable.IsEnabled = true;
-        }
+            }
 
-        private async void btnUpdate_Click(object sender, RoutedEventArgs e)
-        {
-            await updateNotificationsAsyc();
+            if (--updateTimetableCounter == 0)
+            {
+                this.progressRefreshTimetable.IsActive = false;
+                this.btnRefreshTimetable.IsEnabled = true;
+            }
         }
 
         void launchHelp()
         {
             Windows.System.Launcher.LaunchUriAsync(new Uri(Remote.helpUrl));
         }
-
+        private void btnRefreshTimetable_Click(object sender, RoutedEventArgs e)
+        {
+            updateTimetableAsync();
+        }
+        private void btnUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            updateNotificationsAsyc();
+        }
         private void btnHelp_Click(object sender, RoutedEventArgs e)
         {
             launchHelp();
         }
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            changeAccountAsync();
+        }
+
     }
 }
