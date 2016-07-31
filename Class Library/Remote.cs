@@ -264,8 +264,9 @@ namespace TsinghuaUWP
         // remote object URLs and wrappers
 
         static string courseListUrl     = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn";
-        static string hostedCalendarUrl = "http://lizy14.github.io/thuCalendar.json";
-        public static string helpUrl    = "http://lizy14.github.com/thuUwpHelp.html";
+        static string hostedCalendarUrl = "http://static.nullspace.cn/thuCalendar.json";
+        public static string helpUrl    = "http://static.nullspace.cn/thuUwpHelp.html";
+
         static async Task<string> getHomeworkListPage(string courseId)
         {
             return await GET($"http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id={courseId}");
