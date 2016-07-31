@@ -33,11 +33,13 @@ namespace TsinghuaUWP
                     Debug.WriteLine("[Notification] credential exist");
 
                     //deadlines
-                    var deadlines = await DataAccess.getDeadlinesFiltered(forceRemote, limit: 3); 
+                    var deadlines = await DataAccess.getDeadlinesFiltered(forceRemote, limit: 5); 
 
                     foreach (var deadline in deadlines)
                     {
-                        if (! deadline.isPast() && ! deadline.shouldBeIgnored())
+                        if (! deadline.isPast() 
+                            && ! deadline.shouldBeIgnored()
+                            && (tileCount + 1) < 5)
                         {
                             var tile = new TileNotification(getTileXmlForDeadline(deadline));
                             updater.Update(tile);
