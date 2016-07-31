@@ -151,5 +151,14 @@ namespace TsinghuaUWP
             await updateNotificationsAsyc();
         }
 
+        void launchHelp()
+        {
+            Windows.System.Launcher.LaunchUriAsync(new Uri(Remote.helpUrl));
+        }
+
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            launchHelp();
+        }
     }
 }
