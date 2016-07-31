@@ -187,7 +187,7 @@ namespace TsinghuaUWP
         }
         static async Task logoutSSLVPN()
         {
-            await GET("https://sslvpn.tsinghua.edu.cn/dana-na/auth/logout.cgi");
+            await GET(logoutSslvpnUrl);
             Debug.WriteLine("[logoutSSLVPN] finish");
         }
         static async Task<int> loginSSLVPN()
@@ -250,10 +250,11 @@ namespace TsinghuaUWP
         static string lastLoginUsername = "";
         static int LOGIN_TIMEOUT_MINUTES = 5;
 
-        static string loginSslvpnUri = "https://sslvpn.tsinghua.edu.cn/dana-na/auth/url_default/login.cgi";
-        static string loginSslvpnCheckUri = "https://sslvpn.tsinghua.edu.cn/dana/home/starter0.cgi";
+        static string loginSslvpnUri           = "https://sslvpn.tsinghua.edu.cn/dana-na/auth/url_default/login.cgi";
+        static string logoutSslvpnUrl          = "https://sslvpn.tsinghua.edu.cn/dana-na/auth/logout.cgi";
+        static string loginSslvpnCheckUri      = "https://sslvpn.tsinghua.edu.cn/dana/home/starter0.cgi";
         static string loginSslvpnCheckUriCheck = "https://sslvpn.tsinghua.edu.cn/dana/home/starter0.cgi?check=yes";
-        static string loginUri = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp";
+        static string loginUri                 = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp";
 
 
 
@@ -262,8 +263,9 @@ namespace TsinghuaUWP
 
         // remote object URLs and wrappers
 
-        static string courseListUrl = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn";
+        static string courseListUrl     = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn";
         static string hostedCalendarUrl = "http://lizy14.github.io/thuCalendar.json";
+        public static string helpUrl    = "http://lizy14.github.com/thuUwpHelp.html";
         static async Task<string> getHomeworkListPage(string courseId)
         {
             return await GET($"http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id={courseId}");
