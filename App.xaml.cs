@@ -105,7 +105,7 @@ namespace TsinghuaUWP
                 Window.Current.Activate();
             }
             
-            BackgroundTasks.Management.register();
+            BackgroundTasks.TaskManager.register();
             
         }
 

@@ -95,26 +95,12 @@ namespace TsinghuaUWP
                         PrimaryButtonText = "重试"
                     }).ShowAsync();
                 }
-                catch(ParsePageException e)
-                {
-                    await (new ContentDialog
-                    {
-                        Title = "登录失败",
-                        Content = e.verbose(),
-                        PrimaryButtonText = "重试"
-                    }).ShowAsync();
-                }
                 catch (Exception e)
                 {
-                    string msg = Exceptions.getFriendlyMessage(e);
-                    if (!NetworkInterface.GetIsNetworkAvailable())
-                        msg = $"网络不可用 ({msg})";
-
                     await (new ContentDialog
                     {
                         Title = "登录出错",
-                        Content = $@"
-{msg}",
+                        Content = Exceptions.getFriendlyMessage(e),
                         PrimaryButtonText = "重试"
                     }).ShowAsync();
                 }

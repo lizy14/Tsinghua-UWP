@@ -35,12 +35,19 @@ namespace TsinghuaUWP
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             Notification.update(calendarOnly: true);
+            Appointment.updateCalendar();
+
+            if (DataAccess.supposedToWorkAnonymously() == true)
+            {
+                btnLogin.Content = "登录";
+                btnRefreshTimetable.IsEnabled = false;
+                btnUpdate.IsEnabled = false;
+            }
+
             if (DataAccess.supposedToWorkAnonymously() == false
                 && DataAccess.credentialAbsent() == true) {
                 await changeAccountAsync();
-            }
-
-            if(DataAccess.credentialAbsent() == false) {
+            }else if(DataAccess.credentialAbsent() == false) {
                 updateNotificationsAsyc();
                 updateTimetableAsync();
             }
@@ -88,8 +95,10 @@ namespace TsinghuaUWP
                 "Tsinghua_Learn_Website", password.username, password.password));
 
             //fresh log-in, update everything
+            
             updateNotificationsAsyc();
             updateTimetableAsync();
+            
 
             return true;
         }
@@ -108,7 +117,7 @@ namespace TsinghuaUWP
             try {
                 await Notification.update(true);
                 await Appointment.updateDeadlines();
-            } catch (Exception) {
+            } catch (Exception e) {
                 this.errorUpdate.Visibility = Visibility.Visible;
                 try {
                     await Notification.update();
@@ -130,9 +139,9 @@ namespace TsinghuaUWP
             this.errorRefreshTimetable.Visibility = Visibility.Collapsed;
             try {
                 await Appointment.updateTimetable(true);
-            } catch (Exception) {
+            } catch (Exception e) {
                 this.errorRefreshTimetable.Visibility = Visibility.Visible;
-            }
+            } 
             this.progressRefreshTimetable.IsActive = false;
             this.btnRefreshTimetable.IsEnabled = true;
         }

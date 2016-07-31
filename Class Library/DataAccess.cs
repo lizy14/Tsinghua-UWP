@@ -150,7 +150,12 @@ namespace TsinghuaUWP
                     if (DateTime.Parse(__semesters.currentSemester.endDate + " 23:59") < DateTime.Now)
                     {
                         //perform a remote update
-                        getSemester(true);
+                        Task task = getSemester(true);
+                        task.ContinueWith((_) =>
+                        {
+                            Appointment.updateCalendar();
+                        });
+
                         Debug.WriteLine("[getCalendar] Returning cache next");
                         return __semesters.nextSemester;
                     }

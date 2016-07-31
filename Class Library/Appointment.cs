@@ -15,9 +15,11 @@ namespace TsinghuaUWP
 
         static string ddl_cal_name = "作业";
         static string class_cal_name = "课程表";
+        static string cal_cal_name = "校历";
 
         static string ddl_storedKey = "appointmentCalendarForDeadlines";
         static string class_storedKey = "appointmentCalendarForClasses";
+        static string cal_storedKey = "appointmentCalendarForTeachingWeeks";
 
         public static async Task deleteAllCalendars()
         {
@@ -64,12 +66,55 @@ namespace TsinghuaUWP
                 
                 foreach (var ev in deadlines)
                 {
+                    if (ev.shouldBeIgnored())
+                        continue;
                     await ddl_cal.SaveAppointmentAsync(getAppointment(ev));
                 }
             }
             catch (Exception) { }
 
             Debug.WriteLine("[Appointment] deadlines finish");
+        }
+        public static async Task updateCalendar()
+        {
+            Debug.WriteLine("[Appointment] calendar begin");
+
+
+            var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
+
+            try
+            {
+                var weeks = getAppointments(await DataAccess.getSemester());
+
+                //get Calendar object
+                AppointmentCalendar cal;
+                if (DataAccess.getLocalSettings()[cal_storedKey] != null)
+                {
+                    cal = await store.GetAppointmentCalendarAsync(
+                        DataAccess.getLocalSettings()[cal_storedKey].ToString());
+                }
+                else
+                {
+                    cal = await store.CreateAppointmentCalendarAsync(cal_cal_name);
+                    DataAccess.setLocalSettings(cal_storedKey, cal.LocalId);
+                }
+
+
+                //TODO: don't delete all and re-insert all
+                var aps = await cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
+                foreach (var a in aps)
+                {
+                    await cal.DeleteAppointmentAsync(a.LocalId);
+                }
+
+                foreach (var ev in weeks)
+                {
+                    await cal.SaveAppointmentAsync(ev);
+                }
+            }
+            catch (Exception) { }
+
+            Debug.WriteLine("[Appointment] calendar finish");
         }
         public static async Task updateTimetable(bool forceRemote = false)
         {
@@ -79,17 +124,7 @@ namespace TsinghuaUWP
 
             Timetable timetable;
             
-            try{
-                timetable = await DataAccess.getTimetable(forceRemote);
-            }catch(Exception){
-                try{
-                    //TODO: prettier retry
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                    timetable = await DataAccess.getTimetable(forceRemote);
-                }catch(Exception e){
-                    throw e;
-                }
-            }
+            timetable = await DataAccess.getTimetable(forceRemote);
 
             if (timetable.Count == 0)
                 throw new Exception();
@@ -147,6 +182,64 @@ namespace TsinghuaUWP
             a.BusyStatus = AppointmentBusyStatus.Tentative;
             a.Reminder = TimeSpan.FromHours(6);
             return a;
+        }
+
+        static List<Windows.ApplicationModel.Appointments.Appointment> getAppointments(Semester s)
+        {
+            var l = new List<Windows.ApplicationModel.Appointments.Appointment>();
+
+            DateTime start = DateTime.Parse(s.startDate);
+            if(start.DayOfWeek != DayOfWeek.Monday)
+            {
+                //TODO
+                return l;
+            }
+
+            DateTime end;
+            if (s.endDate != null)
+            {
+                end = DateTime.Parse(s.endDate).AddDays(-1);
+                if (end < start)
+                    throw new Exception();
+            }
+            else
+            {
+                //try to auto-complete, assuming 18 weeks per semester
+                if (s.semesterEname.IndexOf("Autumn") != -1
+                    || s.semesterEname.IndexOf("Spring") != -1)
+                {
+                    end = start.AddDays(18 * 7 - 1);
+                }
+                else
+                {
+                    return l;
+                }
+            }
+
+            int i = 0;
+            var day = start;
+            while (233 > 0)
+            {
+                i++;
+                if (day > end)
+                    break;
+
+                var a = new Windows.ApplicationModel.Appointments.Appointment();
+                a.Subject = $"校历第{i}周";
+                a.Details = s.semesterEname
+                    .Replace("Summer", "夏季学期")
+                    .Replace("Spring", "春季学期")
+                    .Replace("Autumn", "秋季学期");
+                a.StartTime = day;
+                a.AllDay = true;
+                a.BusyStatus = AppointmentBusyStatus.Free;
+
+                l.Add(a);
+
+                day = day.AddDays(7);
+            }
+
+            return l;
         }
     }
 }
