@@ -45,15 +45,24 @@ namespace BackgroundTasks
 
     public sealed class UnifiedUpdateTask : IBackgroundTask
     {
+
+        const double REMOTE_INTERVAL_HOURS = 1.9;
+        double remoteIntervalHours()
+        {
+            if(DataAccess.getLocalSettings()["remote_interval"] == null)
+                return REMOTE_INTERVAL_HOURS;
+            return double.Parse(DataAccess.getLocalSettings()["remote_interval"].ToString());
+        }
+
+
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
             
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
             Debug.WriteLine("[UnifiedUpdateTask] launched at " + DateTime.Now);
-
-            Debug.WriteLine("[UnifiedUpdateTask] local");
-            Notification.update();
-            Appointment.updateDeadlines();
+#if DEBUG
+            var start = DateTime.Now;
+#endif
 
             bool goRemote = false;
             string key = "last_successful_remote_task";
@@ -63,37 +72,39 @@ namespace BackgroundTasks
                     goRemote = true;
                 else {
                     var delta = DateTime.Now - DateTime.Parse(DataAccess.getLocalSettings()[key].ToString());
-                    if (delta.TotalHours > .5 /*TODO: MAGIC*/)
+                    if (delta.TotalHours >= remoteIntervalHours())
                         goRemote = true;
                 }
-                if (goRemote) {
-                    Debug.WriteLine("[UnifiedUpdateTask] remote");
-                    await DataAccess.getAllDeadlines(forceRemote: true); //hope this can finish in 30 seconds
-                    Notification.update();
-                    Appointment.updateDeadlines();
-                }
             }
+
+            if (goRemote) {
+                Debug.WriteLine("[UnifiedUpdateTask] remote");
+                await DataAccess.getAllDeadlines(forceRemote: true); //hope this can finish in 30 seconds
+            }
+
+            Notification.update();
+            Appointment.updateDeadlines();
 
             deferral.Complete();
 
             if(goRemote)
                 DataAccess.setLocalSettings(key, DateTime.Now.ToString());
 
-            Debug.WriteLine("[UnifiedUpdateTask] finished");
+            Debug.WriteLine("[UnifiedUpdateTask] finished at" + DateTime.Now);
+#if DEBUG
+            Debug.WriteLine("[UnifiedUpdateTask] seconds elapsed " + (DateTime.Now - start).TotalSeconds);
+#endif
         }
     }
 
     public sealed class TaskManager
     {
-        const int LOCAL_INTERVAL = 15; //minutes
-        const int REMOTE_INTERVAL = 120; //minutes
-
         public static async void register()
         {   
             await RegisterBackgroundTask(
                 unified_task_entry,
                 unified_task_name,
-                new TimeTrigger(LOCAL_INTERVAL, false),
+                new TimeTrigger(15 /*the minimal possible value*/, false),
                 new SystemCondition(SystemConditionType.UserPresent));
 
             return;
