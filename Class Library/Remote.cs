@@ -10,6 +10,7 @@ using System.Runtime.Serialization.Json;
 using System.IO;
 using System.Diagnostics;
 using Windows.Storage;
+using System.Threading;
 
 namespace TsinghuaUWP
 {
@@ -32,9 +33,9 @@ namespace TsinghuaUWP
             var ticket = await POST(
                 "http://learn.cic.tsinghua.edu.cn:80/gnt", 
                 "appId=ALL_ZHJW");
-            await Task.Delay(TimeSpan.FromSeconds(1)); //cross-domain tickets needs some time to take effect
 
-            var timestamp = UnixTime().TotalMilliseconds;
+            //await 十１ｓ(); //cross-domain tickets needs some time to take effect
+
             var year_ago = DateTime.Now.AddYears(-1).ToString("yyyyMMdd");
             var year_later = DateTime.Now.AddYears(+1).ToString("yyyyMMdd");
 
@@ -53,10 +54,13 @@ namespace TsinghuaUWP
                 //connect via sslvpn
                 await loginSSLVPN();
 
+
                 var ticketPage = await GET(
                     $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn+j_acegi_login.do?url=/&ticket={ticket}");
+
                 string pageSslvpn = await GET(
-                    $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn,CT=js+jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_");
+                    $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn,CT=js+jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_&_={UnixTime().TotalMilliseconds}");
+
                 logoutSSLVPN();
 
                 Debug.WriteLine("[getRemoteTimetable] returning sslvpn");
@@ -65,7 +69,7 @@ namespace TsinghuaUWP
 
             //connect directly
             string page = await GET(
-                $"http://zhjw.cic.tsinghua.edu.cn/jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_&_={timestamp}");
+                $"http://zhjw.cic.tsinghua.edu.cn/jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_&_={UnixTime().TotalMilliseconds}");
 
             Debug.WriteLine("[getRemoteTimetable] returning direct");
             return parseTimetablePage(page);
@@ -113,11 +117,10 @@ namespace TsinghuaUWP
 
 
         // handle cookies with m_httpClient
-
+        static Mutex mutex = new Mutex();
         static async Task<int> login(bool useLocalSettings = true, string username = "", string password = "")
         {
             Debug.WriteLine("[login] begin");
-
 
             //retrieve username and password
             if (useLocalSettings)
@@ -135,7 +138,8 @@ namespace TsinghuaUWP
                 password = vault.Retrieve("Tsinghua_Learn_Website", username).Password;
             }
 
-
+            mutex.WaitOne();
+            
             //check for last login
             if ((DateTime.Now - lastLogin).TotalMinutes < LOGIN_TIMEOUT_MINUTES
                 && lastLoginUsername == username)
@@ -144,11 +148,18 @@ namespace TsinghuaUWP
                 return 2;
             }
 
-
+            string loginResponse;
             //login to learn.tsinghua.edu.cn
-            var loginResponse = await POST(
-                loginUri, 
-                $"leixin1=student&userid={username}&userpass={password}");
+            try {
+                loginResponse = await POST(
+                    loginUri,
+                    $"leixin1=student&userid={username}&userpass={password}");
+            }
+            catch (Exception e) {
+                mutex.ReleaseMutex();
+                throw e;
+            }
+            mutex.ReleaseMutex();
 
             //check if successful
             var alertInfoGroup = Regex.Match(loginResponse, @"window.alert\(""(.+)""\);").Groups;
@@ -174,7 +185,7 @@ namespace TsinghuaUWP
 
 
             //login to learn.cic.tsinghua.edu.cn
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await 十１ｓ();
             await GET(iframeSrc);
 
 
@@ -469,6 +480,10 @@ namespace TsinghuaUWP
         static TimeSpan UnixTime()
         {
             return (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)));
+        }
+        static async Task 十１ｓ()
+        {
+            await Task.Delay(TimeSpan.FromSeconds(1));
         }
 
     }
