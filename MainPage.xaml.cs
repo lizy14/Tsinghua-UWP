@@ -50,15 +50,17 @@ namespace TsinghuaUWP
             }
         }
 
-        void update_with_credential()
+        async void update_with_credential()
         {
-            Notification.update();
+            
+            updateDeadlinesAsyc();
+            updateTimetableAsync();
             Appointment.updateCalendar();
         }
-        void update_without_credential()
+        async void update_without_credential()
         {
-            Notification.update(calendarOnly: true);
-            Appointment.updateCalendar();
+            await Notification.update(calendarOnly: true);
+            await Appointment.updateCalendar();
         }
         async Task changeAccountAsync()
         {
@@ -109,7 +111,7 @@ namespace TsinghuaUWP
         }
 
         int updateNotificationsCounter = 0;
-        private async Task updateNotificationsAsyc()
+        private async Task updateDeadlinesAsyc()
         {
             updateNotificationsCounter++;
 
@@ -166,7 +168,7 @@ namespace TsinghuaUWP
         }
         private void btnUpdate_Click(object sender, RoutedEventArgs e)
         {
-            updateNotificationsAsyc();
+            updateDeadlinesAsyc();
         }
         private void btnHelp_Click(object sender, RoutedEventArgs e)
         {
