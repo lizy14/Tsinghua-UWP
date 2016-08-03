@@ -49,7 +49,7 @@ namespace BackgroundTasks
         const double REMOTE_INTERVAL_HOURS = 1.9;
         double remoteIntervalHours()
         {
-            if(DataAccess.getLocalSettings()["remote_interval"] == null)
+            if (DataAccess.getLocalSettings()["remote_interval"] == null)
                 return REMOTE_INTERVAL_HOURS;
             return double.Parse(DataAccess.getLocalSettings()["remote_interval"].ToString());
         }
@@ -57,43 +57,50 @@ namespace BackgroundTasks
 
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
-            
-            BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
-            Debug.WriteLine("[UnifiedUpdateTask] launched at " + DateTime.Now);
+            try
+            {
+                BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
+                Debug.WriteLine("[UnifiedUpdateTask] launched at " + DateTime.Now);
 #if DEBUG
             var start = DateTime.Now;
 #endif
 
-            bool goRemote = false;
-            string key = "last_successful_remote_task";
-            if (NetworkInterface.GetIsNetworkAvailable())
-            {
-                if (DataAccess.getLocalSettings()[key] == null)
-                    goRemote = true;
-                else {
-                    var delta = DateTime.Now - DateTime.Parse(DataAccess.getLocalSettings()[key].ToString());
-                    if (delta.TotalHours >= remoteIntervalHours())
+
+
+                bool goRemote = false;
+                string key = "last_successful_remote_task";
+                if (NetworkInterface.GetIsNetworkAvailable())
+                {
+                    if (DataAccess.getLocalSettings()[key] == null)
                         goRemote = true;
+                    else
+                    {
+                        var delta = DateTime.Now - DateTime.Parse(DataAccess.getLocalSettings()[key].ToString());
+                        if (delta.TotalHours >= remoteIntervalHours())
+                            goRemote = true;
+                    }
                 }
-            }
 
-            if (goRemote) {
-                Debug.WriteLine("[UnifiedUpdateTask] remote");
-                await DataAccess.getAllDeadlines(forceRemote: true); //hope this can finish in 30 seconds
-            }
+                if (goRemote)
+                {
+                    Debug.WriteLine("[UnifiedUpdateTask] remote");
+                    await DataAccess.getAllDeadlines(forceRemote: true); //hope this can finish in 30 seconds
+                }
 
-            Notification.update();
-            Appointment.updateDeadlines();
+                await Notification.update();
+                await Appointment.updateDeadlines();
 
-            deferral.Complete();
+                deferral.Complete();
 
-            if(goRemote)
-                DataAccess.setLocalSettings(key, DateTime.Now.ToString());
+                if (goRemote)
+                    DataAccess.setLocalSettings(key, DateTime.Now.ToString());
 
-            Debug.WriteLine("[UnifiedUpdateTask] finished at" + DateTime.Now);
+                Debug.WriteLine("[UnifiedUpdateTask] finished at" + DateTime.Now);
 #if DEBUG
             Debug.WriteLine("[UnifiedUpdateTask] seconds elapsed " + (DateTime.Now - start).TotalSeconds);
 #endif
+            }
+            catch (Exception) { }
         }
     }
 
