@@ -43,7 +43,7 @@ namespace TsinghuaUWP
         {
             return 
                 localSettings.Values["username"] != null &&
-                localSettings.Values["username"].ToString() == "_demo";
+                localSettings.Values["username"].ToString() == "233333";
         }
         static public void setLocalSettings<Type>(string key, Type value)
         {
@@ -88,6 +88,24 @@ namespace TsinghuaUWP
         }
         public static async Task<List<Course>> getCourses(bool forceRemote = false)
         {
+            if (isDemo())
+            {
+                var list = new List<Course>();
+                list.Add(new Course
+                {
+                    name = "数据结构",
+                    id = "demo_course_0",
+                });
+
+                list.Add(new Course
+                {
+                    name = "操作系统",
+                    id = "demo_course_1",
+                });
+
+                return list;
+            }
+
             if (!forceRemote)
             {
                 //try memory
@@ -117,6 +135,64 @@ namespace TsinghuaUWP
         }
         public static async Task<Timetable> getTimetable(bool forceRemote = false)
         {
+            if (isDemo())
+            {
+                var table = new Timetable();
+
+                var start = DateTime.Now.AddDays(-20);
+                while (start.DayOfWeek != DayOfWeek.Monday)
+                    start = start.AddDays(-1);
+
+                for (var i = 0; i < 10; i++)
+                {
+                    table.Add(new Event
+                    {
+                        nr = "形式语言与自动机",
+                        dd = "六教 6A301",
+                        nq = start.AddDays(i * 7 + 2).ToString("yyyy-MM-dd"),
+                        kssj = "08:00",
+                        jssj = "09:35"
+                    });
+
+                    table.Add(new Event
+                    {
+                        nr = "高级数据结构",
+                        dd = "六教 6A301",
+                        nq = start.AddDays(i * 7 + 2).ToString("yyyy-MM-dd"),
+                        kssj = "09:50",
+                        jssj = "11:25"
+                    });
+
+                    table.Add(new Event
+                    {
+                        nr = "操作系统",
+                        dd = "六教 6A303",
+                        nq = start.AddDays(i * 7 + 3).ToString("yyyy-MM-dd"),
+                        kssj = "09:50",
+                        jssj = "11:25"
+                    });
+
+                    table.Add(new Event
+                    {
+                        nr = "概率论与数理统计",
+                        dd = "六教 6C102",
+                        nq = start.AddDays(i * 7 + 4).ToString("yyyy-MM-dd"),
+                        kssj = "15:20",
+                        jssj = "16:55"
+                    });
+
+                    table.Add(new Event
+                    {
+                        nr = "概率论与数理统计",
+                        dd = "一教 104",
+                        nq = start.AddDays(i * 7 + 1).ToString("yyyy-MM-dd"),
+                        kssj = "13:30",
+                        jssj = "15:05"
+                    });
+                }
+                return table;
+            }
+
             //fetch from remote
             var _remoteTimetable = await Remote.getRemoteTimetable();
             Debug.WriteLine("[getTimetable] Returning remote");
@@ -124,6 +200,19 @@ namespace TsinghuaUWP
         }
         public static async Task<Semester> getSemester(bool forceRemote = false)
         {
+            if (isDemo())
+            {
+                var start = DateTime.Now.AddDays(-20);
+                while (start.DayOfWeek != DayOfWeek.Monday)
+                    start = start.AddDays(-1);
+
+                return new Semester
+                {
+                    startDate = start.ToString("yyyy-MM-dd"),
+                    endDate = start.AddDays(10 * 7 - 1).ToString("yyyy-MM-dd"),
+                    semesterEname = "2333-2334-Spring",
+                };
+            }
             if (forceRemote == false)
             {
                 Semesters __semesters = null;
@@ -187,7 +276,39 @@ namespace TsinghuaUWP
         }
         static public async Task<List<Deadline>> getAllDeadlines(bool forceRemote = false)
         {
+            if (isDemo())
+            {
+                var list = new List<Deadline>();
+                var start = DateTime.Now.AddDays(-20);
+                while (start.DayOfWeek != DayOfWeek.Monday)
+                    start = start.AddDays(-1);
 
+                for (var i = 0; i <= 3; i++)
+                {
+                    list.Add(new Deadline
+                    {
+                        course = "操作系统",
+                        ddl = start.AddDays(i * 7 + 4 + 7).ToString("yyyy-MM-dd"),
+                        name = $"代码阅读报告{i + 1}",
+                        hasBeenFinished = (i < 3),
+                        id = "operating_systems_" + i.ToString(),
+                    });
+                }
+
+                for (var i = 0; i <= 3; i++)
+                {
+                    list.Add(new Deadline
+                    {
+                        course = "数据结构",
+                        ddl = start.AddDays(i * 7 + 3 + 7).ToString("yyyy-MM-dd"),
+                        name = $"数据结构习题{i+1}",
+                        hasBeenFinished = (i < 3),
+                        id = "data_structure_" + i.ToString(),
+                    });
+                }
+
+                return list;
+            }
             if (!forceRemote)
             {
                 //try session memory
