@@ -44,18 +44,18 @@ namespace TsinghuaUWP
                     throw new Exception();
 
                 //get Calendar object
-                AppointmentCalendar ddl_cal;
+                AppointmentCalendar ddl_cal = null;
                 if (DataAccess.getLocalSettings()[ddl_storedKey] != null)
                 {
                     ddl_cal = await store.GetAppointmentCalendarAsync(
                         DataAccess.getLocalSettings()[ddl_storedKey].ToString());
                 }
-                else
+
+                if (ddl_cal == null)
                 {
                     ddl_cal = await store.CreateAppointmentCalendarAsync(ddl_cal_name);
                     DataAccess.setLocalSettings(ddl_storedKey, ddl_cal.LocalId);
                 }
-                var color = ddl_cal.DisplayColor;
 
                 //TODO: don't delete all and re-insert all
                 var aps = await ddl_cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
@@ -93,13 +93,14 @@ namespace TsinghuaUWP
             var weeks = getAppointments(semester);
 
             //get Calendar object
-            AppointmentCalendar cal;
+            AppointmentCalendar cal = null;
             if (DataAccess.getLocalSettings()[cal_storedKey] != null)
             {
                 cal = await store.GetAppointmentCalendarAsync(
                     DataAccess.getLocalSettings()[cal_storedKey].ToString());
             }
-            else
+
+            if (cal == null)
             {
                 cal = await store.CreateAppointmentCalendarAsync(cal_cal_name);
                 DataAccess.setLocalSettings(cal_storedKey, cal.LocalId);
@@ -126,9 +127,7 @@ namespace TsinghuaUWP
 
             //TODO: request calendar access?
 
-            Timetable timetable;
-            
-            timetable = await DataAccess.getTimetable(forceRemote);
+            Timetable timetable = await DataAccess.getTimetable(forceRemote);
 
             if (timetable.Count == 0)
                 throw new Exception();
@@ -136,13 +135,15 @@ namespace TsinghuaUWP
             var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
 
 
-            AppointmentCalendar cal;
+            AppointmentCalendar cal = null;
+
             if (DataAccess.getLocalSettings()[class_storedKey] != null)
             {
                 cal = await store.GetAppointmentCalendarAsync(
                     DataAccess.getLocalSettings()[class_storedKey].ToString());
             }
-            else
+
+            if (cal == null)
             {
                 cal = await store.CreateAppointmentCalendarAsync(class_cal_name);
                 DataAccess.setLocalSettings(class_storedKey, cal.LocalId);

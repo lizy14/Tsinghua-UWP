@@ -34,7 +34,7 @@ namespace TsinghuaUWP
                 "http://learn.cic.tsinghua.edu.cn:80/gnt", 
                 "appId=ALL_ZHJW");
 
-            //await 十１ｓ(); //cross-domain tickets needs some time to take effect
+            await 十１ｓ(); //cross-domain tickets needs some time to take effect
 
             var year_ago = DateTime.Now.AddYears(-1).ToString("yyyyMMdd");
             var year_later = DateTime.Now.AddYears(+1).ToString("yyyyMMdd");
@@ -51,9 +51,18 @@ namespace TsinghuaUWP
                 Debug.WriteLine("[getRemoteTimetable] outside campus network");
                 //throw new NeedCampusNetworkException();
 
+                
+
                 //connect via sslvpn
                 await loginSSLVPN();
 
+                await login();
+
+                ticket = await POST(
+                    "http://learn.cic.tsinghua.edu.cn:80/gnt",
+                    "appId=ALL_ZHJW");
+
+                await 十１ｓ();
 
                 var ticketPage = await GET(
                     $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn+j_acegi_login.do?url=/&ticket={ticket}");
@@ -117,7 +126,7 @@ namespace TsinghuaUWP
 
 
         // handle cookies with m_httpClient
-        static Mutex mutex = new Mutex();
+        static Mutex mutex = new Mutex(false);
         static async Task<int> login(bool useLocalSettings = true, string username = "", string password = "")
         {
             Debug.WriteLine("[login] begin");
@@ -145,64 +154,86 @@ namespace TsinghuaUWP
                 && lastLoginUsername == username)
             {
                 Debug.WriteLine("[login] reuses recent session");
+                mutex.ReleaseMutex();
                 return 2;
             }
 
-            string loginResponse;
-            //login to learn.tsinghua.edu.cn
-            try {
+            
+            try
+            {
+                string loginResponse;
+                
+                //login to learn.tsinghua.edu.cn
+
                 loginResponse = await POST(
                     loginUri,
                     $"leixin1=student&userid={username}&userpass={password}");
+
+                //check if successful
+                var alertInfoGroup = Regex.Match(loginResponse, @"window.alert\(""(.+)""\);").Groups;
+                if (alertInfoGroup.Count > 1)
+                {
+                    throw new LoginException(alertInfoGroup[1].Value.Replace("\\r\\n", "\n"));
+                }
+                if (loginResponse.IndexOf(@"window.location = ""loginteacher_action.jsp"";") == -1)
+                {
+                    throw new ParsePageException("login_redirect");
+                }
+
+                //get iframe src
+                HtmlDocument htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(await GET(courseListUrl));
+
+                string iframeSrc;
+                try
+                {
+                    iframeSrc = htmlDoc.DocumentNode.Descendants("iframe")/*MAGIC*/.First().Attributes["src"].Value;
+                }
+                catch (Exception)
+                {
+                    throw new ParsePageException("find_cic_iframe");
+                }
+
+
+                //login to learn.cic.tsinghua.edu.cn
+                await 十１ｓ();
+                await GET(iframeSrc);
             }
-            catch (Exception e) {
+            catch(Exception e)
+            {
                 mutex.ReleaseMutex();
                 throw e;
             }
-            mutex.ReleaseMutex();
-
-            //check if successful
-            var alertInfoGroup = Regex.Match(loginResponse, @"window.alert\(""(.+)""\);").Groups;
-            if (alertInfoGroup.Count > 1)
-            {
-                throw new LoginException(alertInfoGroup[1].Value.Replace("\\r\\n", "\n"));
-            }
-            if(loginResponse.IndexOf(@"window.location = ""loginteacher_action.jsp"";") == -1)
-            {
-                throw new ParsePageException("login_redirect");
-            }
-
-            //get iframe src
-            HtmlDocument htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(await GET(courseListUrl));
-
-            string iframeSrc;
-            try {
-                iframeSrc = htmlDoc.DocumentNode.Descendants("iframe")/*MAGIC*/.First().Attributes["src"].Value;
-            } catch (Exception) {
-                throw new ParsePageException("find_cic_iframe");
-            }
-
-
-            //login to learn.cic.tsinghua.edu.cn
-            await 十１ｓ();
-            await GET(iframeSrc);
-
 
             Debug.WriteLine("[login] successful");
             lastLogin = DateTime.Now;
             lastLoginUsername = username;
 
+            mutex.ReleaseMutex();
 
             return 0;
         }
         static async Task logoutSSLVPN()
         {
-            await GET(logoutSslvpnUrl);
+
+            try
+            {
+                await GET(logoutSslvpnUrl);
+                mutexSslvpn.ReleaseMutex();
+            }
+            catch(Exception e)
+            {
+                mutexSslvpn.ReleaseMutex();
+                throw e;
+            }
+            
             Debug.WriteLine("[logoutSSLVPN] finish");
         }
+
+        static Mutex mutexSslvpn = new Mutex(false);
         static async Task<int> loginSSLVPN()
         {
+            mutexSslvpn.WaitOne();
 
             Debug.WriteLine("[loginSSLVPN] start");
 
