@@ -101,6 +101,8 @@ namespace TsinghuaUWP
             }
 
             //save credential
+            //TODO: wrap as a function and move into DataAccess
+            DataAccess.setLocalSettings("toasted_assignments", "");
             DataAccess.setLocalSettings("username", password.username);
 
             var vault = new Windows.Security.Credentials.PasswordVault();
