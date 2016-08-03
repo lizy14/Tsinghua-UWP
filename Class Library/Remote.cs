@@ -126,7 +126,7 @@ namespace TsinghuaUWP
 
 
         // handle cookies with m_httpClient
-        static Mutex mutex = new Mutex(false);
+        static bool occupied = false;
         static async Task<int> login(bool useLocalSettings = true, string username = "", string password = "")
         {
             Debug.WriteLine("[login] begin");
@@ -147,14 +147,18 @@ namespace TsinghuaUWP
                 password = vault.Retrieve("Tsinghua_Learn_Website", username).Password;
             }
 
-            mutex.WaitOne();
-            
+            while (occupied)
+            {
+                await 十１ｓ(.1);
+            }
+
+            occupied = true;
             //check for last login
             if ((DateTime.Now - lastLogin).TotalMinutes < LOGIN_TIMEOUT_MINUTES
                 && lastLoginUsername == username)
             {
                 Debug.WriteLine("[login] reuses recent session");
-                mutex.ReleaseMutex();
+                occupied = false;
                 return 2;
             }
 
@@ -201,7 +205,8 @@ namespace TsinghuaUWP
             }
             catch(Exception e)
             {
-                mutex.ReleaseMutex();
+                occupied = false;
+                Debug.WriteLine("[login] unsuccessful");
                 throw e;
             }
 
@@ -209,31 +214,18 @@ namespace TsinghuaUWP
             lastLogin = DateTime.Now;
             lastLoginUsername = username;
 
-            mutex.ReleaseMutex();
+            occupied = false;
 
             return 0;
         }
         static async Task logoutSSLVPN()
         {
-
-            try
-            {
-                await GET(logoutSslvpnUrl);
-                mutexSslvpn.ReleaseMutex();
-            }
-            catch(Exception e)
-            {
-                mutexSslvpn.ReleaseMutex();
-                throw e;
-            }
-            
+            await GET(logoutSslvpnUrl);
             Debug.WriteLine("[logoutSSLVPN] finish");
         }
 
-        static Mutex mutexSslvpn = new Mutex(false);
         static async Task<int> loginSSLVPN()
         {
-            mutexSslvpn.WaitOne();
 
             Debug.WriteLine("[loginSSLVPN] start");
 
@@ -512,9 +504,9 @@ namespace TsinghuaUWP
         {
             return (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)));
         }
-        static async Task 十１ｓ()
+        static async Task 十１ｓ(double seconds = 1)
         {
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await Task.Delay(TimeSpan.FromSeconds(seconds));
         }
 
     }
