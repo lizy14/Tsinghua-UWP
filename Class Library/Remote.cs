@@ -481,8 +481,12 @@ namespace TsinghuaUWP
 
 
         // utilities
-
-        static HttpClient m_httpClient = new HttpClient();
+        static Windows.Web.Http.Filters.HttpBaseProtocolFilter bpf = new Windows.Web.Http.Filters.HttpBaseProtocolFilter();
+        static HttpClient m_httpClient = new HttpClient(bpf);
+        static public HttpCookieManager getCookieManager()
+        {
+            return bpf.CookieManager;
+        }
         static HttpResponseMessage httpResponse = new HttpResponseMessage();
         static async Task<string> GET(string url)
         {
