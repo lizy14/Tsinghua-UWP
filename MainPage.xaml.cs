@@ -151,6 +151,10 @@ namespace TsinghuaUWP
                 await Appointment.updateTimetable(true);
             } catch (Exception e) {
                 this.errorRefreshTimetable.Visibility = Visibility.Visible;
+                try {
+                    await Appointment.updateTimetable(true);
+                    this.errorRefreshTimetable.Visibility = Visibility.Collapsed;
+                } catch (Exception) { }
             }
 
             if (--updateTimetableCounter == 0)
