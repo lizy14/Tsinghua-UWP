@@ -9,14 +9,10 @@ using Windows.Web.Http;
 using System.Runtime.Serialization.Json;
 using System.IO;
 using System.Diagnostics;
-using Windows.Storage;
-using System.Threading;
 
-namespace TsinghuaUWP
-{
-    public static class Remote
-    {
-        
+namespace TsinghuaUWP {
+    public static class Remote {
+
 
 
 
@@ -24,14 +20,13 @@ namespace TsinghuaUWP
 
         // exposes access to remote objects
 
-        public static async Task<Timetable> getRemoteTimetable()
-        {
+        public static async Task<Timetable> getRemoteTimetable() {
             Debug.WriteLine("[getRemoteTimetable] start");
             await login();
 
 
             var ticket = await POST(
-                "http://learn.cic.tsinghua.edu.cn:80/gnt", 
+                "http://learn.cic.tsinghua.edu.cn:80/gnt",
                 "appId=ALL_ZHJW");
 
             await 十１ｓ(); //cross-domain tickets needs some time to take effect
@@ -39,19 +34,16 @@ namespace TsinghuaUWP
             var year_ago = DateTime.Now.AddYears(-1).ToString("yyyyMMdd");
             var year_later = DateTime.Now.AddYears(+1).ToString("yyyyMMdd");
 
-            try
-            {
+            try {
                 var zhjw = await GET(
                     $"http://zhjw.cic.tsinghua.edu.cn/j_acegi_login.do?url=/&ticket={ticket}");
-            }
-            catch (System.Runtime.InteropServices.COMException e)
-            {
+            } catch (System.Runtime.InteropServices.COMException e) {
                 if (e.Message.IndexOf("403") == -1)
                     throw e;
                 Debug.WriteLine("[getRemoteTimetable] outside campus network");
                 //throw new NeedCampusNetworkException();
 
-                
+
 
                 //connect via sslvpn
                 await loginSSLVPN();
@@ -84,36 +76,35 @@ namespace TsinghuaUWP
             return parseTimetablePage(page);
 
         }
-        public static async Task<List<Deadline>> getRemoteHomeworkList(string courseId)
-        {
+
+        public static async Task<List<Deadline>> getRemoteHomeworkList(string courseId) {
             await login();
             return parseHomeworkListPage(await getHomeworkListPage(courseId));
         }
-        public static async Task<List<Deadline>> getRemoteHomeworkListNew(string courseId)
-        {
+
+        public static async Task<List<Deadline>> getRemoteHomeworkListNew(string courseId) {
             await login();
             return await parseHomeworkListPageNew(await getHomeworkListPageNew(courseId));
         }
-        public static async Task<List<Course>> getRemoteCourseList()
-        {
+
+        public static async Task<List<Course>> getRemoteCourseList() {
             await login();
             return parseCourseList(await getCourseListPage());
         }
-        public static async Task<Semesters> getHostedSemesters()
-        {
+
+        public static async Task<Semesters> getHostedSemesters() {
             return JSON.parse<Semesters>(await GET(hostedCalendarUrl));
         }
-        public static async Task<Semesters> getRemoteSemesters()
-        {
+
+        public static async Task<Semesters> getRemoteSemesters() {
             await login();
             var _remoteCalendar = parseSemestersPage(await getCalendarPage());
-            return new Semesters
-            {
+            return new Semesters {
                 currentSemester = _remoteCalendar.currentSemester,
                 nextSemester = _remoteCalendar.nextSemester
             };
         }
-        
+
         public static async Task validateCredential(string username, string password) // throws LoginException if fail
         {
             if (username == "233333")
@@ -128,20 +119,18 @@ namespace TsinghuaUWP
 
 
         // handle cookies with m_httpClient
-        static bool occupied = false;
-        static async Task<int> login(bool useLocalSettings = true, string username = "", string password = "")
-        {
+        private static bool occupied = false;
+        private static async Task<int> login(bool useLocalSettings = true, string username = "", string password = "") {
             Debug.WriteLine("[login] begin");
 
             //retrieve username and password
-            if (useLocalSettings)
-            {
+            if (useLocalSettings) {
                 if (DataAccess.credentialAbsent()) {
                     throw new LoginException("没有指定用户名和密码");
                 }
                 username = DataAccess.getLocalSettings()["username"].ToString();
 
-                if (username == "__anonymous"){
+                if (username == "__anonymous") {
                     throw new LoginException("没有指定用户名和密码");
                 }
 
@@ -149,26 +138,23 @@ namespace TsinghuaUWP
                 password = vault.Retrieve("Tsinghua_Learn_Website", username).Password;
             }
 
-            while (occupied)
-            {
+            while (occupied) {
                 await 十１ｓ(.1);
             }
 
             occupied = true;
             //check for last login
             if ((DateTime.Now - lastLogin).TotalMinutes < LOGIN_TIMEOUT_MINUTES
-                && lastLoginUsername == username)
-            {
+                && lastLoginUsername == username) {
                 Debug.WriteLine("[login] reuses recent session");
                 occupied = false;
                 return 2;
             }
 
-            
-            try
-            {
+
+            try {
                 string loginResponse;
-                
+
                 //login to learn.tsinghua.edu.cn
 
                 loginResponse = await POST(
@@ -177,12 +163,10 @@ namespace TsinghuaUWP
 
                 //check if successful
                 var alertInfoGroup = Regex.Match(loginResponse, @"window.alert\(""(.+)""\);").Groups;
-                if (alertInfoGroup.Count > 1)
-                {
+                if (alertInfoGroup.Count > 1) {
                     throw new LoginException(alertInfoGroup[1].Value.Replace("\\r\\n", "\n"));
                 }
-                if (loginResponse.IndexOf(@"window.location = ""loginteacher_action.jsp"";") == -1)
-                {
+                if (loginResponse.IndexOf(@"window.location = ""loginteacher_action.jsp"";") == -1) {
                     throw new ParsePageException("login_redirect");
                 }
 
@@ -191,12 +175,9 @@ namespace TsinghuaUWP
                 htmlDoc.LoadHtml(await GET(courseListUrl));
 
                 string iframeSrc;
-                try
-                {
+                try {
                     iframeSrc = htmlDoc.DocumentNode.Descendants("iframe")/*MAGIC*/.First().Attributes["src"].Value;
-                }
-                catch (Exception)
-                {
+                } catch (Exception) {
                     throw new ParsePageException("find_cic_iframe");
                 }
 
@@ -204,9 +185,7 @@ namespace TsinghuaUWP
                 //login to learn.cic.tsinghua.edu.cn
                 await 十１ｓ();
                 await GET(iframeSrc);
-            }
-            catch(Exception e)
-            {
+            } catch (Exception e) {
                 occupied = false;
                 Debug.WriteLine("[login] unsuccessful");
                 throw e;
@@ -221,19 +200,18 @@ namespace TsinghuaUWP
 
             return 0;
         }
-        static async Task logoutSSLVPN()
-        {
+
+        private static async Task logoutSSLVPN() {
             await GET(logoutSslvpnUrl);
             Debug.WriteLine("[logoutSSLVPN] finish");
         }
 
-        static async Task<int> loginSSLVPN()
-        {
+        private static async Task<int> loginSSLVPN() {
 
             Debug.WriteLine("[loginSSLVPN] start");
 
             //retrieve username and password
-            if (DataAccess.credentialAbsent()){
+            if (DataAccess.credentialAbsent()) {
                 throw new LoginException("没有指定用户名和密码");
             }
             var username = DataAccess.getLocalSettings()["username"].ToString();
@@ -249,8 +227,7 @@ namespace TsinghuaUWP
 
 
             //another sslvpn session exist?
-            if (loginResponse.IndexOf("btnContinue") != -1)
-            {
+            if (loginResponse.IndexOf("btnContinue") != -1) {
                 Debug.WriteLine("[loginSSLVPN] another sslvpn session exist");
 
                 HtmlDocument htmlDoc = new HtmlDocument();
@@ -261,11 +238,10 @@ namespace TsinghuaUWP
                     loginSslvpnUri,
                     $"btnContinue=继续会话&FormDataStr={Uri.EscapeDataString(formDataStr)}");
             }
-            
+
             //get xauth token
             var xsauthGroups = Regex.Match(loginResponse, @"name=""xsauth"" value=""([^""]+)""").Groups;
-            if (xsauthGroups.Count < 2)
-            {
+            if (xsauthGroups.Count < 2) {
                 throw new ParsePageException("find_xsauth_from_sslvpn");
             }
             var xsauth = xsauthGroups[1];
@@ -274,24 +250,24 @@ namespace TsinghuaUWP
             var timestamp = UnixTime().TotalSeconds;
 
             loginResponse = await POST(
-                loginSslvpnCheckUri, 
+                loginSslvpnCheckUri,
                 $"xsauth={xsauth}&tz_offset=480&clienttime={timestamp}&url=&activex_enabled=0&java_enabled=0&power_user=0&grab=1&browserproxy=&browsertype=&browserproxysettings=&check=yes");
-            
+
 
 
             Debug.WriteLine("[loginSSLVPN] finish");
             return 0;
         }
 
-        static DateTime lastLogin = DateTime.MinValue;
-        static string lastLoginUsername = "";
-        static int LOGIN_TIMEOUT_MINUTES = 5;
+        private static DateTime lastLogin = DateTime.MinValue;
+        private static string lastLoginUsername = "";
+        private static int LOGIN_TIMEOUT_MINUTES = 5;
 
-        static string loginSslvpnUri           = "https://sslvpn.tsinghua.edu.cn/dana-na/auth/url_default/login.cgi";
-        static string logoutSslvpnUrl          = "https://sslvpn.tsinghua.edu.cn/dana-na/auth/logout.cgi";
-        static string loginSslvpnCheckUri      = "https://sslvpn.tsinghua.edu.cn/dana/home/starter0.cgi";
-        static string loginSslvpnCheckUriCheck = "https://sslvpn.tsinghua.edu.cn/dana/home/starter0.cgi?check=yes";
-        static string loginUri                 = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp";
+        private static string loginSslvpnUri = "https://sslvpn.tsinghua.edu.cn/dana-na/auth/url_default/login.cgi";
+        private static string logoutSslvpnUrl = "https://sslvpn.tsinghua.edu.cn/dana-na/auth/logout.cgi";
+        private static string loginSslvpnCheckUri = "https://sslvpn.tsinghua.edu.cn/dana/home/starter0.cgi";
+        private static string loginSslvpnCheckUriCheck = "https://sslvpn.tsinghua.edu.cn/dana/home/starter0.cgi?check=yes";
+        private static string loginUri = "https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp";
 
 
 
@@ -300,26 +276,25 @@ namespace TsinghuaUWP
 
         // remote object URLs and wrappers
 
-        static string courseListUrl     = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn";
-        static string hostedCalendarUrl = "http://static.nullspace.cn/thuCalendar.json";
-        public static string helpUrl    = "http://static.nullspace.cn/thuUwpHelp.html";
+        private static string courseListUrl = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn";
+        private static string hostedCalendarUrl = "http://static.nullspace.cn/thuCalendar.json";
+        public static string helpUrl = "http://static.nullspace.cn/thuUwpHelp.html";
 
-        static async Task<string> getHomeworkListPage(string courseId)
-        {
+        private static async Task<string> getHomeworkListPage(string courseId) {
             return await GET($"http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id={courseId}");
         }
-        static async Task<string> getHomeworkListPageNew(string courseId)
-        {
+
+        private static async Task<string> getHomeworkListPageNew(string courseId) {
             var timestamp = UnixTime().TotalMilliseconds;
             string url = $"http://learn.cic.tsinghua.edu.cn/b/myCourse/homework/list4Student/{courseId}/0?_={timestamp}";
             return await GET(url);
         }
-        static async Task<string> getCourseListPage()
-        {
+
+        private static async Task<string> getCourseListPage() {
             return await GET(courseListUrl);
         }
-        static async Task<string> getCalendarPage()
-        {
+
+        private static async Task<string> getCalendarPage() {
             return await GET("http://learn.cic.tsinghua.edu.cn/b/myCourse/courseList/getCurrentTeachingWeek");
         }
 
@@ -332,10 +307,8 @@ namespace TsinghuaUWP
 
         // parse HTML or JSON, and return corresponding Object
 
-        static List<Deadline> parseHomeworkListPage(string page)
-        {
-            try
-            {
+        private static List<Deadline> parseHomeworkListPage(string page) {
+            try {
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(page);
 
@@ -349,8 +322,7 @@ namespace TsinghuaUWP
 
 
                 List<Deadline> deadlines = new List<Deadline>();
-                for (int i = 4/*MAGIC*/; i < nodes.Length - 1/*MAGIC*/; i++)
-                {
+                for (int i = 4/*MAGIC*/; i < nodes.Length - 1/*MAGIC*/; i++) {
                     HtmlNode node = nodes[i];
 
                     var tds = node.Descendants("td");
@@ -365,8 +337,7 @@ namespace TsinghuaUWP
                     var _href = link_to_detail.Attributes["href"].Value;
                     var _id = Regex.Match(_href, @"[^_]id=(\d+)").Groups[1].Value;
 
-                    deadlines.Add(new Deadline
-                    {
+                    deadlines.Add(new Deadline {
                         name = _name,
                         ddl = _due,
                         course = _course,
@@ -375,22 +346,19 @@ namespace TsinghuaUWP
                     });
                 }
                 return deadlines;
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 throw new ParsePageException("AssignmentList");
             }
-            
+
         }
-        static async Task<List<Deadline>> parseHomeworkListPageNew(string page)
-        {
+
+        private static async Task<List<Deadline>> parseHomeworkListPageNew(string page) {
 
             List<Deadline> deadlines = new List<Deadline>();
 
             string _course = "";
             var root = JSON.parse<CourseAssignmentsRootobject>(page);
-            foreach (var item in root.resultList)
-            {
+            foreach (var item in root.resultList) {
                 var _isFinished = (item.courseHomeworkRecord.status != "0" /*MAGIC*/);
 
                 var _dueTimeStamp = item.courseHomeworkInfo.endDate;
@@ -402,13 +370,14 @@ namespace TsinghuaUWP
 
                 if (_course == "")
                     _course = _courseId;
-                if (_course == _courseId)
-                    foreach (var course in await DataAccess.getCourses())
+                if (_course == _courseId) {
+                    foreach (var course in await DataAccess.getCourses()) {
                         if (course.id == _courseId)
                             _course = course.name;
+                    }
+                }
 
-                deadlines.Add(new Deadline
-                {
+                deadlines.Add(new Deadline {
                     name = _name,
                     ddl = _due,
                     course = _course,
@@ -418,18 +387,16 @@ namespace TsinghuaUWP
             }
             return deadlines;
         }
-        static List<Course> parseCourseList(string page)
-        {
-            try
-            {
+
+        private static List<Course> parseCourseList(string page) {
+            try {
                 List<Course> courses = new List<Course>();
 
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(page);
                 var links = htmlDoc.DocumentNode.Descendants("table")/*MAGIC*/.Last()/*MAGIC*/.Descendants("a")/*MAGIC*/.ToArray();
 
-                foreach (var link in links)
-                {
+                foreach (var link in links) {
                     string _name = link.InnerText.Trim();
                     string _url = link.Attributes["href"].Value;
                     var match = Regex.Match(_name, "(.+?)\\((\\d+)\\)\\((.+?)\\)");
@@ -438,18 +405,14 @@ namespace TsinghuaUWP
                     bool _isNew = false;
                     string _id = "";
 
-                    if (_url.StartsWith("http://learn.cic.tsinghua.edu.cn/"))
-                    {
+                    if (_url.StartsWith("http://learn.cic.tsinghua.edu.cn/")) {
                         _isNew = true;
                         _id = Regex.Match(_url, "/([-\\d]+)").Groups[1].Value;
-                    }
-                    else
-                    {
+                    } else {
                         _isNew = false;
                         _id = Regex.Match(_url, "course_id=(\\d+)").Groups[1].Value;
                     }
-                    courses.Add(new Course
-                    {
+                    courses.Add(new Course {
                         name = _name,
                         isNew = _isNew,
                         id = _id,
@@ -457,18 +420,16 @@ namespace TsinghuaUWP
                     });
                 }
                 return courses;
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 throw new ParsePageException("CourseList");
             }
         }
-        static SemestersRootObject parseSemestersPage(string page)
-        {
+
+        private static SemestersRootObject parseSemestersPage(string page) {
             return JSON.parse<SemestersRootObject>(page);
         }
-        static Timetable parseTimetablePage(string page)
-        {
+
+        private static Timetable parseTimetablePage(string page) {
             if (page.Length < "_([])".Length)
                 throw new ParsePageException("timetable_javascript");
             string json = page.Substring(2, page.Length - 3);
@@ -482,24 +443,23 @@ namespace TsinghuaUWP
 
 
         // utilities
-        static Windows.Web.Http.Filters.HttpBaseProtocolFilter bpf = new Windows.Web.Http.Filters.HttpBaseProtocolFilter();
-        static HttpClient m_httpClient = new HttpClient(bpf);
-        static public HttpCookieManager getCookieManager()
-        {
+        private static Windows.Web.Http.Filters.HttpBaseProtocolFilter bpf = new Windows.Web.Http.Filters.HttpBaseProtocolFilter();
+        private static HttpClient m_httpClient = new HttpClient(bpf);
+        static public HttpCookieManager getCookieManager() {
             return bpf.CookieManager;
         }
-        static HttpResponseMessage httpResponse = new HttpResponseMessage();
-        static async Task<string> GET(string url)
-        {
+
+        private static HttpResponseMessage httpResponse = new HttpResponseMessage();
+        private static async Task<string> GET(string url) {
             //getPage
             httpResponse = await m_httpClient.GetAsync(new Uri(url));
             httpResponse.EnsureSuccessStatusCode();
             return await httpResponse.Content.ReadAsStringAsync();
         }
-        static async Task<string> POST(string url, string form_string)
-        {
+
+        private static async Task<string> POST(string url, string form_string) {
             HttpStringContent stringContent = new HttpStringContent(
-                form_string, 
+                form_string,
                 Windows.Storage.Streams.UnicodeEncoding.Utf8,
                 "application/x-www-form-urlencoded");
 
@@ -507,38 +467,31 @@ namespace TsinghuaUWP
             httpResponse.EnsureSuccessStatusCode();
             return await httpResponse.Content.ReadAsStringAsync();
         }
-        static TimeSpan UnixTime()
-        {
+
+        private static TimeSpan UnixTime() {
             return (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)));
         }
-        static async Task 十１ｓ(double seconds = 1)
-        {
+
+        private static async Task 十１ｓ(double seconds = 1) {
             await Task.Delay(TimeSpan.FromSeconds(seconds));
         }
 
     }
 
     // wrapped JSON parser
-    public class JSON
-    {
-        public static T parse<T>(string jsonString)
-        {
-            try
-            {
-                using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonString)))
-                {
+    public class JSON {
+        public static T parse<T>(string jsonString) {
+            try {
+                using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonString))) {
                     return (T)new DataContractJsonSerializer(typeof(T)).ReadObject(ms);
                 }
-            }
-            catch (Exception)
-            {
-                throw new ParsePageException("JSON "+typeof(T).ToString());
+            } catch (Exception) {
+                throw new ParsePageException("JSON " + typeof(T).ToString());
             }
         }
-        public static string stringify(object jsonObject)
-        {
-            using (var ms = new MemoryStream())
-            {
+
+        public static string stringify(object jsonObject) {
+            using (var ms = new MemoryStream()) {
                 new DataContractJsonSerializer(jsonObject.GetType()).WriteObject(ms, jsonObject);
                 return Encoding.UTF8.GetString(ms.ToArray());
             }

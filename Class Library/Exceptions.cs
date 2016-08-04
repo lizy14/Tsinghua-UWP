@@ -1,39 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TsinghuaUWP
-{
-    public class UserCancelException : Exception
-    {
+namespace TsinghuaUWP {
+    public class UserCancelException : Exception {
     }
 
 
-    public class NeedCampusNetworkException : Exception
-    {
+    public class NeedCampusNetworkException : Exception {
     }
 
-    public class LoginException : Exception
-    {
+    public class LoginException : Exception {
         public new string Message;
-        public LoginException(string _msg)
-        {
+        public LoginException(string _msg) {
             Message = _msg;
         }
     }
 
-    public class ParsePageException : Exception
-    {
-        string additionalInfo;
-        public ParsePageException(string _ = "")
-        {
+    public class ParsePageException : Exception {
+        private string additionalInfo;
+        public ParsePageException(string _ = "") {
             additionalInfo = _;
         }
-        public string verbose()
-        {
+
+        public string verbose() {
             return $@"
 服务器返回数据解析错误
 
@@ -44,26 +33,25 @@ namespace TsinghuaUWP
         }
     }
 
-    public class Exceptions
-    {
-        public static string removeNonsense(string msg)
-        {
+    public class Exceptions {
+        public static string removeNonsense(string msg) {
             return msg
                 .Replace("无法找到与此错误代码关联的文本。", "")
                 .Replace("The text associated with this error code could not be found.", "")
                 .Trim();
         }
-        public static string getFriendlyMessage(Exception e)
-        {
+
+        public static string getFriendlyMessage(Exception e) {
             if (e is ParsePageException)
                 return ((ParsePageException)e).verbose();
             if (e is NeedCampusNetworkException)
                 return "您没有连接到清华校园网";
             string msg = Exceptions.removeNonsense(e.Message);
-            if (!NetworkInterface.GetIsNetworkAvailable())
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
                 msg = $@"
 网络不可用
 {msg}";
+            }
             return msg;
         }
     }

@@ -1,21 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using Windows.UI.Notifications;
 using Windows.Data.Xml.Dom;
 using System.Diagnostics;
-using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace TsinghuaUWP
-{
-    public class Notification
-    {
-        static public async Task<int> update(bool forceRemote = false, bool calendarOnly = false)
-        {
+namespace TsinghuaUWP {
+    public class Notification {
+        static public async Task<int> update(bool forceRemote = false, bool calendarOnly = false) {
             Debug.WriteLine("[Notification] update begin");
 
             var updater = TileUpdateManager.CreateTileUpdaterForApplication();
@@ -26,32 +20,26 @@ namespace TsinghuaUWP
 
             var notifier = ToastNotificationManager.CreateToastNotifier();
 
-            try
-            {
-                if (calendarOnly == false && ! DataAccess.credentialAbsent())
-                {
+            try {
+                if (!calendarOnly && !DataAccess.credentialAbsent()) {
                     Debug.WriteLine("[Notification] credential exist");
 
                     //deadlines
                     var deadlines = DataAccess.sortDeadlines(
                         (from a in await DataAccess.getAllDeadlines(forceRemote)
-                         where a.hasBeenFinished == false && a.shouldBeIgnored() == false
+                         where !a.hasBeenFinished && !a.shouldBeIgnored()
                          select a).ToList());
 
-                    foreach (var deadline in deadlines)
-                    {
-                        if (! deadline.isPast() 
-                            && (tileCount + 1) < 5)
-                        {
+                    foreach (var deadline in deadlines) {
+                        if (!deadline.isPast()
+                            && (tileCount + 1) < 5) {
                             var tile = new TileNotification(getTileXmlForDeadline(deadline));
                             updater.Update(tile);
                             tileCount++;
                         }
 
-                        if (! deadline.hasBeenFinished)
-                        {
-                            if (! deadline.hasBeenToasted())
-                            {
+                        if (!deadline.hasBeenFinished) {
+                            if (!deadline.hasBeenToasted()) {
                                 deadline.mark_as_toasted();
                                 var toast = new ToastNotification(getToastXmlForDeadline(deadline));
                                 notifier.Show(toast);
@@ -59,33 +47,27 @@ namespace TsinghuaUWP
                         }
                     }
                 }
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Debug.WriteLine("[Notification] error dealing with deadlines: " + e.Message);
                 throw e;
             }
 
             //calendar
-            try
-            {
-                if (tileCount < 5)
-                {
+            try {
+                if (tileCount < 5) {
                     updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getSemester(forceRemote))));
                 }
-            }
-            catch(Exception e)
-            {
+            } catch (Exception e) {
                 Debug.WriteLine("[Notification] error dealing with calendar: " + e.Message);
                 throw e;
             }
-            
+
 
             Debug.WriteLine("[Notification] update finished");
             return 0;
         }
-        static XmlDocument getToastXmlForDeadline(Deadline deadline)
-        {
+
+        private static XmlDocument getToastXmlForDeadline(Deadline deadline) {
 
             // TODO: all values need to be XML escaped
 
@@ -107,14 +89,14 @@ $@"<toast>
             toastXml.LoadXml(toastXmlString);
             return toastXml;
         }
-        static XmlDocument getTileXmlForDeadline(Deadline deadline)
-        {
+
+        private static XmlDocument getTileXmlForDeadline(Deadline deadline) {
 
             string name = deadline.name;
             string course = deadline.course;
             string due = deadline.ddl;
             string timeLeft = deadline.timeLeft();
-                
+
             string xml = $@"
 <tile>
     <visual>
@@ -150,11 +132,11 @@ $@"<toast>
 
             return doc;
         }
-        static XmlDocument getTileXmlForCalendar(Semester sem)
-        {
+
+        private static XmlDocument getTileXmlForCalendar(Semester sem) {
             var now = DateTime.Now;
 
-            string[] weekDayNames = {"日", "一", "二", "三", "四", "五", "六"};
+            string[] weekDayNames = { "日", "一", "二", "三", "四", "五", "六" };
             var weekday = "星期" + weekDayNames[Convert.ToInt32(now.DayOfWeek)];
 
             var shortdate = now.ToString("M 月 d 日");

@@ -2,20 +2,12 @@
 using TsinghuaUWP;
 using System.Diagnostics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-
-using Windows.Storage;
 using System.Net.NetworkInformation;
 
-namespace BackgroundTasks
-{
-    public sealed class LocalUpdateTask : IBackgroundTask
-    {
-        public async void Run(IBackgroundTaskInstance taskInstance)
-        {
+namespace BackgroundTasks {
+    public sealed class LocalUpdateTask : IBackgroundTask {
+        public async void Run(IBackgroundTaskInstance taskInstance) {
             Debug.WriteLine("[LocalUpdateTask] launched");
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
 
@@ -28,10 +20,8 @@ namespace BackgroundTasks
         }
     }
 
-    public sealed class RemoteUpdateTask : IBackgroundTask
-    {
-        public async void Run(IBackgroundTaskInstance taskInstance)
-        {
+    public sealed class RemoteUpdateTask : IBackgroundTask {
+        public async void Run(IBackgroundTaskInstance taskInstance) {
             Debug.WriteLine("[RemoteUpdateTask] launched");
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
 
@@ -43,46 +33,39 @@ namespace BackgroundTasks
         }
     }
 
-    public sealed class UnifiedUpdateTask : IBackgroundTask
-    {
+    public sealed class UnifiedUpdateTask : IBackgroundTask {
 
-        const double REMOTE_INTERVAL_HOURS = 1.9;
-        double remoteIntervalHours()
-        {
+        private const double REMOTE_INTERVAL_HOURS = 1.9;
+        private double remoteIntervalHours() {
             if (DataAccess.getLocalSettings()["remote_interval"] == null)
                 return REMOTE_INTERVAL_HOURS;
             return double.Parse(DataAccess.getLocalSettings()["remote_interval"].ToString());
         }
 
 
-        public async void Run(IBackgroundTaskInstance taskInstance)
-        {
-            try
-            {
+        public async void Run(IBackgroundTaskInstance taskInstance) {
+            try {
                 BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
                 Debug.WriteLine("[UnifiedUpdateTask] launched at " + DateTime.Now);
 #if DEBUG
-            var start = DateTime.Now;
+                var start = DateTime.Now;
 #endif
 
 
 
                 bool goRemote = false;
                 string key = "last_successful_remote_task";
-                if (NetworkInterface.GetIsNetworkAvailable())
-                {
+                if (NetworkInterface.GetIsNetworkAvailable()) {
                     if (DataAccess.getLocalSettings()[key] == null)
                         goRemote = true;
-                    else
-                    {
+                    else {
                         var delta = DateTime.Now - DateTime.Parse(DataAccess.getLocalSettings()[key].ToString());
                         if (delta.TotalHours >= remoteIntervalHours())
                             goRemote = true;
                     }
                 }
 
-                if (goRemote)
-                {
+                if (goRemote) {
                     Debug.WriteLine("[UnifiedUpdateTask] remote");
                     await DataAccess.getAllDeadlines(forceRemote: true); //hope this can finish in 30 seconds
                 }
@@ -97,17 +80,14 @@ namespace BackgroundTasks
 
                 Debug.WriteLine("[UnifiedUpdateTask] finished at" + DateTime.Now);
 #if DEBUG
-            Debug.WriteLine("[UnifiedUpdateTask] seconds elapsed " + (DateTime.Now - start).TotalSeconds);
+                Debug.WriteLine("[UnifiedUpdateTask] seconds elapsed " + (DateTime.Now - start).TotalSeconds);
 #endif
-            }
-            catch (Exception) { }
+            } catch (Exception) { }
         }
     }
 
-    public sealed class TaskManager
-    {
-        public static async void register()
-        {   
+    public sealed class TaskManager {
+        public static async void register() {
             await RegisterBackgroundTask(
                 unified_task_entry,
                 unified_task_name,
@@ -120,12 +100,11 @@ namespace BackgroundTasks
         private const string unified_task_name = "UnifiedUpdateTask";
         private const string unified_task_entry = "BackgroundTasks.UnifiedUpdateTask";
 
-        static async Task<BackgroundTaskRegistration> RegisterBackgroundTask(
+        private static async Task<BackgroundTaskRegistration> RegisterBackgroundTask(
             string taskEntryPoint,
             string taskName,
             IBackgroundTrigger trigger,
-            IBackgroundCondition condition)
-        {
+            IBackgroundCondition condition) {
 
             Debug.WriteLine("[BackgroundTasks] registering " + taskName);
 
@@ -134,10 +113,8 @@ namespace BackgroundTasks
                 backgroundAccessStatus == BackgroundAccessStatus.AllowedWithAlwaysOnRealTimeConnectivity))
                 throw new Exception();
 
-            foreach (var cur in BackgroundTaskRegistration.AllTasks)
-            {
-                if (cur.Value.Name == taskName)
-                {
+            foreach (var cur in BackgroundTaskRegistration.AllTasks) {
+                if (cur.Value.Name == taskName) {
                     Debug.WriteLine("[BackgroundTasks] already registered");
                     cur.Value.Unregister(true);
                 }
