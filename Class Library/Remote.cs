@@ -34,7 +34,7 @@ namespace TsinghuaUWP
                 "http://learn.cic.tsinghua.edu.cn:80/gnt", 
                 "appId=ALL_ZHJW");
 
-            //await 十１ｓ(); //cross-domain tickets needs some time to take effect
+            await 十１ｓ(); //cross-domain tickets needs some time to take effect
 
             var year_ago = DateTime.Now.AddYears(-1).ToString("yyyyMMdd");
             var year_later = DateTime.Now.AddYears(+1).ToString("yyyyMMdd");
@@ -62,7 +62,7 @@ namespace TsinghuaUWP
                     "http://learn.cic.tsinghua.edu.cn:80/gnt",
                     "appId=ALL_ZHJW");
 
-                //await 十１ｓ();
+                await 十１ｓ();
 
                 var ticketPage = await GET(
                     $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn+j_acegi_login.do?url=/&ticket={ticket}");
@@ -213,6 +213,7 @@ namespace TsinghuaUWP
             }
 
             Debug.WriteLine("[login] successful");
+
             lastLogin = DateTime.Now;
             lastLoginUsername = username;
 
