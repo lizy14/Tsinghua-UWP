@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
-namespace TsinghuaUWP
-{
+namespace TsinghuaUWP {
 
     /*
      用词对照
@@ -19,111 +14,95 @@ namespace TsinghuaUWP
         课表项：Event, Appointment
 
          */
-    public class Password
-    {
+    public class Password {
         public string username;
         public string password;
     }
-    public class Course
-    {
+
+    public class Course {
         public string id;
         public string name;
         public bool isNew; //uses (`learn.cic` or `learn`?) .tsinghua.edu.cn
         public string semester;
 
-        override public string ToString()
-        {
+        override public string ToString() {
             return "#" + id + ": " + name;
         }
     }
-    public class Deadline
-    {
+
+    public class Deadline {
         public string id;
         public string name;
         public string ddl;
         public string course;
         public string detail;
         public bool hasBeenFinished;
-        public bool hasBeenToasted()
-        {
+        public bool hasBeenToasted() {
             string toasted = "";
-            if(DataAccess.getLocalSettings()["toasted_assignments"] != null)
-            {
+            if (DataAccess.getLocalSettings()["toasted_assignments"] != null) {
                 toasted = DataAccess.getLocalSettings()["toasted_assignments"].ToString();
             }
             return toasted.IndexOf(this.id) != -1;
         }
-        public bool shouldBeIgnored()
-        {
+
+        public bool shouldBeIgnored() {
             string[] keywords = {
                 "补交"
             };
-            foreach(var keyword in keywords)
-            {
+            foreach (var keyword in keywords) {
                 if (name.IndexOf(keyword) != -1)
                     return true;
             }
             return false;
         }
-        public void mark_as_toasted()
-        {
+
+        public void mark_as_toasted() {
             string toasted = "";
-            if (DataAccess.getLocalSettings()["toasted_assignments"] != null)
-            {
+            if (DataAccess.getLocalSettings()["toasted_assignments"] != null) {
                 toasted = DataAccess.getLocalSettings()["toasted_assignments"].ToString();
             }
             toasted += "," + this.id;
             DataAccess.setLocalSettings("toasted_assignments", toasted);
         }
-        public double daysFromNow()
-        {
+
+        public double daysFromNow() {
             return (DateTime.Parse(ddl + " 23:59") - DateTime.Now).TotalDays;
         }
-        public string timeLeft()
-        {
+
+        public string timeLeft() {
             return timeLeftChinese();
         }
-        public bool isPast()
-        {
+
+        public bool isPast() {
             return DateTime.Parse(ddl + " 23:59") < DateTime.Now;
         }
-        public string timeLeftChinese()
-        {
+
+        public string timeLeftChinese() {
             TimeSpan timeDelta = DateTime.Parse(ddl + " 23:59") - DateTime.Now;
 
             var daysLeft = timeDelta.TotalDays;
             string timeLeft = "";
 
-            if (daysLeft > 10)
-            {
+            if (daysLeft > 10) {
                 var d = Math.Round(daysLeft / 7);
                 timeLeft = "还有 " + d.ToString() + " 周";
             }
-            if (daysLeft > 1)
-            {
+            if (daysLeft > 1) {
                 var d = Math.Round(daysLeft);
                 timeLeft = "只剩 " + d.ToString() + " 天";
-            }
-            else if (daysLeft > 0)
-            {
+            } else if (daysLeft > 0) {
                 var d = timeDelta.Hours;
-                if (d > 0) 
+                if (d > 0)
                     timeLeft = "只剩 " + d.ToString() + " 小时";
                 else
                     timeLeft = "即将到期！";
-            }
-            else if (daysLeft > -1)
-            {
+            } else if (daysLeft > -1) {
                 var d = (-timeDelta.Hours);
                 timeLeft = "已经过去 " + d.ToString() + " 小时";
-            }
-            else if (daysLeft > -10)
-            {
+            } else if (daysLeft > -10) {
                 var d = (-timeDelta.Days);
                 timeLeft = "已经过去 " + d.ToString() + " 天";
-            }
-            else
-            {
+            } else {
                 var d = Math.Round(timeDelta.TotalDays / -7);
                 timeLeft = "已经过去 " + d.ToString() + " 周";
             }
@@ -133,21 +112,20 @@ namespace TsinghuaUWP
         }
 
     }
-    public class Semesters
-    {
+
+    public class Semesters {
         public Semester currentSemester { get; set; }
         public Semester nextSemester { get; set; }
     }
-    public class Semester
-    {
+
+    public class Semester {
         public string id { get; set; }
         public string semesterName { get; set; }
         public string startDate { get; set; }
         public string endDate { get; set; }
         public string semesterEname { get; set; }
 
-        public string getWeekName()
-        {
+        public string getWeekName() {
             var semesterStart = DateTime.Parse(startDate);
             var delta = DateTime.Now - semesterStart;
             var days = delta.TotalDays;
@@ -160,18 +138,17 @@ namespace TsinghuaUWP
 
     // the following classes are generated from JSON by Visual Studio, 
     // for JSON parser only
-    public class CourseAssignmentsRootobject
-    {
+    public class CourseAssignmentsRootobject {
         public string message { get; set; }
         public Resultlist[] resultList { get; set; }
     }
-    public class Resultlist
-    {
+
+    public class Resultlist {
         public Coursehomeworkrecord courseHomeworkRecord { get; set; }
         public Coursehomeworkinfo courseHomeworkInfo { get; set; }
     }
-    public class Coursehomeworkrecord
-    {
+
+    public class Coursehomeworkrecord {
         public int seqId { get; set; }
         public string studentId { get; set; }
         public string teacherId { get; set; }
@@ -190,8 +167,8 @@ namespace TsinghuaUWP
         public int groupId { get; set; }
         public object groupName { get; set; }
     }
-    public class Resourcesmappingbyhomewkaffix
-    {
+
+    public class Resourcesmappingbyhomewkaffix {
         public string fileId { get; set; }
         public string resourcesId { get; set; }
         public int diskId { get; set; }
@@ -207,8 +184,8 @@ namespace TsinghuaUWP
         public int resourcesStatus { get; set; }
         public string userCode { get; set; }
     }
-    public class Coursehomeworkinfo
-    {
+
+    public class Coursehomeworkinfo {
         public int homewkId { get; set; }
         public long? regDate { get; set; }
         public long beginDate { get; set; }
@@ -234,15 +211,15 @@ namespace TsinghuaUWP
         public int yiPi { get; set; }
         public int jiaoed { get; set; }
     }
-    public class SemestersRootObject
-    {
+
+    public class SemestersRootObject {
         public Currentteachingweek currentTeachingWeek { get; set; }
         public Semester currentSemester { get; set; }
         public string currentDate { get; set; }
         public Semester nextSemester { get; set; }
     }
-    public class Currentteachingweek
-    {
+
+    public class Currentteachingweek {
         public int teachingWeekId { get; set; }
         public string weekName { get; set; }
         public string beginDate { get; set; }
@@ -251,13 +228,11 @@ namespace TsinghuaUWP
     }
 
 
-    public class Timetable : List<Event>
-    {
-        
+    public class Timetable : List<Event> {
+
     }
 
-    public class Event
-    {
+    public class Event {
         public string dd { get; set; }
         public string fl { get; set; }
         public int grrlID { get; set; }
