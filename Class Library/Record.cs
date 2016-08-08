@@ -25,15 +25,14 @@ namespace TsinghuaUWP {
         public bool isNew; //uses (`learn.cic` or `learn`?) .tsinghua.edu.cn
         public string semester;
 
-        override public string ToString() {
-            return "#" + id + ": " + name;
-        }
+        override public string ToString() => "#" + id + ": " + name;
     }
 
     public class Deadline {
         public string id;
         public string name;
         public string ddl;
+        public DateTime due() => DateTime.Parse(ddl + " 23:59");
         public string course;
         public string detail;
         public bool hasBeenFinished;
@@ -65,21 +64,21 @@ namespace TsinghuaUWP {
             DataAccess.setLocalSettings("toasted_assignments", toasted);
         }
 
-        public double daysFromNow() {
-            return (DateTime.Parse(ddl + " 23:59") - DateTime.Now).TotalDays;
+        public double daysFromNow() => (DateTime.Parse(ddl + " 23:59") - DateTime.Now).TotalDays;
+
+        public string timeLeft() => countdown(DateTime.Now).text;
+
+        public bool isPast() => DateTime.Parse(ddl + " 23:59") < DateTime.Now;
+
+        public string tag() => "ddl_" + id.Substring(id.Length - 4);
+        public class Countdown {
+            public string text;
+            public DateTime validFrom;
+            public TimeSpan validDuration;
         }
+        public Countdown countdown(DateTime _now) {
 
-        public string timeLeft() {
-            return timeLeftChinese();
-        }
-
-        public bool isPast() {
-            return DateTime.Parse(ddl + " 23:59") < DateTime.Now;
-        }
-
-        public string timeLeftChinese() {
-            TimeSpan timeDelta = DateTime.Parse(ddl + " 23:59") - DateTime.Now;
-
+            TimeSpan timeDelta = DateTime.Parse(ddl + " 23:59") - _now;
             var daysLeft = timeDelta.TotalDays;
             string timeLeft = "";
 
@@ -107,8 +106,28 @@ namespace TsinghuaUWP {
                 timeLeft = "已经过去 " + d.ToString() + " 周";
             }
 
+            var duration = TimeSpan.FromDays(0);
+            switch(timeLeft[timeLeft.Length - 1]) {
+                case '时':
+                case '！':
+                    duration = TimeSpan.FromHours(1);
+                    break;
+                case '天':
+                    duration = TimeSpan.FromDays(1);
+                    break;
+                case '周':
+                    duration = TimeSpan.FromDays(7);
+                    break;
+                case '分':
+                    duration = TimeSpan.FromMinutes(1);
+                    break;
+            }
 
-            return timeLeft;
+            return new Countdown {
+                validFrom = _now,
+                text = timeLeft,
+                validDuration = duration
+            };
         }
 
     }
