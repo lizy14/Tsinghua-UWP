@@ -46,6 +46,7 @@ namespace TsinghuaUWP {
 
 
                 //connect via sslvpn
+                await logoutSSLVPN();
                 await loginSSLVPN();
 
                 await login();
