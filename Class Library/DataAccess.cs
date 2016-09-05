@@ -175,17 +175,24 @@ namespace TsinghuaUWP {
             return _remoteTimetable;
         }
 
-        public static async Task<Semester> getSemester(bool forceRemote = false) {
+        public static async Task<Semester> getSemester(bool forceRemote = false, bool getNextSemester = false) {
             if (isDemo()) {
                 var start = DateTime.Now.AddDays(-20);
                 while (start.DayOfWeek != DayOfWeek.Monday)
                     start = start.AddDays(-1);
 
-                return new Semester {
-                    startDate = start.ToString("yyyy-MM-dd"),
-                    endDate = start.AddDays(10 * 7 - 1).ToString("yyyy-MM-dd"),
-                    semesterEname = "2333-2334-Spring",
-                };
+                if(!getNextSemester)
+                    return new Semester {
+                        startDate = start.ToString("yyyy-MM-dd"),
+                        endDate = start.AddDays(10 * 7 - 1).ToString("yyyy-MM-dd"),
+                        semesterEname = "2333-2334-Spring",
+                    };
+                else
+                    return new Semester {
+                        startDate = start.AddDays(10 * 7).ToString("yyyy-MM-dd"),
+                        endDate = start.AddDays(20 * 7 - 1).ToString("yyyy-MM-dd"),
+                        semesterEname = "2334-2335-Autumn",
+                    };
             }
             if (!forceRemote) {
                 Semesters __semesters = null;
@@ -204,6 +211,9 @@ namespace TsinghuaUWP {
 
                 //cache hit
                 if (__semesters != null) {
+                    if(getNextSemester)
+                        return __semesters.nextSemester;
+
                     if (DateTime.Parse(__semesters.currentSemester.endDate + " 23:59") < DateTime.Now) {
                         //perform a remote update
                         Task task = getSemester(true);

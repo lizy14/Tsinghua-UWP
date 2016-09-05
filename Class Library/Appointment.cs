@@ -70,12 +70,11 @@ namespace TsinghuaUWP {
 
             var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
 
-            var semester = await DataAccess.getSemester();
+            var current_semester = await DataAccess.getSemester(getNextSemester: false);
+            var next_semester = await DataAccess.getSemester(getNextSemester: true);
 
-            if (semester.semesterEname == semester_in_system_calendar)
+            if (current_semester.semesterEname == semester_in_system_calendar)
                 return;
-
-            var weeks = getAppointments(semester);
 
             //get Calendar object
             AppointmentCalendar cal = null;
@@ -94,11 +93,15 @@ namespace TsinghuaUWP {
                 await cal.DeleteAppointmentAsync(a.LocalId);
             }
 
-            foreach (var ev in weeks) {
+            foreach (var ev in getAppointments(current_semester)) {
                 await cal.SaveAppointmentAsync(ev);
             }
 
-            semester_in_system_calendar = semester.semesterEname;
+            foreach (var ev in getAppointments(next_semester)) {
+                await cal.SaveAppointmentAsync(ev);
+            }
+
+            semester_in_system_calendar = current_semester.semesterEname;
 
             Debug.WriteLine("[Appointment] calendar finish");
         }
