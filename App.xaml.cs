@@ -44,8 +44,9 @@ namespace TsinghuaUWP {
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e) {
-#if DEBUG
+        protected override async void OnLaunched(LaunchActivatedEventArgs e) {
+
+#if DEBUG_FOOBAR
             if (System.Diagnostics.Debugger.IsAttached) {
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
@@ -78,9 +79,9 @@ namespace TsinghuaUWP {
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
-
+            
             BackgroundTasks.TaskManager.register();
-
+            
         }
 
         /// <summary>
