@@ -149,7 +149,8 @@ $@"<toast>
                     .Replace("Autumn", "秋季学期")
                     , @"^(\d+-\d+)-(\w+)$").Groups;
 
-            var week = $"校历第 {sem.getWeekName()} 周";
+            var week = $"校历第{sem.getWeekName()}周";
+            var weekLong = $"校历第 {sem.getWeekName()} 周";
 
             string xml = $@"
 <tile>
@@ -163,14 +164,14 @@ $@"<toast>
         </binding>
 
         <binding template=""TileWide"">
-            <text hint-style=""body"">{week}</text>
+            <text hint-style=""body"">{weekLong}</text>
             <text hint-style=""captionSubtle"">{nameGroup[0]}</text>
             <text hint-style=""caption"">{weekday}</text>
             <text hint-style=""captionSubtle"">{date}</text>
         </binding>
 
         <binding template=""TileLarge"">
-            <text hint-style=""title"">{week}</text>
+            <text hint-style=""title"">{weekLong}</text>
             <text hint-style=""bodySubtle"">{nameGroup[0]}</text>
             <text hint-style=""body"">{weekday}</text>
             <text hint-style=""bodySubtle"">{date}</text>

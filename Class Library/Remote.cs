@@ -29,10 +29,10 @@ namespace TsinghuaUWP {
                 "http://learn.cic.tsinghua.edu.cn:80/gnt",
                 "appId=ALL_ZHJW");
 
-            await 十１ｓ(); //cross-domain tickets needs some time to take effect
+            //await 十１ｓ(); //cross-domain tickets needs some time to take effect
 
-            var year_ago = DateTime.Now.AddYears(-1).ToString("yyyyMMdd");
-            var year_later = DateTime.Now.AddYears(+1).ToString("yyyyMMdd");
+            var starting_date = DateTime.Now.AddMonths(-6).ToString("yyyyMMdd");
+            var ending_date = DateTime.Now.AddMonths(6).ToString("yyyyMMdd");
 
             try {
                 var zhjw = await GET(
@@ -60,8 +60,9 @@ namespace TsinghuaUWP {
                 var ticketPage = await GET(
                     $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn+j_acegi_login.do?url=/&ticket={ticket}");
 
+                var __stamp = (long)UnixTime().TotalMilliseconds;
                 string pageSslvpn = await GET(
-                    $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn,CT=js+jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_&_={UnixTime().TotalMilliseconds}");
+                    $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn,CT=js+jxmh.do?m=bks_jxrl_all&p_start_date={starting_date}&p_end_date={ending_date}&jsoncallback=_&_={__stamp}");
 
                 logoutSSLVPN();
 
@@ -70,9 +71,10 @@ namespace TsinghuaUWP {
             }
 
             //connect directly
-            string page = await GET(
-                $"http://zhjw.cic.tsinghua.edu.cn/jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_&_={UnixTime().TotalMilliseconds}");
 
+            var stamp = (long)UnixTime().TotalMilliseconds;
+            string page = await GET(
+                $"http://zhjw.cic.tsinghua.edu.cn/jxmh.do?m=bks_jxrl_all&p_start_date={starting_date}&p_end_date={ending_date}&jsoncallback=_&_={stamp}");
             Debug.WriteLine("[getRemoteTimetable] returning direct");
             return parseTimetablePage(page);
 
