@@ -216,10 +216,16 @@ namespace TsinghuaUWP {
 
                     if (DateTime.Parse(__semesters.currentSemester.endDate + " 23:59") < DateTime.Now) {
                         //perform a remote update
-                        Task task = getSemester(true);
-                        task.ContinueWith((_) => Appointment.updateCalendar());
+                        Task task = getSemester(forceRemote: true);
+                        task.ContinueWith((_) => 0);
 
                         Debug.WriteLine("[getCalendar] Returning cache next");
+                        if (__semesters.nextSemester.endDate == null) {
+                            //automatically complete missing endDate
+                            if (__semesters.nextSemester.semesterEname.IndexOf("Autumn") != -1
+                                || __semesters.nextSemester.semesterEname.IndexOf("Spring") != -1)
+                                __semesters.nextSemester.endDate = DateTime.Parse(__semesters.nextSemester.startDate).AddDays(18 * 7 - 1).ToString();
+                        }
                         return __semesters.nextSemester;
                     }
                     Debug.WriteLine("[getCalendar] Returning cache");
@@ -230,17 +236,14 @@ namespace TsinghuaUWP {
             //fetch from remote
             Semesters _remoteSemesters = null;
 
-            try {
-                _remoteSemesters = await Remote.getHostedSemesters();
-            } catch (Exception) { }
-
+            if (credentialAbsent() == false) {
+                try {
+                    _remoteSemesters = await Remote.getRemoteSemesters();
+                } catch (Exception) { }
+            }
             if (_remoteSemesters == null) {
-                Debug.WriteLine("[getCalendar] hosted fail, falling back");
-
-                if (credentialAbsent())
-                    throw new LoginException("calendar_fall_back");
-
-                _remoteSemesters = await Remote.getRemoteSemesters();
+                Debug.WriteLine("[getCalendar] remote fail, falling back to hosted");
+                _remoteSemesters = await Remote.getHostedSemesters();
             }
 
             semesters = _remoteSemesters;
