@@ -97,8 +97,10 @@ namespace TsinghuaUWP {
                 await cal.SaveAppointmentAsync(ev);
             }
 
-            foreach (var ev in getAppointments(next_semester)) {
-                await cal.SaveAppointmentAsync(ev);
+            if (next_semester.id != current_semester.id) {
+                foreach (var ev in getAppointments(next_semester)) {
+                    await cal.SaveAppointmentAsync(ev);
+                }
             }
 
             semester_in_system_calendar = current_semester.semesterEname;
