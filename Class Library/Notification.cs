@@ -72,11 +72,15 @@ namespace TsinghuaUWP {
             // TODO: all values need to be XML escaped
 
             // Construct the visuals of the toast
+            Regex re = new Regex("&[^;]+;");
+            string name = re.Replace(deadline.name, " ");
+            string course = re.Replace(deadline.course, " ");
+
             string toastVisual = $@"
 <visual>
   <binding template='ToastGeneric'>
-    <text>{deadline.name}</text>
-    <text>{deadline.ddl}, {deadline.course}</text>
+    <text>{name}</text>
+    <text>{deadline.ddl}, {course}</text>
 </binding>
 </visual>";
 
@@ -92,8 +96,10 @@ $@"<toast>
 
         private static XmlDocument getTileXmlForDeadline(Deadline deadline) {
 
-            string name = deadline.name;
-            string course = deadline.course;
+            Regex re = new Regex("&[^;]+;");
+            string name = re.Replace(deadline.name, " ");
+            string course = re.Replace(deadline.course, " ");
+
             string due = deadline.ddl;
             string timeLeft = deadline.timeLeft();
 
@@ -111,8 +117,8 @@ $@"<toast>
         <binding template=""TileWide"">
             <text hint-style=""body"">{name}</text>
             <text hint-style=""captionSubtle"">{course}</text>
-            <text hint-style=""captionSubtle"">{due}, {timeLeft}</text>
-            <text hint-style=""captionSubtle"">更新于 {DateTime.Now}</text>
+            <text hint-style=""caption"">{timeLeft}</text>
+            <text hint-style=""captionSubtle"">截止于 {due}</text>
         </binding>
 
         <binding template=""TileLarge"">

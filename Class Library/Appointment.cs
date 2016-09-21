@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Appointments;
 
@@ -161,8 +162,9 @@ namespace TsinghuaUWP {
 
         private static Windows.ApplicationModel.Appointments.Appointment getAppointment(Deadline e) {
             var a = new Windows.ApplicationModel.Appointments.Appointment();
-            a.Subject = e.name;
-            a.Location = e.course;
+            Regex re = new Regex("&[^;]+;");
+            a.Subject = re.Replace(e.name, " ");
+            a.Location = re.Replace(e.course, " ");
             a.StartTime = DateTime.Parse(e.ddl + " 23:59");
             a.AllDay = false;
             a.BusyStatus = AppointmentBusyStatus.Tentative;
