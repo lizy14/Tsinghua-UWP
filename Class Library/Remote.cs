@@ -9,6 +9,7 @@ using Windows.Web.Http;
 using System.Runtime.Serialization.Json;
 using System.IO;
 using System.Diagnostics;
+using System.Net;
 
 namespace TsinghuaUWP {
     public static class Remote {
@@ -368,6 +369,7 @@ namespace TsinghuaUWP {
                 _course = htmlDoc.DocumentNode.Descendants("td")/*MAGIC*/.First().InnerText;
                 _course = _course.Trim();
                 _course = _course.Substring(6/*MAGIC*/);
+                _course = WebUtility.HtmlDecode(_course);
 
                 HtmlNode[] nodes = htmlDoc.DocumentNode.Descendants("tr")/*MAGIC*/.ToArray();
 
@@ -384,6 +386,7 @@ namespace TsinghuaUWP {
 
                     var link_to_detail = node.Descendants("a")/*MAGIC*/.First();
                     _name = link_to_detail.InnerText;
+                    _name = WebUtility.HtmlDecode(_name);
 
                     var _href = link_to_detail.Attributes["href"].Value;
                     var _id = Regex.Match(_href, @"[^_]id=(\d+)").Groups[1].Value;
@@ -427,6 +430,9 @@ namespace TsinghuaUWP {
                             _course = course.name;
                     }
                 }
+
+                _course = WebUtility.HtmlDecode(_course);
+                _name = WebUtility.HtmlDecode(_name);
 
                 deadlines.Add(new Deadline {
                     name = _name,
