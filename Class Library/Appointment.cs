@@ -141,10 +141,13 @@ namespace TsinghuaUWP {
                 await cal.DeleteAppointmentAsync(ddl_ap.LocalId);
             }
 
-            foreach (var ev in timetable) {
-                var appointment = getAppointment(ev);
-                await cal.SaveAppointmentAsync(appointment);
-            }
+
+            var list = new List<Windows.ApplicationModel.Appointments.Appointment>();
+            foreach (var ev in timetable)
+                list.Add(getAppointment(ev));
+            list = mergeAppointments(list);
+            foreach(var e in list)
+                await cal.SaveAppointmentAsync(e);
 
             Debug.WriteLine("[Appointment] update finished");
         }
@@ -167,9 +170,35 @@ namespace TsinghuaUWP {
             a.Location = re.Replace(e.course, " ");
             a.StartTime = DateTime.Parse(e.ddl + " 23:59");
             a.AllDay = false;
-            a.BusyStatus = AppointmentBusyStatus.Tentative;
+            a.BusyStatus = e.hasBeenFinished? AppointmentBusyStatus.Free: AppointmentBusyStatus.Tentative;
             a.Reminder = TimeSpan.FromHours(6);
             return a;
+        }
+
+        private static List<Windows.ApplicationModel.Appointments.Appointment> mergeAppointments(List<Windows.ApplicationModel.Appointments.Appointment> input) {
+            int n = input.Count;
+            var output = new List<Windows.ApplicationModel.Appointments.Appointment>();
+            for (int i = 0; i < n;) {
+                var starting = input[i];
+                int offset = 1;
+                while (true) {
+                    if (i + offset >= n) break;
+                    var current = input[i + offset];
+                    if (current.Subject == starting.Subject && current.Location == starting.Location) {
+                        if (starting.StartTime + starting.Duration - current.StartTime < TimeSpan.FromMinutes(21)) {
+                            starting.Duration = current.StartTime + current.Duration - starting.StartTime;
+                            offset++;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                output.Add(starting);
+                i += offset;
+            }
+            return output;
         }
 
         private static List<Windows.ApplicationModel.Appointments.Appointment> getAppointments(Semester s) {
