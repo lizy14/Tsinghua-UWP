@@ -136,6 +136,7 @@ namespace TsinghuaUWP {
 
 
             //TODO: don't delete all and re-insert all
+            //
             var aps = await cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
             foreach (var ddl_ap in aps) {
                 await cal.DeleteAppointmentAsync(ddl_ap.LocalId);
@@ -171,7 +172,10 @@ namespace TsinghuaUWP {
             a.StartTime = DateTime.Parse(e.ddl + " 23:59");
             a.AllDay = false;
             a.BusyStatus = e.hasBeenFinished? AppointmentBusyStatus.Free: AppointmentBusyStatus.Tentative;
-            a.Reminder = TimeSpan.FromHours(6);
+            if (e.hasBeenFinished)
+                a.Reminder = null;
+            else
+                a.Reminder = TimeSpan.FromHours(6);
             return a;
         }
 
