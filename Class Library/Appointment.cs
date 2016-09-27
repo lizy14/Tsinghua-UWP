@@ -56,6 +56,8 @@ namespace TsinghuaUWP {
                 foreach (var ev in deadlines) {
                     if (ev.shouldBeIgnored())
                         continue;
+                    if (ev.hasBeenFinished)
+                        continue; //TODO: should be user-configurable
                     await ddl_cal.SaveAppointmentAsync(getAppointment(ev));
                 }
             } catch (Exception) { }

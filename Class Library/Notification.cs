@@ -80,7 +80,7 @@ namespace TsinghuaUWP {
 <visual>
   <binding template='ToastGeneric'>
     <text>{name}</text>
-    <text>新出现的 ddl, {deadline.ddl}, {course}</text>
+    <text>新出现 ddl: {deadline.ddl}, {course}</text>
 </binding>
 </visual>";
 
