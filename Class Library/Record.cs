@@ -47,7 +47,8 @@ namespace TsinghuaUWP {
 
         public bool shouldBeIgnored() {
             string[] keywords = {
-                "补交"
+                "补交",
+                "迟交"
             };
             foreach (var keyword in keywords) {
                 if (name.IndexOf(keyword) != -1)
