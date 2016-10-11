@@ -16,6 +16,9 @@ namespace TsinghuaUWP {
             updater.EnableNotificationQueue(true);
             updater.Clear(); //TODO: should always clear?
 
+
+
+            var semester = await DataAccess.getSemester(forceRemote);
             int tileCount = 0;
 
             var notifier = ToastNotificationManager.CreateToastNotifier();
@@ -33,7 +36,7 @@ namespace TsinghuaUWP {
                     foreach (var deadline in deadlines) {
                         if (!deadline.isPast()
                             && (tileCount + 1) < 5) {
-                            var tile = new TileNotification(getTileXmlForDeadline(deadline));
+                            var tile = new TileNotification(getTileXmlForDeadline(deadline, semester));
                             updater.Update(tile);
                             tileCount++;
                         }
@@ -55,7 +58,7 @@ namespace TsinghuaUWP {
             //calendar
             try {
                 if (tileCount < 5) {
-                    updater.Update(new TileNotification(getTileXmlForCalendar(await DataAccess.getSemester(forceRemote))));
+                    updater.Update(new TileNotification(getTileXmlForCalendar(semester)));
                 }
             } catch (Exception e) {
                 Debug.WriteLine("[Notification] error dealing with calendar: " + e.Message);
@@ -66,7 +69,12 @@ namespace TsinghuaUWP {
             Debug.WriteLine("[Notification] update finished");
             return 0;
         }
-
+        private static string getWeekday() {
+            var now = DateTime.Now;
+            string[] weekDayNames = { "日", "一", "二", "三", "四", "五", "六" };
+            var weekday = "星期" + weekDayNames[Convert.ToInt32(now.DayOfWeek)];
+            return weekday;
+        }
         private static XmlDocument getToastXmlForDeadline(Deadline deadline) {
 
             // TODO: all values need to be XML escaped
@@ -94,7 +102,7 @@ $@"<toast>
             return toastXml;
         }
 
-        private static XmlDocument getTileXmlForDeadline(Deadline deadline) {
+        private static XmlDocument getTileXmlForDeadline(Deadline deadline, Semester semester) {
 
             Regex re = new Regex("&[^;]+;");
             string name = re.Replace(deadline.name, " ");
@@ -102,16 +110,16 @@ $@"<toast>
 
             string due = deadline.ddl;
             string timeLeft = deadline.timeLeft();
-
+            string weekname = $"第 { semester.getWeekName()} 周";
             string xml = $@"
 <tile>
-    <visual>
+    <visual branding=""nameAndLogo"" displayName=""校历{weekname}{getWeekday()}"">
 
-        <binding template=""TileMedium"">
+        <binding template=""TileMedium"" branding=""name"" displayName=""校历第 {semester.getWeekName()} 周"">
             <text>{name}</text>
             <text hint-style=""captionSubtle"">{course}</text>
             <text hint-style=""captionSubtle"">{due}</text>
-            <text hint-style=""captionSubtle"">{timeLeft}</text>
+            <text hint-style=""caption"">{timeLeft}</text>
         </binding>
 
         <binding template=""TileWide"">
@@ -142,8 +150,7 @@ $@"<toast>
         private static XmlDocument getTileXmlForCalendar(Semester sem) {
             var now = DateTime.Now;
 
-            string[] weekDayNames = { "日", "一", "二", "三", "四", "五", "六" };
-            var weekday = "星期" + weekDayNames[Convert.ToInt32(now.DayOfWeek)];
+            var weekday = getWeekday();
 
             var shortdate = now.ToString("M 月 d 日");
             var date = now.ToString("yyyy 年 M 月 d 日");
@@ -160,9 +167,9 @@ $@"<toast>
 
             string xml = $@"
 <tile>
-    <visual>
+    <visual branding=""nameAndLogo"">
 
-        <binding template=""TileMedium"">
+        <binding template=""TileMedium"" branding=""name"">
             <text hint-style=""body"">{week}</text>
             <text hint-style=""captionSubtle"">{nameGroup[2]}</text>
             <text hint-style=""caption"">{weekday}</text>
