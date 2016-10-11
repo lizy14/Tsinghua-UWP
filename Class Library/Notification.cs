@@ -110,28 +110,39 @@ $@"<toast>
 
             string due = deadline.ddl;
             string timeLeft = deadline.timeLeft();
-            string weekname = $"第 { semester.getWeekName()} 周";
+
             string xml = $@"
 <tile>
-    <visual branding=""nameAndLogo"" displayName=""校历{weekname}{getWeekday()}"">
+    <visual 
+        branding=""none"">
 
-        <binding template=""TileMedium"" branding=""name"" displayName=""校历第 {semester.getWeekName()} 周"">
-            <text hint-wrap=""true"">{name}</text>
-            <text hint-style=""captionSubtle"">{course}</text>
+        <binding template=""TileMedium"">
+            <text 
+                hint-wrap=""true"" 
+                hint-maxLines=""2"">{name}</text>
+            <text hint-style=""captionSubtle""
+                hint-wrap=""true"" 
+                hint-maxLines=""2"">{course}</text>
             <text hint-style=""caption"">{timeLeft}</text>
             <text hint-style=""captionSubtle"">{due}</text>
         </binding>
 
         <binding template=""TileWide"">
-            <text hint-style=""body"">{name}</text>
+            <text hint-style=""body"" 
+                hint-wrap=""true"" 
+                hint-maxLines=""2"">{name}</text>
             <text hint-style=""captionSubtle"">{course}</text>
             <text hint-style=""caption"">{timeLeft}</text>
             <text hint-style=""captionSubtle"">截止于 {due}</text>
         </binding>
 
-        <binding template=""TileLarge"">
-            <text hint-wrap=""true"" hint-style=""subtitle"">{name}</text>
-            <text hint-wrap=""true"" hint-style=""bodySubtle"">{course}</text>
+        <binding template=""TileLarge"" 
+            branding=""nameAndLogo"" 
+            displayName=""校历第 {semester.getWeekName()} 周{getWeekday()}"">
+            <text hint-style=""subtitle""
+                hint-wrap=""true"">{name}</text>
+            <text hint-style=""bodySubtle"" 
+                hint-wrap=""true"">{course}</text>
             <text hint-style=""body"">{timeLeft}</text>
             <text hint-style=""bodySubtle"">截止于 {due}</text>
             
@@ -167,9 +178,10 @@ $@"<toast>
 
             string xml = $@"
 <tile>
-    <visual branding=""nameAndLogo"">
+    <visual 
+        branding=""nameAndLogo"">
 
-        <binding template=""TileMedium"" branding=""name"">
+        <binding template=""TileMedium"">
             <text hint-style=""body"">{week}</text>
             <text hint-style=""captionSubtle"">{nameGroup[2]}</text>
             <text hint-style=""caption"">{weekday}</text>

@@ -18,7 +18,7 @@ namespace TsinghuaUWP {
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e) {
-
+            
             if (DataAccess.supposedToWorkAnonymously()) {
                 btnLogin.Content = "登录";
                 btnRefreshTimetable.IsEnabled = false;
