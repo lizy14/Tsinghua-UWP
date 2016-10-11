@@ -116,10 +116,10 @@ $@"<toast>
     <visual branding=""nameAndLogo"" displayName=""校历{weekname}{getWeekday()}"">
 
         <binding template=""TileMedium"" branding=""name"" displayName=""校历第 {semester.getWeekName()} 周"">
-            <text>{name}</text>
+            <text hint-wrap=""true"">{name}</text>
             <text hint-style=""captionSubtle"">{course}</text>
-            <text hint-style=""captionSubtle"">{due}</text>
             <text hint-style=""caption"">{timeLeft}</text>
+            <text hint-style=""captionSubtle"">{due}</text>
         </binding>
 
         <binding template=""TileWide"">
@@ -130,11 +130,11 @@ $@"<toast>
         </binding>
 
         <binding template=""TileLarge"">
-            <text hint-style=""title"">{name}</text>
-            <text hint-style=""bodySubtle"">{course}</text>
-            <text hint-style=""bodySubtle"">截止于 {due}</text>
+            <text hint-wrap=""true"" hint-style=""subtitle"">{name}</text>
+            <text hint-wrap=""true"" hint-style=""bodySubtle"">{course}</text>
             <text hint-style=""body"">{timeLeft}</text>
-            <text hint-style=""captionSubtle"">更新于 {DateTime.Now}</text>
+            <text hint-style=""bodySubtle"">截止于 {due}</text>
+            
         </binding>
 
     </visual>
@@ -188,7 +188,6 @@ $@"<toast>
             <text hint-style=""bodySubtle"">{nameGroup[0]}</text>
             <text hint-style=""body"">{weekday}</text>
             <text hint-style=""bodySubtle"">{date}</text>
-            <text hint-style=""captionSubtle"">更新于 {DateTime.Now}</text>
         </binding>
 
     </visual>
