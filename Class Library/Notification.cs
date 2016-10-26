@@ -9,6 +9,29 @@ using System.Text.RegularExpressions;
 
 namespace TsinghuaUWP {
     public class Notification {
+
+        static private void setBadgeNumber(int num) {
+
+            // Get the blank badge XML payload for a badge number
+            XmlDocument badgeXml =
+                BadgeUpdateManager.GetTemplateContent(BadgeTemplateType.BadgeNumber);
+
+            // Set the value of the badge in the XML to our number
+            XmlElement badgeElement = badgeXml.SelectSingleNode("/badge") as XmlElement;
+            badgeElement.SetAttribute("value", num.ToString());
+
+            // Create the badge notification
+            BadgeNotification badge = new BadgeNotification(badgeXml);
+
+            // Create the badge updater for the application
+            BadgeUpdater badgeUpdater =
+                BadgeUpdateManager.CreateBadgeUpdaterForApplication();
+
+            // And update the badge
+            badgeUpdater.Update(badge);
+
+        }
+
         static public async Task<int> update(bool forceRemote = false, bool calendarOnly = false) {
             Debug.WriteLine("[Notification] update begin");
 
@@ -23,6 +46,7 @@ namespace TsinghuaUWP {
 
             var notifier = ToastNotificationManager.CreateToastNotifier();
 
+
             try {
                 if (!calendarOnly && !DataAccess.credentialAbsent()) {
                     Debug.WriteLine("[Notification] credential exist");
@@ -32,6 +56,9 @@ namespace TsinghuaUWP {
                         (from a in await DataAccess.getAllDeadlines(forceRemote)
                          where !a.hasBeenFinished && !a.shouldBeIgnored()
                          select a).ToList());
+
+                    int n = (from a in deadlines where !a.isPast() select a).Count();
+                    setBadgeNumber(n);
 
                     foreach (var deadline in deadlines) {
                         if (!deadline.isPast()
