@@ -141,31 +141,32 @@ $@"<toast>
             string xml = $@"
 <tile>
     <visual 
-        branding=""none"">
+        displayName=""校历第 {semester.getWeekName()} 周{getWeekday()}"">
 
-        <binding template=""TileMedium"">
+        <binding template=""TileMedium""
+            branding=""none"">
             <text 
                 hint-wrap=""true"" 
                 hint-maxLines=""2"">{name}</text>
             <text hint-style=""captionSubtle""
                 hint-wrap=""true"" 
                 hint-maxLines=""2"">{course}</text>
-            <text hint-style=""caption"">{timeLeft}</text>
+            <text hint-style=""caption"">{timeLeft}</text>            
             <text hint-style=""captionSubtle"">{due}</text>
         </binding>
 
-        <binding template=""TileWide"">
+        <binding template=""TileWide""
+            branding=""name"">
             <text hint-style=""body"" 
                 hint-wrap=""true"" 
                 hint-maxLines=""2"">{name}</text>
             <text hint-style=""captionSubtle"">{course}</text>
-            <text hint-style=""caption"">{timeLeft}</text>
+            <text hint-style=""caption"">{timeLeft}</text>            
             <text hint-style=""captionSubtle"">截止于 {due}</text>
         </binding>
 
         <binding template=""TileLarge"" 
-            branding=""nameAndLogo"" 
-            displayName=""校历第 {semester.getWeekName()} 周{getWeekday()}"">
+            branding=""nameAndLogo"">
             <text hint-style=""subtitle""
                 hint-wrap=""true"">{name}</text>
             <text hint-style=""bodySubtle"" 
