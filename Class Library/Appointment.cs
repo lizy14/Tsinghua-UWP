@@ -159,9 +159,16 @@ namespace TsinghuaUWP {
             var a = new Windows.ApplicationModel.Appointments.Appointment();
             a.Subject = e.nr;
             a.Location = e.dd;
-            //TODO: probably doesn't work for exam events, which may be something like "2:30", "7:00"
+            
             a.StartTime = DateTime.Parse(e.nq + " " + e.kssj);
             a.Duration = DateTime.Parse(e.nq + " " + e.jssj) - a.StartTime;
+            // 修正考试时间 12 小时制
+            if(e.fl == "考试") {
+                if(a.StartTime.Hour < 8) {
+                    a.StartTime += TimeSpan.FromHours(12);
+                }
+                a.Subject += "考试";
+            }
             a.AllDay = false;
             return a;
         }
