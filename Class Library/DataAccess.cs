@@ -280,7 +280,6 @@ namespace TsinghuaUWP {
 
         static string DEADLINES_FILENAME = "deadlines.json";
         static public async Task<List<Deadline>> getAllDeadlines(bool forceRemote = false) {
-            forceRemote = false;
             if (isDemo()) {
                 var list = new List<Deadline>();
                 var start = DateTime.Now.AddDays(-20);
