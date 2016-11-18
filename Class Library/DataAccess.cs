@@ -19,6 +19,28 @@ namespace TsinghuaUWP {
             return localSettings.Values;
         }
 
+        static async Task writeCache(string filename, string value) {
+            StorageFolder localCacheFolder = ApplicationData.Current.LocalCacheFolder;
+            StorageFile file;
+            try {
+                file = await localCacheFolder.GetFileAsync(filename);
+            } catch {
+                file = await localCacheFolder.CreateFileAsync(filename);
+            }
+            await FileIO.WriteTextAsync(file, value);
+        }
+
+        static async Task<string> readCache(string filename) {
+            try {
+                StorageFolder localCacheFolder = ApplicationData.Current.LocalCacheFolder;
+                StorageFile file = await localCacheFolder.GetFileAsync(filename);
+                String fileContent = await FileIO.ReadTextAsync(file);
+                return fileContent;
+            }catch {
+                return "";
+            }
+        }
+
         static public bool credentialAbsent() {
             var username = localSettings.Values["username"];
             return username == null
@@ -76,6 +98,7 @@ namespace TsinghuaUWP {
             return future.Concat(past.Take(limit - futureCount)).ToList();
         }
 
+        static string COURSES_FILENAME = "courses.json";
         public static async Task<List<Course>> getCourses(bool forceRemote = false) {
             if (isDemo()) {
                 var list = new List<Course>();
@@ -100,10 +123,10 @@ namespace TsinghuaUWP {
                 }
 
                 //try localSettings
-                var localCourses = localSettings.Values["courses"];
-                if (localCourses != null) {
+                var localCourses = await readCache(COURSES_FILENAME);
+                if (localCourses.Length > 0) {
                     Debug.WriteLine("[getCourses] Returning local settings");
-                    courses = JSON.parse<List<Course>>((string)localCourses);
+                    courses = JSON.parse<List<Course>>(localCourses);
                     return courses;
                 }
             }
@@ -112,7 +135,8 @@ namespace TsinghuaUWP {
             //fetch from remote
             var _courses = await Remote.getRemoteCourseList();
             courses = _courses;
-            localSettings.Values["courses"] = JSON.stringify(_courses);
+            writeCache(COURSES_FILENAME, JSON.stringify(_courses));
+
             Debug.WriteLine("[getCourses] Returning remote");
             return courses;
         }
@@ -175,6 +199,7 @@ namespace TsinghuaUWP {
             return _remoteTimetable;
         }
 
+        static string SEMESTERS_FILENAME = "semesters.json";
         public static async Task<Semester> getSemester(bool forceRemote = false, bool getNextSemester = false) {
             if (isDemo()) {
                 var start = DateTime.Now.AddDays(-20);
@@ -202,10 +227,10 @@ namespace TsinghuaUWP {
                     __semesters = semesters;
                 } else //try localSettings
                   {
-                    var localJSON = localSettings.Values["semesters"];
-                    if (localJSON != null) {
+                    var localJSON = await readCache(SEMESTERS_FILENAME);
+                    if (localJSON.Length > 0) {
                         Debug.WriteLine("[getCalendar] local settings");
-                        __semesters = JSON.parse<Semesters>((string)localJSON);
+                        __semesters = JSON.parse<Semesters>(localJSON);
                     }
                 }
 
@@ -247,13 +272,15 @@ namespace TsinghuaUWP {
             }
 
             semesters = _remoteSemesters;
-            localSettings.Values["semesters"] = JSON.stringify(semesters);
+            writeCache(SEMESTERS_FILENAME, JSON.stringify(semesters));
+
             Debug.WriteLine("[getCalendar] Returning remote");
             return semesters.currentSemester;
         }
 
         static string DEADLINES_FILENAME = "deadlines.json";
         static public async Task<List<Deadline>> getAllDeadlines(bool forceRemote = false) {
+            forceRemote = false;
             if (isDemo()) {
                 var list = new List<Deadline>();
                 var start = DateTime.Now.AddDays(-20);
@@ -291,17 +318,11 @@ namespace TsinghuaUWP {
 
 
                 //try local
-                try {
-                    {
-                        StorageFolder localCacheFolder = ApplicationData.Current.LocalCacheFolder;
-                        StorageFile file = await localCacheFolder.GetFileAsync(DEADLINES_FILENAME);
-                        String fileContent = await FileIO.ReadTextAsync(file);
-                        if (fileContent.Length > 0) {
-                            Debug.WriteLine("[getAllDeadlines] Returning local");
-                            return JSON.parse<List<Deadline>>(fileContent);
-                        }
-                    }
-                } catch { }
+                var cache = await readCache(DEADLINES_FILENAME);
+                if (cache.Length > 0) {
+                    Debug.WriteLine("[getAllDeadlines] Returning local");
+                    return JSON.parse<List<Deadline>>(cache);
+                }
             }
 
             //fetch from remote
@@ -321,16 +342,8 @@ namespace TsinghuaUWP {
 
 
             deadlines = _deadlines;
-            {
-                StorageFolder localCacheFolder = ApplicationData.Current.LocalCacheFolder;
-                StorageFile file;
-                try {
-                    file = await localCacheFolder.GetFileAsync(DEADLINES_FILENAME);
-                } catch {
-                    file = await localCacheFolder.CreateFileAsync(DEADLINES_FILENAME);
-                }
-                await FileIO.WriteTextAsync(file, JSON.stringify(deadlines));
-            }
+            writeCache(DEADLINES_FILENAME, JSON.stringify(deadlines));
+            
             Debug.WriteLine("[getAllDeadlines] Returning remote");
 
             return _deadlines;
