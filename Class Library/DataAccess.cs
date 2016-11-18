@@ -252,6 +252,7 @@ namespace TsinghuaUWP {
             return semesters.currentSemester;
         }
 
+        static string DEADLINES_FILENAME = "deadlines.json";
         static public async Task<List<Deadline>> getAllDeadlines(bool forceRemote = false) {
             if (isDemo()) {
                 var list = new List<Deadline>();
@@ -289,12 +290,18 @@ namespace TsinghuaUWP {
                 }
 
 
-                //try localSettings
-                var local = localSettings.Values["deadlines"];
-                if (local != null) {
-                    Debug.WriteLine("[getAllDeadlines] Returning local settings");
-                    return JSON.parse<List<Deadline>>((string)local);
-                }
+                //try local
+                try {
+                    {
+                        StorageFolder localCacheFolder = ApplicationData.Current.LocalCacheFolder;
+                        StorageFile file = await localCacheFolder.GetFileAsync(DEADLINES_FILENAME);
+                        String fileContent = await FileIO.ReadTextAsync(file);
+                        if (fileContent.Length > 0) {
+                            Debug.WriteLine("[getAllDeadlines] Returning local");
+                            return JSON.parse<List<Deadline>>(fileContent);
+                        }
+                    }
+                } catch { }
             }
 
             //fetch from remote
@@ -314,7 +321,16 @@ namespace TsinghuaUWP {
 
 
             deadlines = _deadlines;
-            localSettings.Values["deadlines"] = JSON.stringify(_deadlines);
+            {
+                StorageFolder localCacheFolder = ApplicationData.Current.LocalCacheFolder;
+                StorageFile file;
+                try {
+                    file = await localCacheFolder.GetFileAsync(DEADLINES_FILENAME);
+                } catch {
+                    file = await localCacheFolder.CreateFileAsync(DEADLINES_FILENAME);
+                }
+                await FileIO.WriteTextAsync(file, JSON.stringify(deadlines));
+            }
             Debug.WriteLine("[getAllDeadlines] Returning remote");
 
             return _deadlines;

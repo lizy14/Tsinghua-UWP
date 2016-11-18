@@ -52,10 +52,11 @@ namespace TsinghuaUWP {
                     Debug.WriteLine("[Notification] credential exist");
 
                     //deadlines
-                    var deadlines = DataAccess.sortDeadlines(
-                        (from a in await DataAccess.getAllDeadlines(forceRemote)
-                         where !a.hasBeenFinished && !a.shouldBeIgnored()
-                         select a).ToList());
+                    var unfiltered = await DataAccess.getAllDeadlines(forceRemote);
+                    var unsorted = (from a in unfiltered
+                                    where !a.hasBeenFinished && !a.shouldBeIgnored()
+                                    select a);
+                    var deadlines = DataAccess.sortDeadlines(unsorted.ToList());
 
                     int n = (from a in deadlines where !a.isPast() select a).Count();
                     setBadgeNumber(n);
