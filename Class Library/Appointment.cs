@@ -70,7 +70,7 @@ namespace TsinghuaUWP {
         public static async Task updateCalendar() {
             Debug.WriteLine("[Appointment] calendar begin");
 
-
+            //TODO: possible duplication, lock?
             var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
 
             var current_semester = await DataAccess.getSemester(getNextSemester: false);
