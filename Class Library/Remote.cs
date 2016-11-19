@@ -9,6 +9,7 @@ using Windows.Web.Http;
 using System.Runtime.Serialization.Json;
 using System.IO;
 using System.Diagnostics;
+using System.Net;
 
 namespace TsinghuaUWP {
     public static class Remote {
@@ -29,11 +30,9 @@ namespace TsinghuaUWP {
                 "http://learn.cic.tsinghua.edu.cn:80/gnt",
                 "appId=ALL_ZHJW");
 
-            await 十１ｓ(); //cross-domain tickets needs some time to take effect
+            //await 十１ｓ(); //cross-domain tickets needs some time to take effect
 
-            var year_ago = DateTime.Now.AddYears(-1).ToString("yyyyMMdd");
-            var year_later = DateTime.Now.AddYears(+1).ToString("yyyyMMdd");
-
+            bool outside_campus_network = false;
             try {
                 var zhjw = await GET(
                     $"http://zhjw.cic.tsinghua.edu.cn/j_acegi_login.do?url=/&ticket={ticket}");
@@ -43,8 +42,13 @@ namespace TsinghuaUWP {
                 Debug.WriteLine("[getRemoteTimetable] outside campus network");
                 //throw new NeedCampusNetworkException();
 
+                outside_campus_network = true;
+
+            }
 
 
+
+            if (outside_campus_network) {
                 //connect via sslvpn
                 await logoutSSLVPN();
                 await loginSSLVPN();
@@ -60,22 +64,69 @@ namespace TsinghuaUWP {
                 var ticketPage = await GET(
                     $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn+j_acegi_login.do?url=/&ticket={ticket}");
 
-                string pageSslvpn = await GET(
-                    $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn,CT=js+jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_&_={UnixTime().TotalMilliseconds}");
+                Timetable timetable = new Timetable();
+
+                for (int i = -6; i <= 4; i += 2) {
+                    string page;
+                    try {
+                        page = await get_calendar_sslvpn_page(
+                            DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
+                            DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd")
+                            );
+                    } catch (Exception) {
+                        page = await get_calendar_sslvpn_page(
+                            DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
+                            DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd")
+                            );
+                    }
+                    var set_to_be_appended = parseTimetablePage(page);
+                    foreach (var _____ in set_to_be_appended) {
+                        timetable.Add(_____);
+                    }
+                }
 
                 logoutSSLVPN();
 
                 Debug.WriteLine("[getRemoteTimetable] returning sslvpn");
-                return parseTimetablePage(pageSslvpn);
+                return timetable;
+            } else { //TODO: duplicate code
+
+                //connect directly
+
+                Timetable timetable = new Timetable();
+                for (int i = -6; i <= 4; i += 2) {
+                    string page;
+                    try {
+                        page = await get_calendar_page(
+                            DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
+                            DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd")
+                            );
+                    } catch (Exception) {
+                        page = await get_calendar_page(
+                            DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
+                            DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd")
+                            );
+                    }
+                    var set_to_be_appended = parseTimetablePage(page);
+                    foreach (var _____ in set_to_be_appended) {
+                        timetable.Add(_____);
+                    }
+                }
+
+                Debug.WriteLine("[getRemoteTimetable] returning direct");
+                return timetable;
             }
-
-            //connect directly
-            string page = await GET(
-                $"http://zhjw.cic.tsinghua.edu.cn/jxmh.do?m=bks_jxrl_all&p_start_date={year_ago}&p_end_date={year_later}&jsoncallback=_&_={UnixTime().TotalMilliseconds}");
-
-            Debug.WriteLine("[getRemoteTimetable] returning direct");
-            return parseTimetablePage(page);
-
+        }
+        static async Task<string> get_calendar_page(string starting_date, string ending_date) {
+            Debug.WriteLine($"[get_calendar_page] {starting_date}-{ending_date}");
+            var stamp = (long)UnixTime().TotalMilliseconds;
+            return await GET(
+                $"http://zhjw.cic.tsinghua.edu.cn/jxmh.do?m=bks_jxrl_all&p_start_date={starting_date}&p_end_date={ending_date}&jsoncallback=_&_={stamp}");
+        }
+        static async Task<string> get_calendar_sslvpn_page(string starting_date, string ending_date) {
+            var stamp = (long)UnixTime().TotalMilliseconds;
+            return await GET(
+                    $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn,CT=js+jxmh.do?m=bks_jxrl_all&p_start_date={starting_date}&p_end_date={ending_date}&jsoncallback=_&_={stamp}");
         }
 
         public static async Task<List<Deadline>> getRemoteHomeworkList(string courseId) {
@@ -318,6 +369,7 @@ namespace TsinghuaUWP {
                 _course = htmlDoc.DocumentNode.Descendants("td")/*MAGIC*/.First().InnerText;
                 _course = _course.Trim();
                 _course = _course.Substring(6/*MAGIC*/);
+                _course = WebUtility.HtmlDecode(_course);
 
                 HtmlNode[] nodes = htmlDoc.DocumentNode.Descendants("tr")/*MAGIC*/.ToArray();
 
@@ -334,6 +386,7 @@ namespace TsinghuaUWP {
 
                     var link_to_detail = node.Descendants("a")/*MAGIC*/.First();
                     _name = link_to_detail.InnerText;
+                    _name = WebUtility.HtmlDecode(_name);
 
                     var _href = link_to_detail.Attributes["href"].Value;
                     var _id = Regex.Match(_href, @"[^_]id=(\d+)").Groups[1].Value;
@@ -377,6 +430,9 @@ namespace TsinghuaUWP {
                             _course = course.name;
                     }
                 }
+
+                _course = WebUtility.HtmlDecode(_course);
+                _name = WebUtility.HtmlDecode(_name);
 
                 deadlines.Add(new Deadline {
                     name = _name,

@@ -19,6 +19,28 @@ namespace TsinghuaUWP {
             return localSettings.Values;
         }
 
+        static async Task writeCache(string filename, string value) {
+            StorageFolder localCacheFolder = ApplicationData.Current.LocalCacheFolder;
+            StorageFile file;
+            try {
+                file = await localCacheFolder.GetFileAsync(filename);
+            } catch {
+                file = await localCacheFolder.CreateFileAsync(filename);
+            }
+            await FileIO.WriteTextAsync(file, value);
+        }
+
+        static async Task<string> readCache(string filename) {
+            try {
+                StorageFolder localCacheFolder = ApplicationData.Current.LocalCacheFolder;
+                StorageFile file = await localCacheFolder.GetFileAsync(filename);
+                String fileContent = await FileIO.ReadTextAsync(file);
+                return fileContent;
+            }catch {
+                return "";
+            }
+        }
+
         static public bool credentialAbsent() {
             var username = localSettings.Values["username"];
             return username == null
@@ -76,6 +98,7 @@ namespace TsinghuaUWP {
             return future.Concat(past.Take(limit - futureCount)).ToList();
         }
 
+        static string COURSES_FILENAME = "courses.json";
         public static async Task<List<Course>> getCourses(bool forceRemote = false) {
             if (isDemo()) {
                 var list = new List<Course>();
@@ -100,10 +123,10 @@ namespace TsinghuaUWP {
                 }
 
                 //try localSettings
-                var localCourses = localSettings.Values["courses"];
-                if (localCourses != null) {
+                var localCourses = await readCache(COURSES_FILENAME);
+                if (localCourses.Length > 0) {
                     Debug.WriteLine("[getCourses] Returning local settings");
-                    courses = JSON.parse<List<Course>>((string)localCourses);
+                    courses = JSON.parse<List<Course>>(localCourses);
                     return courses;
                 }
             }
@@ -112,7 +135,8 @@ namespace TsinghuaUWP {
             //fetch from remote
             var _courses = await Remote.getRemoteCourseList();
             courses = _courses;
-            localSettings.Values["courses"] = JSON.stringify(_courses);
+            writeCache(COURSES_FILENAME, JSON.stringify(_courses));
+
             Debug.WriteLine("[getCourses] Returning remote");
             return courses;
         }
@@ -175,17 +199,25 @@ namespace TsinghuaUWP {
             return _remoteTimetable;
         }
 
-        public static async Task<Semester> getSemester(bool forceRemote = false) {
+        static string SEMESTERS_FILENAME = "semesters.json";
+        public static async Task<Semester> getSemester(bool forceRemote = false, bool getNextSemester = false) {
             if (isDemo()) {
                 var start = DateTime.Now.AddDays(-20);
                 while (start.DayOfWeek != DayOfWeek.Monday)
                     start = start.AddDays(-1);
 
-                return new Semester {
-                    startDate = start.ToString("yyyy-MM-dd"),
-                    endDate = start.AddDays(10 * 7 - 1).ToString("yyyy-MM-dd"),
-                    semesterEname = "2333-2334-Spring",
-                };
+                if(!getNextSemester)
+                    return new Semester {
+                        startDate = start.ToString("yyyy-MM-dd"),
+                        endDate = start.AddDays(10 * 7 - 1).ToString("yyyy-MM-dd"),
+                        semesterEname = "2333-2334-Spring",
+                    };
+                else
+                    return new Semester {
+                        startDate = start.AddDays(10 * 7).ToString("yyyy-MM-dd"),
+                        endDate = start.AddDays(20 * 7 - 1).ToString("yyyy-MM-dd"),
+                        semesterEname = "2334-2335-Autumn",
+                    };
             }
             if (!forceRemote) {
                 Semesters __semesters = null;
@@ -195,21 +227,30 @@ namespace TsinghuaUWP {
                     __semesters = semesters;
                 } else //try localSettings
                   {
-                    var localJSON = localSettings.Values["semesters"];
-                    if (localJSON != null) {
+                    var localJSON = await readCache(SEMESTERS_FILENAME);
+                    if (localJSON.Length > 0) {
                         Debug.WriteLine("[getCalendar] local settings");
-                        __semesters = JSON.parse<Semesters>((string)localJSON);
+                        __semesters = JSON.parse<Semesters>(localJSON);
                     }
                 }
 
                 //cache hit
                 if (__semesters != null) {
+                    if(getNextSemester)
+                        return __semesters.nextSemester;
+
                     if (DateTime.Parse(__semesters.currentSemester.endDate + " 23:59") < DateTime.Now) {
                         //perform a remote update
-                        Task task = getSemester(true);
-                        task.ContinueWith((_) => Appointment.updateCalendar());
+                        Task task = getSemester(forceRemote: true);
+                        task.ContinueWith((_) => 0);
 
                         Debug.WriteLine("[getCalendar] Returning cache next");
+                        if (__semesters.nextSemester.endDate == null) {
+                            //automatically complete missing endDate
+                            if (__semesters.nextSemester.semesterEname.IndexOf("Autumn") != -1
+                                || __semesters.nextSemester.semesterEname.IndexOf("Spring") != -1)
+                                __semesters.nextSemester.endDate = DateTime.Parse(__semesters.nextSemester.startDate).AddDays(18 * 7 - 1).ToString();
+                        }
                         return __semesters.nextSemester;
                     }
                     Debug.WriteLine("[getCalendar] Returning cache");
@@ -220,25 +261,24 @@ namespace TsinghuaUWP {
             //fetch from remote
             Semesters _remoteSemesters = null;
 
-            try {
-                _remoteSemesters = await Remote.getHostedSemesters();
-            } catch (Exception) { }
-
+            if (credentialAbsent() == false) {
+                try {
+                    _remoteSemesters = await Remote.getRemoteSemesters();
+                } catch (Exception) { }
+            }
             if (_remoteSemesters == null) {
-                Debug.WriteLine("[getCalendar] hosted fail, falling back");
-
-                if (credentialAbsent())
-                    throw new LoginException("calendar_fall_back");
-
-                _remoteSemesters = await Remote.getRemoteSemesters();
+                Debug.WriteLine("[getCalendar] remote fail, falling back to hosted");
+                _remoteSemesters = await Remote.getHostedSemesters();
             }
 
             semesters = _remoteSemesters;
-            localSettings.Values["semesters"] = JSON.stringify(semesters);
+            writeCache(SEMESTERS_FILENAME, JSON.stringify(semesters));
+
             Debug.WriteLine("[getCalendar] Returning remote");
             return semesters.currentSemester;
         }
 
+        static string DEADLINES_FILENAME = "deadlines.json";
         static public async Task<List<Deadline>> getAllDeadlines(bool forceRemote = false) {
             if (isDemo()) {
                 var list = new List<Deadline>();
@@ -276,11 +316,11 @@ namespace TsinghuaUWP {
                 }
 
 
-                //try localSettings
-                var local = localSettings.Values["deadlines"];
-                if (local != null) {
-                    Debug.WriteLine("[getAllDeadlines] Returning local settings");
-                    return JSON.parse<List<Deadline>>((string)local);
+                //try local
+                var cache = await readCache(DEADLINES_FILENAME);
+                if (cache.Length > 0) {
+                    Debug.WriteLine("[getAllDeadlines] Returning local");
+                    return JSON.parse<List<Deadline>>(cache);
                 }
             }
 
@@ -301,7 +341,8 @@ namespace TsinghuaUWP {
 
 
             deadlines = _deadlines;
-            localSettings.Values["deadlines"] = JSON.stringify(_deadlines);
+            writeCache(DEADLINES_FILENAME, JSON.stringify(deadlines));
+            
             Debug.WriteLine("[getAllDeadlines] Returning remote");
 
             return _deadlines;

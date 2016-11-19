@@ -47,12 +47,22 @@ namespace TsinghuaUWP {
 
         public bool shouldBeIgnored() {
             string[] keywords = {
-                "补交"
+                "补交",
+                "迟交"
             };
             foreach (var keyword in keywords) {
                 if (name.IndexOf(keyword) != -1)
                     return true;
             }
+
+            string[] courses = {
+                "实验室科研探究"
+            };
+            foreach (var _course in courses) {
+                if (course.IndexOf(_course) != -1)
+                    return true;
+            }
+
             return false;
         }
 
