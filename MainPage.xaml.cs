@@ -41,8 +41,11 @@ namespace TsinghuaUWP {
         }
 
         private async void update_without_credential() {
-            await Notification.update(calendarOnly: true);
-            await Appointment.updateCalendar();
+            try {
+                await Notification.update(calendarOnly: true);
+                await Appointment.updateCalendar();
+            } catch { }
+
         }
 
         private async Task changeAccountAsync() {

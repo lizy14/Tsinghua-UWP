@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Appointments;
 
@@ -55,6 +56,8 @@ namespace TsinghuaUWP {
                 foreach (var ev in deadlines) {
                     if (ev.shouldBeIgnored())
                         continue;
+                    if (ev.hasBeenFinished)
+                        continue; //TODO: should be user-configurable
                     await ddl_cal.SaveAppointmentAsync(getAppointment(ev));
                 }
             } catch (Exception) { }
@@ -67,15 +70,14 @@ namespace TsinghuaUWP {
         public static async Task updateCalendar() {
             Debug.WriteLine("[Appointment] calendar begin");
 
-
+            //TODO: possible duplication, lock?
             var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
 
-            var semester = await DataAccess.getSemester();
+            var current_semester = await DataAccess.getSemester(getNextSemester: false);
+            var next_semester = await DataAccess.getSemester(getNextSemester: true);
 
-            if (semester.semesterEname == semester_in_system_calendar)
+            if (current_semester.semesterEname == semester_in_system_calendar)
                 return;
-
-            var weeks = getAppointments(semester);
 
             //get Calendar object
             AppointmentCalendar cal = null;
@@ -94,11 +96,17 @@ namespace TsinghuaUWP {
                 await cal.DeleteAppointmentAsync(a.LocalId);
             }
 
-            foreach (var ev in weeks) {
+            foreach (var ev in getAppointments(current_semester)) {
                 await cal.SaveAppointmentAsync(ev);
             }
 
-            semester_in_system_calendar = semester.semesterEname;
+            if (next_semester.id != current_semester.id) {
+                foreach (var ev in getAppointments(next_semester)) {
+                    await cal.SaveAppointmentAsync(ev);
+                }
+            }
+
+            semester_in_system_calendar = current_semester.semesterEname;
 
             Debug.WriteLine("[Appointment] calendar finish");
         }
@@ -130,15 +138,19 @@ namespace TsinghuaUWP {
 
 
             //TODO: don't delete all and re-insert all
+            //
             var aps = await cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
             foreach (var ddl_ap in aps) {
                 await cal.DeleteAppointmentAsync(ddl_ap.LocalId);
             }
 
-            foreach (var ev in timetable) {
-                var appointment = getAppointment(ev);
-                await cal.SaveAppointmentAsync(appointment);
-            }
+
+            var list = new List<Windows.ApplicationModel.Appointments.Appointment>();
+            foreach (var ev in timetable)
+                list.Add(getAppointment(ev));
+            list = mergeAppointments(list);
+            foreach(var e in list)
+                await cal.SaveAppointmentAsync(e);
 
             Debug.WriteLine("[Appointment] update finished");
         }
@@ -147,22 +159,59 @@ namespace TsinghuaUWP {
             var a = new Windows.ApplicationModel.Appointments.Appointment();
             a.Subject = e.nr;
             a.Location = e.dd;
-            //TODO: probably doesn't work for exam events, which may be something like "2:30", "7:00"
+            
             a.StartTime = DateTime.Parse(e.nq + " " + e.kssj);
             a.Duration = DateTime.Parse(e.nq + " " + e.jssj) - a.StartTime;
+            // 修正考试时间 12 小时制
+            if(e.fl == "考试") {
+                if(a.StartTime.Hour < 8) {
+                    a.StartTime += TimeSpan.FromHours(12);
+                }
+                a.Subject += "考试";
+            }
             a.AllDay = false;
             return a;
         }
 
         private static Windows.ApplicationModel.Appointments.Appointment getAppointment(Deadline e) {
             var a = new Windows.ApplicationModel.Appointments.Appointment();
-            a.Subject = e.name;
-            a.Location = e.course;
+            Regex re = new Regex("&[^;]+;");
+            a.Subject = re.Replace(e.name, " ");
+            a.Location = re.Replace(e.course, " ");
             a.StartTime = DateTime.Parse(e.ddl + " 23:59");
             a.AllDay = false;
-            a.BusyStatus = AppointmentBusyStatus.Tentative;
-            a.Reminder = TimeSpan.FromHours(6);
+            a.BusyStatus = e.hasBeenFinished? AppointmentBusyStatus.Free: AppointmentBusyStatus.Tentative;
+            if (e.hasBeenFinished)
+                a.Reminder = null;
+            else
+                a.Reminder = TimeSpan.FromHours(6);
             return a;
+        }
+
+        private static List<Windows.ApplicationModel.Appointments.Appointment> mergeAppointments(List<Windows.ApplicationModel.Appointments.Appointment> input) {
+            int n = input.Count;
+            var output = new List<Windows.ApplicationModel.Appointments.Appointment>();
+            for (int i = 0; i < n;) {
+                var starting = input[i];
+                int offset = 1;
+                while (true) {
+                    if (i + offset >= n) break;
+                    var current = input[i + offset];
+                    if (current.Subject == starting.Subject && current.Location == starting.Location) {
+                        if (starting.StartTime + starting.Duration - current.StartTime < TimeSpan.FromMinutes(21)) {
+                            starting.Duration = current.StartTime + current.Duration - starting.StartTime;
+                            offset++;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                output.Add(starting);
+                i += offset;
+            }
+            return output;
         }
 
         private static List<Windows.ApplicationModel.Appointments.Appointment> getAppointments(Semester s) {
