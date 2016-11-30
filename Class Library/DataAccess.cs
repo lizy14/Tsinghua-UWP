@@ -14,6 +14,9 @@ namespace TsinghuaUWP {
         private static List<Course> courses = null;
         private static List<Deadline> deadlines = null;
         private static Semesters semesters = null;
+        static string DEADLINES_FILENAME = "deadlines.json";
+        static string SEMESTERS_FILENAME = "semesters.json";
+        static string COURSES_FILENAME = "courses.json";
 
         static public Windows.Foundation.Collections.IPropertySet getLocalSettings() {
             return localSettings.Values;
@@ -98,7 +101,6 @@ namespace TsinghuaUWP {
             return future.Concat(past.Take(limit - futureCount)).ToList();
         }
 
-        static string COURSES_FILENAME = "courses.json";
         public static async Task<List<Course>> getCourses(bool forceRemote = false) {
             if (isDemo()) {
                 var list = new List<Course>();
@@ -199,7 +201,6 @@ namespace TsinghuaUWP {
             return _remoteTimetable;
         }
 
-        static string SEMESTERS_FILENAME = "semesters.json";
         public static async Task<Semester> getSemester(bool forceRemote = false, bool getNextSemester = false) {
             if (isDemo()) {
                 var start = DateTime.Now.AddDays(-20);
@@ -278,7 +279,6 @@ namespace TsinghuaUWP {
             return semesters.currentSemester;
         }
 
-        static string DEADLINES_FILENAME = "deadlines.json";
         static public async Task<List<Deadline>> getAllDeadlines(bool forceRemote = false) {
             if (isDemo()) {
                 var list = new List<Deadline>();
