@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Appointments;
@@ -47,19 +48,47 @@ namespace TsinghuaUWP {
                     DataAccess.setLocalSettings(ddl_storedKey, ddl_cal.LocalId);
                 }
 
-                //TODO: don't delete all and re-insert all
                 var aps = await ddl_cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
                 foreach (var ddl_ap in aps) {
-                    await ddl_cal.DeleteAppointmentAsync(ddl_ap.LocalId);
+                    if (ddl_ap.Details == "") {
+                        await ddl_cal.DeleteAppointmentAsync(ddl_ap.LocalId);
+                        Debug.WriteLine("[updateDeadlines] deleting " + ddl_ap.Subject);
+                    }
                 }
 
+                var existing = new List<Windows.ApplicationModel.Appointments.Appointment>();
+                aps = await ddl_cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
+                foreach (var a in aps) {
+                    existing.Add(a);
+                }
+
+                var waiting = new List<Windows.ApplicationModel.Appointments.Appointment>();
                 foreach (var ev in deadlines) {
                     if (ev.shouldBeIgnored())
                         continue;
                     if (ev.hasBeenFinished)
                         continue; //TODO: should be user-configurable
-                    await ddl_cal.SaveAppointmentAsync(getAppointment(ev));
+                    waiting.Add(getAppointment(ev));
                 }
+
+                var to_be_deleted = existing.Except(waiting, new AppointmentComparer());
+                var to_be_inserted = waiting.Except(existing, new AppointmentComparer());
+
+
+                foreach (var i in to_be_deleted) {
+                    Debug.WriteLine("[updateDeadlines] deleting' " + i.Subject);
+                    await ddl_cal.DeleteAppointmentAsync(i.LocalId);
+                }
+
+                foreach (var i in to_be_inserted) {
+                    Debug.WriteLine("[updateDeadlines] inserting " + i.Subject);
+                    if (i.StartTime - DateTime.Now < TimeSpan.FromHours(7)) {
+                        Debug.WriteLine("[updateDeadlines] ignoring " + i.Subject);
+                        continue;
+                    }
+                    await ddl_cal.SaveAppointmentAsync(i);
+                }
+
             } catch (Exception) { }
 
             Debug.WriteLine("[Appointment] deadlines finish");
@@ -185,6 +214,7 @@ namespace TsinghuaUWP {
                 a.Reminder = null;
             else
                 a.Reminder = TimeSpan.FromHours(6);
+            a.Details = e.id;
             return a;
         }
 
@@ -263,4 +293,19 @@ namespace TsinghuaUWP {
             return l;
         }
     }
+
+    public class AppointmentComparer : IEqualityComparer<Windows.ApplicationModel.Appointments.Appointment> {
+
+        public bool Equals(Windows.ApplicationModel.Appointments.Appointment x, Windows.ApplicationModel.Appointments.Appointment y) {
+            return
+                x.Details == y.Details;
+        }
+
+        public int GetHashCode(Windows.ApplicationModel.Appointments.Appointment a) {
+            return a.Details.GetHashCode();
+        }
+    }
 }
+
+
+
