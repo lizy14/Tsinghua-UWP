@@ -6,74 +6,119 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    <ScrollViewer >
-        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
-            <StackPanel Margin="10" Orientation="Vertical">
+    
 
+    <Grid>
+        
 
-                <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="0" TextWrapping="Wrap" VerticalAlignment="Top">
-							<Run Text="作业截止提醒会显示在动态磁贴上。"/>
-							<LineBreak/>
-							<Run Text="校历、课表、作业，请使用系统内置''日历''。"/>
-							<LineBreak/>
-							<Run/>
-							<LineBreak/>
-							<Run Text="为了获得最佳体验，请您"/>
-							<LineBreak/>
-							<Run/>
-							<LineBreak/>
-							<Run Text=" • 将''清华磁贴''固定到''开始''屏幕；"/>
-							<LineBreak/>
-							<Run Text=" • 将''日历''固定到''开始''屏幕；"/>
-							<LineBreak/>
-							<Run Text=" • ''设置&gt;个性化&gt;锁屏界面&gt;显示详细状态的应用''，选择''日历''。"/>
-                </TextBlock>
+        <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-                <RelativePanel Margin="0,20,0,20">
-                    <Button x:Name="btnHelp" Content="查看帮助" Click="btnHelp_Click" Width="203" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-                </RelativePanel>
+            <RelativePanel Background="MediumPurple" >
+                <Button Name="HamburgerButton" 
+                    RelativePanel.AlignLeftWithPanel="True"
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="31"
+                    Content ="&#xE700;"
+                    Click="HamburgerButton_Click" Background="#FFA634BE"
+                   Foreground="White"
+                       
+                    />
 
-                <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top">
-                    <Run Text="当您进行了选课、退课操作，您需要手动点击以下按钮。"/>
-                </TextBlock>
+                
 
-                <RelativePanel Margin="0,20,0,20">
-                    <Button x:Name="btnRefreshTimetable" Content="刷新课程表" Width="203" Click="btnRefreshTimetable_Click" Height="33" VerticalAlignment="Top"/>
-                    <Image x:Name="errorRefreshTimetable" HorizontalAlignment="Left" Height="32" Margin="208,0,0,0" VerticalAlignment="Top" Width="32" Source="Assets/error.png" Visibility="Collapsed"/>
-                    <ProgressRing x:Name="progressRefreshTimetable" HorizontalAlignment="Left" Margin="208,0,0,0" VerticalAlignment="Top" Height="22" Width="22" RenderTransformOrigin="0.5,0.5">
-                        <ProgressRing.RenderTransform>
-                            <CompositeTransform TranslateX="5" TranslateY="5"/>
-                        </ProgressRing.RenderTransform>
-                    </ProgressRing>
+                <TextBlock Name="TitleTextBlock"
+                       RelativePanel.RightOf="HamburgerButton"
+                       FontSize="30"
+                        Margin="20,2,0,3"
+                       Text="Tsinghua UWP"
+                          FontStretch="SemiCondensed"
+                           Foreground="Black" FontFamily="Bradley Hand ITC" FontWeight="Bold"
+                          
+                       />
 
+                <Button Name="SearchButton"
+                    RelativePanel.AlignRightWithPanel="True"
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="20"
+                    Content="&#xE1A3;"
+                    Click="SearchButton_Click"
+                        Margin="0,2,0,2"
+                    />
 
-                </RelativePanel>
-                <TextBlock x:Name="textBlock1_Copy" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top">
-                    <Run Text="作业截止日期在后台自动更新。如果等不及（比如刚提交了一份作业，再也不想看见它），您可以手动点击以下按钮。"/>
-                </TextBlock>
-                <RelativePanel Margin="0,20,0,20">
+                <TextBox Name="SearchTextBox"
+                     RelativePanel.LeftOf="SearchButton"
+                         
+                     Height="24"
+                     Width="200"
+                     FontSize="15"
+                     PlaceholderText="Search"
+                          Margin="0,2,0,0"
+                     />
+            </RelativePanel>
+            
+            <SplitView Grid.Row="1" 
+                   Name="MySplitView"
+                   DisplayMode="CompactOverlay"
+                   OpenPaneLength="200"
+                   CompactPaneLength="51"
+                       
+                   >
+                <SplitView.Pane >
+                    <ListBox SelectionMode="Single" 
+                             SelectionChanged="ListBox_SelectionChanged" Background="#FF7434A9">
+                        <ListBoxItem Name="Function1">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock  
+                                FontFamily="Segoe MDL2 Assets"
+                                 FontSize="26"
+                                Text="&#xE80F;"
+                         Foreground="white"
+                                />
+                            <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
+                                Sync
+                                </TextBlock>
+                            </StackPanel>
+                        </ListBoxItem>
+                        <ListBoxItem Name="Food">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock 
+                                FontFamily="Segoe MDL2 Assets"
+                                 FontSize="26"
+                                Text="&#xE1CE;"
+                              Foreground="white"
+                                />
+                            <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
+                                About
+                                </TextBlock>
+                            </StackPanel>
+                        </ListBoxItem>
+                       
+                           
+                       
+                    </ListBox>
+                    
+                </SplitView.Pane>
 
+            <SplitView.Content>
 
-                    <Button x:Name="btnUpdate" Content="刷新作业" Width="203" Click="btnUpdate_Click" VerticalAlignment="Top"/>
-                    <Image x:Name="errorUpdate" HorizontalAlignment="Left" Height="32" Margin="208,0,0,0" VerticalAlignment="Top" Width="32" Source="Assets/error.png" Visibility="Collapsed"/>
-                    <ProgressRing x:Name="progressUpdate" HorizontalAlignment="Left" Margin="208,0,0,0" VerticalAlignment="Top" Height="22" Width="22" RenderTransformOrigin="0.5,0.5">
-                        <ProgressRing.RenderTransform>
-                            <CompositeTransform TranslateX="5" TranslateY="5"/>
-                        </ProgressRing.RenderTransform>
-                    </ProgressRing>
-                </RelativePanel>
+                <Frame Name="MyFrame" Navigated="MyFrame_Navigated">
 
-
-                <RelativePanel Margin="0,20,20,20">
-                    <Button x:Name="btnLogin" Content="注销登录" Click="button_Click" Width="203" VerticalAlignment="Top" />
-                    <ProgressRing x:Name="progressLogin" HorizontalAlignment="Left" Margin="208,0,0,0" VerticalAlignment="Top" Height="22" Width="22" RenderTransformOrigin="0.5,0.5">
-                        <ProgressRing.RenderTransform>
-                            <CompositeTransform TranslateX="5" TranslateY="5"/>
-                        </ProgressRing.RenderTransform>
-                    </ProgressRing>
-                </RelativePanel>
-
-            </StackPanel>
+                </Frame>
+            </SplitView.Content>
+        </SplitView>
+            <Button Grid.Row="1" 
+                    Name="BackButton" 
+                     FontFamily="Segoe MDL2 Assets"
+                    FontSize="30"
+                    Content ="&#xE0C4;"
+                    Click="BackButton_Click" 
+                    VerticalAlignment="Bottom"
+                    Margin='0,0,0,0'
+                    Foreground="white"
+                    />
         </Grid>
-    </ScrollViewer>
+  
 </Page>
