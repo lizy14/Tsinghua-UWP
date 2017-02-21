@@ -148,11 +148,11 @@ $@"<toast>
             branding=""none"">
             <text 
                 hint-wrap=""true"" 
-                hint-maxLines=""2"">{name}</text>
+                hint-maxLines=""3"">{name}</text>
+            <text hint-style=""caption"">{timeLeft}</text>                        
             <text hint-style=""captionSubtle""
                 hint-wrap=""true"" 
                 hint-maxLines=""2"">{course}</text>
-            <text hint-style=""caption"">{timeLeft}</text>            
             <text hint-style=""captionSubtle"">{due}</text>
         </binding>
 
@@ -160,9 +160,9 @@ $@"<toast>
             branding=""name"">
             <text hint-style=""body"" 
                 hint-wrap=""true"" 
-                hint-maxLines=""2"">{name}</text>
-            <text hint-style=""captionSubtle"">{course}</text>
+                hint-maxLines=""3"">{name}</text>
             <text hint-style=""caption"">{timeLeft}</text>            
+            <text hint-style=""captionSubtle"">{course}</text>
             <text hint-style=""captionSubtle"">截止于 {due}</text>
         </binding>
 
