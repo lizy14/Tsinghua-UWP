@@ -228,7 +228,8 @@ namespace TsinghuaUWP {
                     if (i + offset >= n) break;
                     var current = input[i + offset];
                     if (current.Subject == starting.Subject && current.Location == starting.Location) {
-                        if (starting.StartTime + starting.Duration - current.StartTime < TimeSpan.FromMinutes(21)) {
+                        var gap = current.StartTime - starting.StartTime - starting.Duration;
+                        if (gap < TimeSpan.FromMinutes(21) && gap > TimeSpan.FromMinutes(-1)) {
                             starting.Duration = current.StartTime + current.Duration - starting.StartTime;
                             offset++;
                         } else {
