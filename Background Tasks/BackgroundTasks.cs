@@ -109,13 +109,15 @@ namespace BackgroundTasks {
             Debug.WriteLine("[BackgroundTasks] registering " + taskName);
 
             var backgroundAccessStatus = await BackgroundExecutionManager.RequestAccessAsync();
-            if (!(
+            try {
+                if (!(
                 backgroundAccessStatus == BackgroundAccessStatus.AllowedMayUseActiveRealTimeConnectivity ||
                 backgroundAccessStatus == BackgroundAccessStatus.AllowedWithAlwaysOnRealTimeConnectivity ||
                 backgroundAccessStatus == BackgroundAccessStatus.AlwaysAllowed ||
                 backgroundAccessStatus == BackgroundAccessStatus.AllowedSubjectToSystemPolicy)) {
-                throw new Exception();
-            }
+                    throw new Exception();
+                }
+            } catch { }
 
             foreach (var cur in BackgroundTaskRegistration.AllTasks) {
                 if (cur.Value.Name == taskName) {
