@@ -25,6 +25,7 @@ namespace TsinghuaUWP {
                         PrimaryButtonText = "继续",
                         SecondaryButtonText = "现在登录"
                     }).ShowAsync();
+
                     if (userRasponseAgain == ContentDialogResult.Primary)
                         throw new UserCancelException();
                     else
@@ -51,14 +52,17 @@ namespace TsinghuaUWP {
                 }
 
                 try {
-                    if (validate) {
+                    if (validate)
+                    {
                         await Remote.validateCredential(username, password);
                     }
                     return new Password {
                         username = username,
                         password = password
                     };
-                } catch (LoginException e) {
+                }
+                catch (LoginException e)
+                {
                     await (new ContentDialog {
                         Title = "登录失败",
                         Content = $@"
@@ -66,16 +70,16 @@ namespace TsinghuaUWP {
 {e.Message}",
                         PrimaryButtonText = "重试"
                     }).ShowAsync();
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     await (new ContentDialog {
                         Title = "登录出错",
                         Content = Exceptions.getFriendlyMessage(e),
                         PrimaryButtonText = "重试"
                     }).ShowAsync();
-                }
-
+                }    
             }
-
+           
 
         }
 

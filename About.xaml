@@ -1,0 +1,46 @@
+﻿<Page
+    x:Class="TsinghuaUWP.About"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TsinghuaUWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <ScrollViewer 
+                  HorizontalScrollBarVisibility="Auto" 
+                  VerticalScrollBarVisibility="Auto">
+        <Grid Background="LightGray">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" FontSize="24" Margin="10,10,10,10">About the APP</TextBlock>
+            <Grid Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,10,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+                <TextBlock Width="400" FontSize="20"  TextWrapping="Wrap">这个UWP实现了一些简单的功能, C#部分为清华磁贴.UWP源码,原版帮助文件可点击以下按钮获得</TextBlock>
+                
+                <HyperlinkButton   Grid.Row="1" BorderBrush="Purple" Content="清华磁贴.UWP的帮助文件" Height="36" Width="Auto" NavigateUri="http://static.nullspace.cn/thuUwpHelp.html"/>
+            </Grid>
+            
+
+            <Grid Grid.Row="2" Grid.Column="0" Margin="10,10,10,10">
+                <TextBlock FontSize="24" Margin="10,10,10,10">Copyright</TextBlock>
+            </Grid>
+            <Grid Grid.Row="2" Grid.Column="1" Margin="10,10,10,10" HorizontalAlignment="Left">
+                <TextBlock FontSize="20" Width="400" Margin="10,10,10,10" TextWrapping="Wrap">我改动了大部分XAML代码，以及小部分.CS代码，原著者拥有大部分版权,仅作为学习之用</TextBlock>
+            </Grid>
+
+        </Grid>
+    </ScrollViewer>
+
+</Page>
