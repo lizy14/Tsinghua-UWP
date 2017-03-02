@@ -255,4 +255,42 @@ namespace TsinghuaUWP {
         public string sm { get; set; }
     }
 
+    //CourseNotice New
+    public class CourseNotice
+    {
+        public object id { get; set; }
+        public string title { get; set; }
+        public string owner { get; set; }
+        public string regDate { get; set; }
+        public object endDate { get; set; }
+        public string courseId { get; set; }
+        public int msgPriority { get; set; }
+        public string status { get; set; }
+        public string detail { get; set; }
+        public int browseTimes { get; set; }
+    }
+
+    public class RecordList
+    {
+        public string status { get; set; }
+        public CourseNotice courseNotice { get; set; }
+    }
+
+    public class PaginationList
+    {
+        public List<RecordList> recordList { get; set; }
+        public int recordCount { get; set; }
+        public int pageSize { get; set; }
+        public int currentPage { get; set; }
+        public int pageMax { get; set; }
+        public int pageStart { get; set; }
+        public string currentPageStr { get; set; }
+        public string recordCountStr { get; set; }
+    }
+
+    public class AncRootObject
+    {
+        public string message { get; set; }
+        public PaginationList paginationList { get; set; }
+    }
 }

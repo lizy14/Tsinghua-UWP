@@ -1,6 +1,10 @@
 ﻿
 using System;
 using System.Threading.Tasks;
+using TsinghuaUWP.Courses;
+using TsinghuaUWP.Logins;
+using TsinghuaUWP.TsinghuaTVs;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -11,154 +15,97 @@ namespace TsinghuaUWP {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainPage : Page {
-
-        public MainPage() {
-            this.InitializeComponent();
-        }
-
-        protected override async void OnNavigatedTo(NavigationEventArgs e) {
-
-            if (DataAccess.supposedToWorkAnonymously()) {
-                btnLogin.Content = "登录";
-                btnRefreshTimetable.IsEnabled = false;
-                btnUpdate.IsEnabled = false;
-                update_without_credential();
-            } else if (!DataAccess.supposedToWorkAnonymously()
-                 && DataAccess.credentialAbsent()) {
-                update_without_credential();
-                await changeAccountAsync();
-            } else if (!DataAccess.credentialAbsent()) {
-                update_with_credential();
-            }
-        }
-
-        private async void update_with_credential() {
-
-            updateDeadlinesAsyc();
-            updateTimetableAsync();
-            Appointment.updateCalendar();
-        }
-
-        private async void update_without_credential() {
-            try {
-                await Notification.update(calendarOnly: true);
-                await Appointment.updateCalendar();
-            } catch { }
-
-        }
-
-        private async Task changeAccountAsync() {
-            btnLogin.Content = "登录";
-            this.btnRefreshTimetable.IsEnabled = false;
-            this.btnUpdate.IsEnabled = false;
-            this.btnLogin.IsEnabled = false;
-            if (await changeAccountHelper()) {
-                this.btnLogin.Content = "注销登录";
-                this.btnRefreshTimetable.IsEnabled = true;
-                this.btnUpdate.IsEnabled = true;
-                update_with_credential();
-            } else {
-                this.btnLogin.Content = "登录";
-                update_without_credential();
-            }
-            this.progressLogin.IsActive = false;
-            this.btnLogin.IsEnabled = true;
-        }
-
-        private async Task<bool> changeAccountHelper() //false for anonymous
+    public sealed partial class MainPage : Page
+    {
+        bool tvflag;
+        bool tvfllag;
+        public MainPage()
         {
-            var dialog = new PasswordDialog();
-            Password password;
-            this.progressLogin.IsActive = true;
-            try {
-                password = await dialog.getCredentialAsyc();
-                this.progressLogin.IsActive = false;
-            } catch (UserCancelException) {
-                //user choose to stay anonymous
-                DataAccess.setLocalSettings("username", "__anonymous");
-                return false;
+            this.InitializeComponent();
+            var titleBar = Windows.UI.ViewManagement.ApplicationView.GetForCurrentView().TitleBar;
+            titleBar.BackgroundColor = Colors.Purple;
+            titleBar.ButtonHoverBackgroundColor = Colors.Wheat;
+            titleBar.ButtonBackgroundColor = Colors.Purple;
+            tvflag = false;
+        }
+
+        private void MyFrame_Navigated(object sender, NavigationEventArgs e)
+        {
+
+        }
+        private void HamburgerButton_Click(object sender, RoutedEventArgs e)
+        {
+            MySplitView.IsPaneOpen = !MySplitView.IsPaneOpen;
+        }
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Webview.Visibility = Visibility.Collapsed;
+             if (tvflag) {
+                // MessageDialog a = new MessageDialog("请将正在播放的视频暂停");
+                // a.ShowAsync();
+                // TV.IsSelected = true;
+                MyFrame.Navigate(typeof(TsinghuaTV));
+                tvflag = false;
+                 // goto stoptv;
+              }
+            
+            if (Courses.IsSelected)
+            {
+
+                Refresh.Visibility = Visibility.Collapsed;
+
+                MyFrame.Navigate(typeof(Learn));
+                TitleTextBlock.Text = "Courses beta";
             }
-
-            //save credential
-            //TODO: wrap as a function and move into DataAccess
-            DataAccess.setLocalSettings("toasted_assignments", "");
-            DataAccess.setLocalSettings("username", password.username);
-
-            var vault = new Windows.Security.Credentials.PasswordVault();
-            vault.Add(new Windows.Security.Credentials.PasswordCredential(
-                "Tsinghua_Learn_Website", password.username, password.password));
-
-            return true;
-        }
-
-        private int updateNotificationsCounter = 0;
-        private async Task updateDeadlinesAsyc() {
-            updateNotificationsCounter++;
-
-            this.progressUpdate.IsActive = true;
-            this.btnUpdate.IsEnabled = false;
-            this.errorUpdate.Visibility = Visibility.Collapsed;
-
-            //TODO: simplify update logic of local being fall-back
-            try {
-                await Notification.update(true);
-                await Appointment.updateDeadlines();
-            } catch (Exception e) {
-                this.errorUpdate.Visibility = Visibility.Visible;
-                try {
-                    await Notification.update();
-                } catch (Exception) { }
+            else if (Login.IsSelected)
+            {
+                Refresh.Visibility = Visibility.Collapsed;
+                MyFrame.Navigate(typeof(Loginindex));
+                TitleTextBlock.Text = "Login";
             }
-
-            if (--updateNotificationsCounter == 0) {
-                this.progressUpdate.IsActive = false;
-                this.btnUpdate.IsEnabled = !DataAccess.credentialAbsent();
+            else if (Mails.IsSelected)
+            {
+                Refresh.Visibility = Visibility.Collapsed;
+                Webview.Visibility = Visibility.Visible;
+                Webview.Navigate(new Uri("http://mails.tsinghua.edu.cn/coremail/xphone/index.jsp"));
+                //MyFrame.Navigate(typeof(WEBS));
+                TitleTextBlock.Text = "Mails";
             }
-        }
-
-        private int updateTimetableCounter = 0;
-        private async Task updateTimetableAsync() {
-            updateTimetableCounter++;
-
-            this.progressRefreshTimetable.IsActive = true;
-            this.btnRefreshTimetable.IsEnabled = false;
-            this.errorRefreshTimetable.Visibility = Visibility.Collapsed;
-            try {
-                await Appointment.updateTimetable(true);
-            } catch (Exception e) {
-                this.errorRefreshTimetable.Visibility = Visibility.Visible;
-                try {
-                    await Appointment.updateTimetable(true);
-                    this.errorRefreshTimetable.Visibility = Visibility.Collapsed;
-                } catch (Exception) { }
+            else if (TV.IsSelected)
+            {
+                Refresh.Visibility = Visibility.Collapsed;
+                MyFrame.Navigate(typeof(TsinghuaTV));
+                TitleTextBlock.Text = "Tsinghua TV IPV6";
+                tvflag = true;
             }
-
-            if (--updateTimetableCounter == 0) {
-                this.progressRefreshTimetable.IsActive = false;
-                this.btnRefreshTimetable.IsEnabled = true;
-            }
+        
         }
 
-        private void launchHelp() {
-            Windows.System.Launcher.LaunchUriAsync(new Uri(Remote.helpUrl));
+        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            String Baidu = "https://www.bing.com/search?q=";
+            String Content = SearchTextBox.Text;
+            String helpurl = string.Join("", Baidu, Content);
+            Windows.System.Launcher.LaunchUriAsync(new Uri(helpurl));
+            // Webview.Visibility = Visibility.Visible;
+            // Webview.Navigate(new Uri(helpurl));
+        }
+        private void TitleTextBlock_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+
         }
 
-        private void btnRefreshTimetable_Click(object sender, RoutedEventArgs e) {
-            updateTimetableAsync();
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
         }
+        private void Initial1(object sender, RoutedEventArgs e)
+        {
+            var Url = "http://www.tsinghua.edu.cn/publish/newthu/index.html";
 
-        private void btnUpdate_Click(object sender, RoutedEventArgs e) {
-            updateDeadlinesAsyc();
+            Webview.Navigate(new Uri(Url));
+            //  Refresh.Visibility = Visibility.Collapsed;
+            // MyFrame.Navigate(typeof(Loginindex));
+            // TitleTextBlock.Text = "Login";
         }
-
-        private void btnHelp_Click(object sender, RoutedEventArgs e) {
-            launchHelp();
-        }
-
-        private void button_Click(object sender, RoutedEventArgs e) {
-            changeAccountAsync();
-        }
-
     }
 }

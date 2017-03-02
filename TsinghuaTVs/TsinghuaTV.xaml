@@ -1,0 +1,72 @@
+﻿<Page
+    x:Class="TsinghuaUWP.TsinghuaTVs.TsinghuaTV"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TsinghuaUWP.TsinghuaTVs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Loaded="REFRESHKUAIDI_Click"
+    >
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+
+
+        <Grid >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <ScrollViewer Grid.Column="0">
+                <GridView Name="TVGrid" 
+                          ItemsSource="{x:Bind TV1}"
+                          HorizontalAlignment="Left"
+                      VerticalAlignment="Stretch"
+                          Margin="10,0,0,0"
+                      SelectionChanged="TVGrid_SelectionChanged"
+                      >
+                    <GridView.ItemTemplate>
+                        <DataTemplate >
+                            <local:MyUserControlTV1/>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+            </ScrollViewer>
+
+
+            <Grid Grid.Column="1">
+                <!-- <WebView  x:Name="Webview" Source="https://iptv.tsinghua.edu.cn/">
+                </WebView>-->
+                <MediaElement Name="MyMedias" AutoPlay="True"  AreTransportControlsEnabled="True">
+                    <MediaElement.TransportControls>
+                        <MediaTransportControls IsCompact="True" 
+                                                    IsFullWindowButtonVisible="True"
+                                                
+                                                    IsVolumeButtonVisible="True"
+                                                    />
+                    </MediaElement.TransportControls>
+                </MediaElement>
+            </Grid>
+
+
+
+        </Grid>
+
+
+
+        <Button Name="REFRESHKUAIDI" Grid.Row="2" Content="Refresh Tips" Click="REFRESHKUAIDI_Click" Visibility="Collapsed">
+            <!--<Button.Flyout>
+                <MenuFlyout Placement="Right">
+                    <MenuFlyoutItem Text="Using Refresh on the top"></MenuFlyoutItem>
+                </MenuFlyout>
+            </Button.Flyout>-->
+        </Button>
+        <TextBlock Grid.Row="2" Height="Auto"  Width="Auto"  HorizontalAlignment="Right" Text="视频源为清华内网, 不用走流量"></TextBlock>
+    </Grid>
+</Page>

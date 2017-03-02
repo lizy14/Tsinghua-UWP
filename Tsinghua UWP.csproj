@@ -11,7 +11,7 @@
     <AssemblyName>Tsinghua UWP</AssemblyName>
     <DefaultLanguage>zh-CN</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>
+    <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -100,13 +100,38 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Courses\ContentDialogAnc.xaml.cs">
+      <DependentUpon>ContentDialogAnc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Courses\ContentDialogAncnew.xaml.cs">
+      <DependentUpon>ContentDialogAncnew.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Courses\Learn.xaml.cs">
+      <DependentUpon>Learn.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Courses\MyUserControlCourses.xaml.cs">
+      <DependentUpon>MyUserControlCourses.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Courses\MyUserControlHomework.xaml.cs">
+      <DependentUpon>MyUserControlHomework.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Logins\Loginindex.xaml.cs">
+      <DependentUpon>Loginindex.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Logins\PasswordDialog.xaml.cs">
+      <DependentUpon>PasswordDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PasswordDialog.xaml.cs">
-      <DependentUpon>PasswordDialog.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TsinghuaTVs\MyUserControlTV1.xaml.cs">
+      <DependentUpon>MyUserControlTV1.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TsinghuaTVs\TsinghuaTV.xaml.cs">
+      <DependentUpon>TsinghuaTV.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TsinghuaTVs\TV1.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -125,6 +150,7 @@
     <Content Include="Assets\Square71x71Logo.scale-200.png" />
     <Content Include="Assets\StoreLogo.scale-400.png" />
     <None Include="Package.StoreAssociation.xml" />
+    <Content Include="Courses\HTMLPage1.html" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
@@ -145,11 +171,43 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Courses\ContentDialogAnc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Courses\ContentDialogAncnew.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Courses\Learn.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Courses\MyUserControlCourses.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Courses\MyUserControlHomework.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Logins\Loginindex.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Logins\PasswordDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PasswordDialog.xaml">
+    <Page Include="TsinghuaTVs\MyUserControlTV1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TsinghuaTVs\TsinghuaTV.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
