@@ -132,6 +132,9 @@
       <DependentUpon>TsinghuaTV.xaml</DependentUpon>
     </Compile>
     <Compile Include="TsinghuaTVs\TV1.cs" />
+    <Compile Include="Webs\TsinghuaNews.xaml.cs">
+      <DependentUpon>TsinghuaNews.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -208,6 +211,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="TsinghuaTVs\TsinghuaTV.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Webs\TsinghuaNews.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
