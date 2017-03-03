@@ -19,8 +19,10 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        
-            <WebView Margin="0" Name="hkview"  Height="350" Width="500" HorizontalAlignment="Left" ></WebView>
+        <ScrollViewer ZoomMode="Enabled">
+            <WebView Margin="0" Name="hkview"  Height="500" Width="400" HorizontalAlignment="Left" ></WebView>
+        </ScrollViewer>
+           
       
     </Grid>
 

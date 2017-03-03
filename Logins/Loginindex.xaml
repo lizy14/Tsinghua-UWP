@@ -43,7 +43,7 @@
 
             </StackPanel>
             <StackPanel Grid.Row="2" Grid.Column="1">
-                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1">当您进行了选课、退课操作，您需要手动点击以上按钮。</TextBlock>
+                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap">当您进行了选课、退课操作，您需要手动点击以上按钮。</TextBlock>
             </StackPanel>
 
             <StackPanel Grid.Row="3">
@@ -61,7 +61,7 @@
             </StackPanel>
 
             <StackPanel Grid.Row="4" Grid.Column="1">
-                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1">当万恶的Prof布置了作业或者可爱的你提交了作业时需要按下以上按钮</TextBlock>
+                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap">当万恶的Prof布置了作业或者可爱的你提交了作业时需要按下以上按钮</TextBlock>
             </StackPanel>
 
             <StackPanel Grid.Row="5" >
@@ -77,7 +77,7 @@
 
             </StackPanel>
             <StackPanel Grid.Row="6" Grid.Column="1">
-                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1">Login or Logout</TextBlock>
+                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap">Login or Logout</TextBlock>
             </StackPanel>
 
         </Grid>

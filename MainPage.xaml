@@ -7,9 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Loaded="Initial1">
-    
 
-    <Grid>
+
+    <Grid  Name="Highest" Background="Transparent" >
 
 
         <Grid.RowDefinitions>
@@ -26,6 +26,7 @@
                     <VisualState.Setters>
                         <Setter Target="SearchTextBox.Visibility" Value="Collapsed"/>
                         <Setter Target="SearchButton.Visibility" Value="Collapsed"/>
+                        <Setter Target="MySplitView.CompactPaneLength" Value="0"/>
 
                     </VisualState.Setters>
                 </VisualState>
@@ -33,7 +34,7 @@
                 <VisualState x:Name="Highlayout">
                     <VisualState.StateTriggers>
 
-                        <AdaptiveTrigger MinWindowHeight="200"/>
+                        <AdaptiveTrigger MinWindowHeight="400"/>
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
 
@@ -53,7 +54,7 @@
 
                 <VisualState x:Name="WideLayout">
                     <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="500"/>
+                        <AdaptiveTrigger MinWindowWidth="800"/>
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="SearchTextBox.Visibility" Value="Visible" />
@@ -113,32 +114,17 @@
         <SplitView Grid.Row="1" 
                    Name="MySplitView"
                    DisplayMode="CompactOverlay"
-                   OpenPaneLength="300"
+                   OpenPaneLength="200"
                    CompactPaneLength="51"
                        
                    >
             <SplitView.Pane >
-                <ScrollViewer>
+                <ScrollViewer RequestedTheme="Default" Background="#FF7434A9" BorderBrush="#FF7434A9"  >
                     <ListBox SelectionMode="Single" 
-                             SelectionChanged="ListBox_SelectionChanged"  Background="#FF7434A9">
+                             SelectionChanged="ListBox_SelectionChanged"  Background="#FF7434A9" Name="Mylistbox">
 
-                        <!--
-                    <ListBoxItem Name="Function1">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock  
-                                FontFamily="Segoe MDL2 Assets"
-                                 FontSize="26"
-                                Text="&#xE80F;"
-                         Foreground="white"
-                                />
-                            <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
-                                Sync
-                            </TextBlock>
-                        </StackPanel>
-                    </ListBoxItem>
-                    -->
 
-                        <ListBoxItem Name="Courses" >
+                        <ListBoxItem Name="News" >
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock 
                                 FontFamily="Segoe MDL2 Assets"
@@ -147,7 +133,21 @@
                               Foreground="white"
                                 />
                                 <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
-                                Courses beta
+                               News
+                                </TextBlock>
+                            </StackPanel>
+                        </ListBoxItem>
+
+                        <ListBoxItem Name="Courses" >
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock 
+                                FontFamily="Segoe MDL2 Assets"
+                                 FontSize="26"
+                                Text="&#xE7BE;"
+                              Foreground="white"
+                                />
+                                <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
+                                MyCourses
                                 </TextBlock>
                             </StackPanel>
                         </ListBoxItem>
@@ -161,7 +161,7 @@
                               Foreground="white"
                                 />
                                 <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
-                                Mails
+                              Mails
                                 </TextBlock>
                             </StackPanel>
                         </ListBoxItem>
@@ -176,25 +176,11 @@
                               Foreground="white"
                                 />
                                 <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
-                                TV IPV6
+                                IPTV
                                 </TextBlock>
                             </StackPanel>
                         </ListBoxItem>
-                        <!--
-                    <ListBoxItem Name="jkp" >
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock 
-                                FontFamily="Segoe MDL2 Assets"
-                                 FontSize="26"
-                                Text="&#xE1D7;"
-                              Foreground="white"
-                                />
-                            <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
-                                JKPark
-                            </TextBlock>
-                        </StackPanel>
-                    </ListBoxItem>
--->
+
                         <ListBoxItem Name="Login">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock 
@@ -215,24 +201,27 @@
             </SplitView.Pane>
 
             <SplitView.Content>
-                <Grid>
+                <Grid Name="SplitGrid">
                     <Frame Name="MyFrame" Navigated="MyFrame_Navigated">
                     </Frame>
-                    <WebView Name="Webview"></WebView>
+                    <Button 
+                    Name="BackButton" 
+                     FontFamily="Segoe MDL2 Assets"
+                    FontSize="24"
+                    Content ="&#xE0C4;"
+                    Click="BackButton_Click" 
+                    VerticalAlignment="Top"
+                        HorizontalAlignment="Right"
+                   Opacity="0.6"
+                    Foreground="white"
+                        Background="Purple" Canvas.ZIndex="1"
+                      />
+                    <WebView Name="Webview" NewWindowRequested="Webview_NewWindowRequested"></WebView>
                 </Grid>
             </SplitView.Content>
         </SplitView>
-        <!-- <Button Grid.Row="1" 
-                    Name="BackButton" 
-                     FontFamily="Segoe MDL2 Assets"
-                    FontSize="30"
-                    Content ="&#xE0C4;"
-                    Click="BackButton_Click" 
-                    VerticalAlignment="Bottom"
-                    Margin='0,0,0,0'
-                    Foreground="white"
-                    />-->
+
     </Grid>
 
-  
+
 </Page>

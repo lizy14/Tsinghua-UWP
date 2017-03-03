@@ -12,15 +12,15 @@
     <Grid  Padding="3" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100"></ColumnDefinition>
-            <ColumnDefinition Width="200"></ColumnDefinition>
-            <ColumnDefinition Width="100"></ColumnDefinition>
+            <ColumnDefinition Width="2*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Ellipse Width="400" Height="1.5" Grid.ColumnSpan="3" Fill="Gray" Margin="0,0,0,10" VerticalAlignment="Top"/>
+        <Ellipse Width="1000" Height="1.5" Grid.ColumnSpan="3" Fill="Gray" Margin="0,0,0,10" VerticalAlignment="Top"  Stretch="Fill"/>
 
 
         <TextBlock Grid.Row="1" HorizontalAlignment="Left" Text="{x:Bind mycourse.id}"
@@ -31,15 +31,16 @@
                            />
         <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind mycourse.name}"
                            Name="SubheadTextBox"
-                           HorizontalAlignment="Left"
+                         
                             FontSize="18"
                            TextWrapping="Wrap"
                           Margin="20,0,20,0"
                            />
         <TextBlock Grid.Row="1" Grid.Column="2" Text="{x:Bind mycourse.semester}"
-                           HorizontalAlignment="Right"
+                         
                             FontSize="18"
                            TextWrapping="Wrap"
+                    TextAlignment="Right"
                            />
 
 

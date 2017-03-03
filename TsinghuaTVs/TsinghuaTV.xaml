@@ -10,20 +10,56 @@
     >
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
 
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="NarrowLayout">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="TVList.(Grid.Row)" Value="1"/>
+                        <Setter Target="TVPlayer.(Grid.Row)" Value="0"/>
+                        <Setter Target="TVPlayer.(Grid.Column)" Value="0"/>
+                        <Setter Target="TVList.Height" Value="200"/>
+                        <Setter Target="TVList.(Grid.ColumnSpan)" Value="2"/>
+                        <Setter Target="TVPlayer.(Grid.ColumnSpan)" Value="2"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="WideLayout">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="800"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+
+
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <Grid.RowDefinitions >
+            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
 
 
         <Grid >
+            
+           
+            
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="AUTO"></RowDefinition>
+            </Grid.RowDefinitions>
+            
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="220"></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <ScrollViewer Grid.Column="0">
+            
+            <ScrollViewer Grid.Column="0" Name="TVList">
                 <GridView Name="TVGrid" 
                           ItemsSource="{x:Bind TV1}"
                           HorizontalAlignment="Left"
@@ -40,7 +76,7 @@
             </ScrollViewer>
 
 
-            <Grid Grid.Column="1">
+            <Grid Grid.Column="1" Name="TVPlayer">
                 <!-- <WebView  x:Name="Webview" Source="https://iptv.tsinghua.edu.cn/">
                 </WebView>-->
                 <MediaElement Name="MyMedias" AutoPlay="True"  AreTransportControlsEnabled="True">

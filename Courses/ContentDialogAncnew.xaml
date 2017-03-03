@@ -16,7 +16,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <WebView Height="500" Width="500"  Name="RichTB"></WebView>
+        <WebView Height="500" Width="400"  Name="RichTB"></WebView>
         
     </Grid>
 </ContentDialog>

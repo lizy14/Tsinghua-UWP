@@ -36,7 +36,7 @@ namespace TsinghuaUWP.Courses
         }
         private async void Coursebuttons_Click(object sender, RoutedEventArgs e)
         {
-
+            PR0.IsActive = true;
             try
             {
                 //listcourses.Clear();
@@ -48,12 +48,15 @@ namespace TsinghuaUWP.Courses
                 MessageDialog a = new MessageDialog("Wrong data");
                 await a.ShowAsync();
             }
-
+            PR0.IsActive = false;
         }
 
         private async void CourseGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             //List<Course> temp;
+            INFOTB.Visibility = Visibility.Collapsed;
+            PR1.IsActive = true;
+
             int tp;
             String coid;
             tp = CourseGrid.SelectedIndex;
@@ -63,19 +66,29 @@ namespace TsinghuaUWP.Courses
                 coid = listcourses[tp].id;
 
                 listddl = await CourseManager.getRemoteAncList(coid, ddl1);
+
+               var text= listddl[0];
                 // tryhomework.Text = listddl[0].name;
+               // if (listddl=null)
+              //  {
+                //    
+               // }
+
 
             }
             catch
             {
-
+                INFOTB.Visibility = Visibility.Visible;
             }
             ButtonHK.IsEnabled = true;
             ButtonAnc.IsEnabled = false;
+            PR1.IsActive = false;
         }
 
         private async void ButtonHK_Click(object sender, RoutedEventArgs e)
         {
+            INFOTB.Visibility = Visibility.Collapsed;
+            PR1.IsActive = true;
             int tp;
             String coid;
             tp = CourseGrid.SelectedIndex;
@@ -87,17 +100,23 @@ namespace TsinghuaUWP.Courses
                 listddl = await CourseManager.getRemoteHomeworkList(coid, ddl1);
                 // tryhomework.Text = listddl[0].name;
 
+
+                var text = listddl[0];
+
             }
             catch
             {
-
+                INFOTB.Visibility = Visibility.Visible;
             }
             ButtonHK.IsEnabled = false;
             ButtonAnc.IsEnabled = true;
+            PR1.IsActive = false;
         }
 
         private async void ButtonAnc_Click(object sender, RoutedEventArgs e)
         {
+            INFOTB.Visibility = Visibility.Collapsed;
+            PR1.IsActive = true;
             int tp;
             String coid;
             tp = CourseGrid.SelectedIndex;
@@ -108,14 +127,16 @@ namespace TsinghuaUWP.Courses
 
                 listddl = await CourseManager.getRemoteAncList(coid, ddl1);
                 // tryhomework.Text = listddl[0].name;
+                
 
             }
             catch
             {
-
+                INFOTB.Visibility = Visibility.Visible;
             }
             ButtonHK.IsEnabled = true;
             ButtonAnc.IsEnabled = false;
+            PR1.IsActive = false;
         }
 
         private async void HWGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -159,14 +180,12 @@ namespace TsinghuaUWP.Courses
 
         private void GridView_Loading(FrameworkElement sender, object args)
         {
-            PR1.Visibility = Visibility.Visible;
-            PR1.IsActive = true;
+         
         }
 
         private void GridView_Loaded(object sender, RoutedEventArgs e)
         {
-            PR1.Visibility = Visibility.Collapsed;
-            PR1.IsActive = false;
+           
         }
     }
 }

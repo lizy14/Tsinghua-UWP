@@ -4,9 +4,11 @@ using System.Threading.Tasks;
 using TsinghuaUWP.Courses;
 using TsinghuaUWP.Logins;
 using TsinghuaUWP.TsinghuaTVs;
+using Windows.System.Profile;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Documents;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -22,11 +24,25 @@ namespace TsinghuaUWP {
         public MainPage()
         {
             this.InitializeComponent();
-            var titleBar = Windows.UI.ViewManagement.ApplicationView.GetForCurrentView().TitleBar;
-            titleBar.BackgroundColor = Colors.Purple;
-            titleBar.ButtonHoverBackgroundColor = Colors.Wheat;
-            titleBar.ButtonBackgroundColor = Colors.Purple;
+            var bb = AnalyticsInfo.VersionInfo.DeviceFamily;
+            if (bb == "Windows.Desktop" || bb == "Windows.Tablet")
+            {
+                var titleBar = Windows.UI.ViewManagement.ApplicationView.GetForCurrentView().TitleBar;
+                titleBar.BackgroundColor = Colors.Purple;
+                titleBar.ButtonHoverBackgroundColor = Colors.Wheat;
+                titleBar.ButtonBackgroundColor = Colors.Purple;
+            }
+            else
+            {
+                var appTitleBar = Windows.UI.ViewManagement.ApplicationView.GetForCurrentView().TitleBar;
+                var coreTitleBar = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().TitleBar;
+                appTitleBar.BackgroundColor = Colors.Black;
+                // Highest.Background = "Black";
+
+            }
+
             tvflag = false;
+            
         }
 
         private void MyFrame_Navigated(object sender, NavigationEventArgs e)
@@ -40,13 +56,15 @@ namespace TsinghuaUWP {
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             Webview.Visibility = Visibility.Collapsed;
+            if(!News.IsSelected)
+            {
+                BackButton.Visibility = Visibility.Collapsed;
+            }
              if (tvflag) {
-                // MessageDialog a = new MessageDialog("请将正在播放的视频暂停");
-                // a.ShowAsync();
-                // TV.IsSelected = true;
+               
                 MyFrame.Navigate(typeof(TsinghuaTV));
                 tvflag = false;
-                 // goto stoptv;
+               
               }
             
             if (Courses.IsSelected)
@@ -55,7 +73,7 @@ namespace TsinghuaUWP {
                 Refresh.Visibility = Visibility.Collapsed;
 
                 MyFrame.Navigate(typeof(Learn));
-                TitleTextBlock.Text = "Courses beta";
+                TitleTextBlock.Text = "MyCourses beta";
             }
             else if (Login.IsSelected)
             {
@@ -69,14 +87,22 @@ namespace TsinghuaUWP {
                 Webview.Visibility = Visibility.Visible;
                 Webview.Navigate(new Uri("http://mails.tsinghua.edu.cn/coremail/xphone/index.jsp"));
                 //MyFrame.Navigate(typeof(WEBS));
-                TitleTextBlock.Text = "Mails";
+                TitleTextBlock.Text = "Tsinghua Mails";
             }
             else if (TV.IsSelected)
             {
                 Refresh.Visibility = Visibility.Collapsed;
                 MyFrame.Navigate(typeof(TsinghuaTV));
-                TitleTextBlock.Text = "Tsinghua TV IPV6";
+                TitleTextBlock.Text = "Tsinghua TV";
                 tvflag = true;
+            }
+            else if(News.IsSelected)
+            {
+                Refresh.Visibility = Visibility.Collapsed;
+                Webview.Visibility = Visibility.Visible;
+                Webview.Navigate(new Uri("http://news.tsinghua.edu.cn/publish/thunews/index.html"));
+                BackButton.Visibility = Visibility.Visible;
+                TitleTextBlock.Text = "Tsinghua News";
             }
         
         }
@@ -100,12 +126,28 @@ namespace TsinghuaUWP {
         }
         private void Initial1(object sender, RoutedEventArgs e)
         {
-            var Url = "http://www.tsinghua.edu.cn/publish/newthu/index.html";
+            News.IsSelected = true;
+            
+        }
 
-            Webview.Navigate(new Uri(Url));
-            //  Refresh.Visibility = Visibility.Collapsed;
-            // MyFrame.Navigate(typeof(Loginindex));
-            // TitleTextBlock.Text = "Login";
+        private void Webview_NewWindowRequested(WebView sender, WebViewNewWindowRequestedEventArgs e)
+        {
+            
+            Webview.Navigate(e.Uri);
+           
+            e.Handled = true;
+
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(News.IsSelected&&Webview.CanGoBack&&Webview.Source!= new Uri("http://news.tsinghua.edu.cn/publish/thunews/index.html"))
+            {
+                Webview.GoBack();
+
+            }
+            
+
         }
     }
 }

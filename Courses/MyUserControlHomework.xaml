@@ -27,7 +27,7 @@
                            FontSize="18"
                            TextWrapping="Wrap"
                            />
-        <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind myddl.hasBeenFinished}"
+      <!--<TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind myddl.hasBeenFinished}"
                            Name="SubheadTextBox"
                          
                             FontSize="18"
@@ -35,12 +35,14 @@
                           Margin="20,0,20,0"
                    TextAlignment="Right"
                            />
+        -->
         <TextBlock Grid.Row="1" Grid.Column="2" Text="{x:Bind myddl.ddl}"
                          
                             FontSize="18"
                            TextWrapping="Wrap"
                    TextAlignment="Left"
                            />
+        
         <!--  <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind myddl.detail}">
             TextWrapping="Wrap"
 
