@@ -68,13 +68,7 @@ namespace TsinghuaUWP.Courses
                 listddl = await CourseManager.getRemoteAncList(coid, ddl1);
 
                var text= listddl[0];
-                // tryhomework.Text = listddl[0].name;
-               // if (listddl=null)
-              //  {
-                //    
-               // }
-
-
+               
             }
             catch
             {
@@ -98,8 +92,6 @@ namespace TsinghuaUWP.Courses
                 coid = listcourses[tp].id;
 
                 listddl = await CourseManager.getRemoteHomeworkList(coid, ddl1);
-                // tryhomework.Text = listddl[0].name;
-
 
                 var text = listddl[0];
 
@@ -126,8 +118,8 @@ namespace TsinghuaUWP.Courses
                 coid = listcourses[tp].id;
 
                 listddl = await CourseManager.getRemoteAncList(coid, ddl1);
-                // tryhomework.Text = listddl[0].name;
-                
+
+                var text = listddl[0];
 
             }
             catch

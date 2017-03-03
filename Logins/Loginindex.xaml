@@ -18,6 +18,8 @@
                 <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition Height="1*"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="1*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -43,7 +45,7 @@
 
             </StackPanel>
             <StackPanel Grid.Row="2" Grid.Column="1">
-                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap">当您进行了选课、退课操作，您需要手动点击以上按钮。</TextBlock>
+                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap" Margin="2">当您进行了选课、退课操作，您需要手动点击以上按钮。</TextBlock>
             </StackPanel>
 
             <StackPanel Grid.Row="3">
@@ -61,7 +63,7 @@
             </StackPanel>
 
             <StackPanel Grid.Row="4" Grid.Column="1">
-                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap">当万恶的Prof布置了作业或者可爱的你提交了作业时需要按下以上按钮</TextBlock>
+                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap" Margin="2">当万恶的Prof布置了作业或者可爱的你提交了作业时需要按下以上按钮</TextBlock>
             </StackPanel>
 
             <StackPanel Grid.Row="5" >
@@ -78,6 +80,15 @@
             </StackPanel>
             <StackPanel Grid.Row="6" Grid.Column="1">
                 <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap">Login or Logout</TextBlock>
+            </StackPanel>
+
+            <StackPanel Grid.Row="7" >
+                <TextBlock FontSize="24" Margin="20,0,0,0">About</TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Row="7" Grid.Column="1">
+                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap">
+                    Coded by Li Zhaoyang,School of Software and Zhang Jiawei, Dept. of Physics, Tsinghua University.
+                </TextBlock>
             </StackPanel>
 
         </Grid>
