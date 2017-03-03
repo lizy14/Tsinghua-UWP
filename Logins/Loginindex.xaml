@@ -87,7 +87,7 @@
             </StackPanel>
             <StackPanel Grid.Row="7" Grid.Column="1">
                 <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap">
-                    Coded by Li Zhaoyang,School of Software and Zhang Jiawei, Dept. of Physics, Tsinghua University.
+                    Coded by Li Zhaoyang, School of Software and Zhang Jiawei, Dept. of Physics, Tsinghua University.
                 </TextBlock>
             </StackPanel>
 

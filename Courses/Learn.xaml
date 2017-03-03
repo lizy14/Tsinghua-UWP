@@ -23,19 +23,20 @@
                         <Setter Target="HKGrid.(Grid.Column)" Value="0"/>
                         <Setter Target="HKGrid.(Grid.Row)" Value="2"/>
                         <Setter Target="HKGrid.(Grid.ColumnSpan)" Value="2"/>
-                        <Setter Target="HKGrid.(Grid.Height)" Value="150"></Setter>
+                        <Setter Target="HKGrid.(Grid.Height)" Value="130"></Setter>
                         <Setter Target="Buttonplace.(Grid.Height)" Value="Auto"></Setter>
                         <Setter Target="Buttons.(Grid.Column)" Value="0"/>
                         <Setter Target="Buttons.(Grid.Row)" Value="3"/>
                         <Setter Target="Buttonplace1.(Grid.Width)" Value="0"></Setter>
                         <Setter Target="Buttonplace.(Grid.ColumnSpan)" Value="2"></Setter>
+                        <Setter Target="Buttonplace.(Grid.HorizontalAlignment)" Value="Left"></Setter>
                         <Setter Target="Coursegd.(Grid.ColumnSpan)" Value="2"></Setter>
                         <Setter Target="BTMline.Visibility" Value="Visible"></Setter>
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState x:Name="WideLayout">
                     <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="900"/>
+                        <AdaptiveTrigger MinWindowWidth="800"/>
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="HKGrid.(Grid.Column)" Value="1"/>
@@ -50,7 +51,7 @@
         </VisualStateManager.VisualStateGroups>
         
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="400"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -67,7 +68,7 @@
         <Button Grid.Column="0" Name="Coursebuttons" Content="133" Click="Coursebuttons_Click" Visibility="Collapsed"></Button>
         <TextBlock  Name="coursetry" Text="trying" Visibility="Collapsed"></TextBlock>
         
-        <StackPanel Name="Buttons" Grid.Column="1"  VerticalAlignment="Center" HorizontalAlignment="Center"  Orientation="Horizontal">
+        <StackPanel Name="Buttons" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center"  Orientation="Horizontal">
             <Button Content="作业" Name="ButtonHK" Height="Auto" Width="150" Margin="20,15,20,5" Click="ButtonHK_Click" VerticalAlignment="Center"></Button>
             <Button Content="公告" Name="ButtonAnc" Height="Auto" Width="150" Margin="20,15,20,5" Click="ButtonAnc_Click" VerticalAlignment="Center"></Button>
         </StackPanel>

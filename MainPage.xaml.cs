@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using TsinghuaUWP.Courses;
 using TsinghuaUWP.Logins;
 using TsinghuaUWP.TsinghuaTVs;
+using TsinghuaUWP.Webs;
 using Windows.System.Profile;
 using Windows.UI;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Documents;
@@ -34,9 +36,11 @@ namespace TsinghuaUWP {
             }
             else
             {
-                var appTitleBar = Windows.UI.ViewManagement.ApplicationView.GetForCurrentView().TitleBar;
-                var coreTitleBar = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().TitleBar;
-                appTitleBar.BackgroundColor = Colors.Black;
+                StatusBar status = StatusBar.GetForCurrentView();
+                status.BackgroundColor = Colors.BlueViolet;
+                status.BackgroundOpacity = 1; // 透明度
+                status.ForegroundColor = Colors.White;
+
                 // Highest.Background = "Black";
 
             }
@@ -56,7 +60,8 @@ namespace TsinghuaUWP {
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             Webview.Visibility = Visibility.Collapsed;
-            if(!News.IsSelected)
+            Webview.NavigateToString("Loading...");
+            if (!News.IsSelected)
             {
                 BackButton.Visibility = Visibility.Collapsed;
             }
@@ -71,13 +76,14 @@ namespace TsinghuaUWP {
             {
 
                 Refresh.Visibility = Visibility.Collapsed;
-
+                MyFrame.Visibility = Visibility.Visible;
                 MyFrame.Navigate(typeof(Learn));
                 TitleTextBlock.Text = "MyCourses beta";
             }
             else if (Login.IsSelected)
             {
                 Refresh.Visibility = Visibility.Collapsed;
+                MyFrame.Visibility = Visibility.Visible;
                 MyFrame.Navigate(typeof(Loginindex));
                 TitleTextBlock.Text = "Login";
             }
@@ -92,6 +98,7 @@ namespace TsinghuaUWP {
             else if (TV.IsSelected)
             {
                 Refresh.Visibility = Visibility.Collapsed;
+                MyFrame.Visibility = Visibility.Visible;
                 MyFrame.Navigate(typeof(TsinghuaTV));
                 TitleTextBlock.Text = "Tsinghua TV";
                 tvflag = true;
@@ -99,8 +106,10 @@ namespace TsinghuaUWP {
             else if(News.IsSelected)
             {
                 Refresh.Visibility = Visibility.Collapsed;
-                Webview.Visibility = Visibility.Visible;
+                MyFrame.Visibility = Visibility.Collapsed;
+               
                 Webview.Navigate(new Uri("http://news.tsinghua.edu.cn/publish/thunews/index.html"));
+                Webview.Visibility = Visibility.Visible;
                 BackButton.Visibility = Visibility.Visible;
                 TitleTextBlock.Text = "Tsinghua News";
             }
