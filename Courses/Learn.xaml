@@ -23,7 +23,7 @@
                         <Setter Target="HKGrid.(Grid.Column)" Value="0"/>
                         <Setter Target="HKGrid.(Grid.Row)" Value="2"/>
                         <Setter Target="HKGrid.(Grid.ColumnSpan)" Value="2"/>
-                        <Setter Target="SmallLAYOUT.(Grid.Height)" Value="200"></Setter>
+                        <Setter Target="HKGrid.(Grid.Height)" Value="150"></Setter>
                         <Setter Target="Buttonplace.(Grid.Height)" Value="Auto"></Setter>
                         <Setter Target="Buttons.(Grid.Column)" Value="0"/>
                         <Setter Target="Buttons.(Grid.Row)" Value="3"/>
@@ -100,7 +100,7 @@
                 </ListView>
               
             </ScrollViewer>
-            <Rectangle Name="BTMline" Grid.Row="1" Width="1000" Grid.ColumnSpan="3" Fill="Purple" Height="1.5" Margin="3" VerticalAlignment="Bottom"></Rectangle>
+            <Rectangle Name="BTMline" Grid.Row="1" Width="1000" Grid.ColumnSpan="3" Fill="MediumPurple" Height="1.5" Margin="3" VerticalAlignment="Bottom"></Rectangle>
         </Grid>
 
 
@@ -109,7 +109,7 @@
             <ProgressRing Width="50" Height="50" Visibility="Visible"  IsActive="False" x:Name="PR1" Canvas.ZIndex="10" VerticalAlignment="Top" >
 
             </ProgressRing>
-            <ScrollViewer  VerticalScrollBarVisibility="Visible">
+            <ScrollViewer  >
 
                 <!-- <TextBlock Name="tryhomework" Text="HW" Visibility="Collapsed"></TextBlock>-->
                 <StackPanel>

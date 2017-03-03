@@ -113,8 +113,8 @@ namespace TsinghuaUWP {
             String Content = SearchTextBox.Text;
             String helpurl = string.Join("", Baidu, Content);
             Windows.System.Launcher.LaunchUriAsync(new Uri(helpurl));
-            // Webview.Visibility = Visibility.Visible;
             // Webview.Navigate(new Uri(helpurl));
+          
         }
         private void TitleTextBlock_SelectionChanged(object sender, RoutedEventArgs e)
         {

@@ -103,6 +103,6 @@
                 </MenuFlyout>
             </Button.Flyout>-->
         </Button>
-        <TextBlock Grid.Row="2" Height="Auto"  Width="Auto"  HorizontalAlignment="Right" Text="视频源为清华内网, 不用走流量"></TextBlock>
+        <TextBlock Grid.Row="2" Height="Auto"  Width="Auto"  HorizontalAlignment="Right" Text="视频源为清华内网, 不用走流量, 需要连接清华内网"></TextBlock>
     </Grid>
 </Page>

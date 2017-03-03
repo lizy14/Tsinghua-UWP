@@ -102,11 +102,10 @@
 
             <TextBox Name="SearchTextBox"
                      RelativePanel.LeftOf="SearchButton"
-                         
                      Height="24"
                      Width="200"
                      FontSize="15"
-                     PlaceholderText="Search"
+                     PlaceholderText="Bing Search"
                           Margin="0,2,0,0"
                      />
         </RelativePanel>
