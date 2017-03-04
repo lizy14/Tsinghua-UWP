@@ -5,6 +5,7 @@ using TsinghuaUWP.Courses;
 using TsinghuaUWP.Logins;
 using TsinghuaUWP.TsinghuaTVs;
 using TsinghuaUWP.Webs;
+using Windows.Storage;
 using Windows.System.Profile;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -135,8 +136,19 @@ namespace TsinghuaUWP {
         }
         private void Initial1(object sender, RoutedEventArgs e)
         {
-            News.IsSelected = true;
-            
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            //判断是否是第一次启动
+           if ((localSettings.Values["FirstStart"] == null))
+            {
+                //第一次启动，初始化本地数据文件
+              //  localSettings.Values["FirstStart"] = true;
+                Login.IsSelected = true;
+                localSettings.Values["FirstStart"] = null;
+            }
+            else
+            {
+               News.IsSelected = true;
+            }    
         }
 
         private void Webview_NewWindowRequested(WebView sender, WebViewNewWindowRequestedEventArgs e)
