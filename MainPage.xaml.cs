@@ -79,14 +79,14 @@ namespace TsinghuaUWP {
                 Refresh.Visibility = Visibility.Collapsed;
                 MyFrame.Visibility = Visibility.Visible;
                 MyFrame.Navigate(typeof(Learn));
-                TitleTextBlock.Text = "MyCourses beta";
+                TitleTextBlock.Text = "网络学堂";
             }
             else if (Login.IsSelected)
             {
                 Refresh.Visibility = Visibility.Collapsed;
                 MyFrame.Visibility = Visibility.Visible;
                 MyFrame.Navigate(typeof(Loginindex));
-                TitleTextBlock.Text = "Login";
+                TitleTextBlock.Text = "登录同步";
             }
             else if (Mails.IsSelected)
             {
@@ -94,14 +94,14 @@ namespace TsinghuaUWP {
                 Webview.Visibility = Visibility.Visible;
                 Webview.Navigate(new Uri("http://mails.tsinghua.edu.cn/coremail/xphone/index.jsp"));
                 //MyFrame.Navigate(typeof(WEBS));
-                TitleTextBlock.Text = "Tsinghua Mails";
+                TitleTextBlock.Text = "清华邮箱";
             }
             else if (TV.IsSelected)
             {
                 Refresh.Visibility = Visibility.Collapsed;
                 MyFrame.Visibility = Visibility.Visible;
                 MyFrame.Navigate(typeof(TsinghuaTV));
-                TitleTextBlock.Text = "Tsinghua TV";
+                TitleTextBlock.Text = "高清电视";
                 tvflag = true;
             }
             else if(News.IsSelected)
@@ -112,7 +112,7 @@ namespace TsinghuaUWP {
                 Webview.Navigate(new Uri("http://news.tsinghua.edu.cn/publish/thunews/index.html"));
                 Webview.Visibility = Visibility.Visible;
                 BackButton.Visibility = Visibility.Visible;
-                TitleTextBlock.Text = "Tsinghua News";
+                TitleTextBlock.Text = "清华新闻";
             }
         
         }
