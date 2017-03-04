@@ -81,12 +81,12 @@
 
             <TextBlock Name="TitleTextBlock"
                        RelativePanel.RightOf="HamburgerButton"
-                       FontSize="22"
+                       FontSize="27"
                         Margin="20,2,0,2"
-                       Text="Tsinghua UWP"
-                      
+                       Text="清华磁贴"
+                      VerticalAlignment="Center"
                          
-                           Foreground="Black" FontFamily="Segoe Print"
+                           Foreground="Black" 
                            SelectionChanged="TitleTextBlock_SelectionChanged"
                           
                        />
@@ -120,7 +120,7 @@
                        
                    >
             <SplitView.Pane >
-                <ScrollViewer RequestedTheme="Default" Background="#FF7434A9" BorderBrush="#FF7434A9"  >
+                
                     <ListBox SelectionMode="Single" 
                              SelectionChanged="ListBox_SelectionChanged"  Background="#FF7434A9" Name="Mylistbox">
 
@@ -133,8 +133,8 @@
                                 Text="&#xE80F;"
                               Foreground="white"
                                 />
-                                <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
-                               News
+                                <TextBlock FontSize="20" Margin="30,0,0,0" Foreground="white">
+                               新闻
                                 </TextBlock>
                             </StackPanel>
                         </ListBoxItem>
@@ -147,8 +147,8 @@
                                 Text="&#xE7BE;"
                               Foreground="white"
                                 />
-                                <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
-                                MyCourses
+                                <TextBlock FontSize="20" Margin="30,0,0,0" Foreground="white">
+                                学堂
                                 </TextBlock>
                             </StackPanel>
                         </ListBoxItem>
@@ -161,8 +161,8 @@
                                 Text="&#xE119;"
                               Foreground="white"
                                 />
-                                <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
-                              Mails
+                                <TextBlock FontSize="20" Margin="30,0,0,0" Foreground="white">
+                              邮件
                                 </TextBlock>
                             </StackPanel>
                         </ListBoxItem>
@@ -176,29 +176,29 @@
                                 Text="&#xE1E4;"
                               Foreground="white"
                                 />
-                                <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
-                                IPTV
+                                <TextBlock FontSize="20" Margin="30,0,0,0" Foreground="white">
+                                电视
                                 </TextBlock>
                             </StackPanel>
                         </ListBoxItem>
 
                         <ListBoxItem Name="Login">
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" >
                                 <TextBlock 
                                 FontFamily="Segoe MDL2 Assets"
                                  FontSize="26"
                                 Text="&#xEA8C;"
                               Foreground="white"
                                 />
-                                <TextBlock FontSize="24" Margin="20,0,0,0" Foreground="white">
-                              Login
+                                <TextBlock FontSize="20" Margin="30,0,0,0" Foreground="white">
+                              登录
                                 </TextBlock>
                             </StackPanel>
                         </ListBoxItem>
 
 
                     </ListBox>
-                </ScrollViewer>
+               
             </SplitView.Pane>
 
             <SplitView.Content>
