@@ -6,6 +6,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -38,23 +39,28 @@ namespace TsinghuaUWP.Logins
         {
             //if (App.Islogin)
             //   btnLogin.Content = "注销登录";
-            if (DataAccess.supposedToWorkAnonymously())
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            if(!(localSettings.Values["FirstStart"] == null))
             {
-                btnLogin.Content = "登录";
-                btnRefreshTimetable.IsEnabled = false;
-                btnUpdate.IsEnabled = false;
-                update_without_credential();
+                if (DataAccess.supposedToWorkAnonymously())
+                {
+                    btnLogin.Content = "登录";
+                    btnRefreshTimetable.IsEnabled = false;
+                    btnUpdate.IsEnabled = false;
+                    update_without_credential();
+                }
+                else if (!DataAccess.supposedToWorkAnonymously()
+                   && DataAccess.credentialAbsent())
+                {
+                    update_without_credential();
+                    await changeAccountAsync();
+                }
+                else if (!DataAccess.credentialAbsent())
+                {
+                    update_with_credential();
+                }
             }
-            else if (!DataAccess.supposedToWorkAnonymously()
-               && DataAccess.credentialAbsent())
-            {
-                update_without_credential();
-                await changeAccountAsync();
-            }
-            else if (!DataAccess.credentialAbsent())
-            {
-                update_with_credential();
-            }
+          
         }
 
         private async void update_with_credential()
@@ -221,6 +227,42 @@ namespace TsinghuaUWP.Logins
         private async void btnLogin_Click(object sender, RoutedEventArgs e)
         {
             await changeAccountAsync();
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            if(localSettings.Values["FirstStart"] == null)
+            {
+                FlipSts.Visibility = Visibility.Visible;
+                localSettings.Values["FirstStart"] = true;
+            }
+            else
+            {
+                FlipSts.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private async void StartButton_Click(object sender, RoutedEventArgs e)
+        {
+            FlipSts.Visibility = Visibility.Collapsed;
+            if (DataAccess.supposedToWorkAnonymously())
+            {
+                btnLogin.Content = "登录";
+                btnRefreshTimetable.IsEnabled = false;
+                btnUpdate.IsEnabled = false;
+                update_without_credential();
+            }
+            else if (!DataAccess.supposedToWorkAnonymously()
+               && DataAccess.credentialAbsent())
+            {
+                update_without_credential();
+                await changeAccountAsync();
+            }
+            else if (!DataAccess.credentialAbsent())
+            {
+                update_with_credential();
+            }
         }
     }
 }
