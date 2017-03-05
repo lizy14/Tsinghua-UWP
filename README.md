@@ -1,2 +1,6 @@
-# Tsinghua-UWP-1
+# Tsinghua-UWP
 清华磁贴 for UWP：校历、课表、作业提醒
+
+开发团队
+- 李肇阳（软件学院）
+- 章家维（物理系）
