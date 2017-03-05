@@ -1,0 +1,146 @@
+﻿<Page
+    x:Class="TsinghuaUWP.Courses.Learn"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TsinghuaUWP.Courses"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+        Loaded="Coursebuttons_Click"
+    >
+
+  
+
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Name="ALL">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="NarrowLayout">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="HKGrid.(Grid.Column)" Value="0"/>
+                        <Setter Target="HKGrid.(Grid.Row)" Value="2"/>
+                        <Setter Target="HKGrid.(Grid.ColumnSpan)" Value="2"/>
+                        <Setter Target="HKGrid.(Grid.Height)" Value="130"></Setter>
+                        <Setter Target="Buttonplace.(Grid.Height)" Value="Auto"></Setter>
+                        <Setter Target="Buttons.(Grid.Column)" Value="0"/>
+                        <Setter Target="Buttons.(Grid.Row)" Value="3"/>
+                        <Setter Target="Buttonplace1.(Grid.Width)" Value="0"></Setter>
+                        <Setter Target="Buttonplace.(Grid.ColumnSpan)" Value="2"></Setter>
+                        <Setter Target="Buttonplace.(Grid.HorizontalAlignment)" Value="Left"></Setter>
+                        <Setter Target="Coursegd.(Grid.ColumnSpan)" Value="2"></Setter>
+                        <Setter Target="BTMline.Visibility" Value="Visible"></Setter>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="WideLayout">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="800"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="HKGrid.(Grid.Column)" Value="1"/>
+                        <Setter Target="HKGrid.(Grid.Row)" Value="1"/>
+                        <Setter Target="HKGrid.(Grid.ColumnSpan)" Value="2"/>
+                        <Setter Target="SmallLAYOUT.(Grid.Height)" Value="0"></Setter>
+                        <Setter Target="Buttonplace.(Grid.Height)" Value="0"></Setter>
+                        <Setter Target="BTMline.Visibility" Value="Collapsed"></Setter>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="2*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock  Text="课程列表"  Height="Auto" Width="Auto"  FontSize="40" Margin="20,5,20,5" TextAlignment="Left"></TextBlock>
+            
+        </StackPanel>
+       
+        <Button Grid.Column="0" Name="Coursebuttons" Content="133" Click="Coursebuttons_Click" Visibility="Collapsed"></Button>
+        <TextBlock  Name="coursetry" Text="trying" Visibility="Collapsed"></TextBlock>
+        
+        <StackPanel Name="Buttons" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center"  Orientation="Horizontal">
+            <Button Content="作业" Name="ButtonHK" Height="Auto" Width="150" Margin="20,15,20,5" Click="ButtonHK_Click" VerticalAlignment="Center"></Button>
+            <Button Content="公告" Name="ButtonAnc" Height="Auto" Width="150" Margin="20,15,20,5" Click="ButtonAnc_Click" VerticalAlignment="Center"></Button>
+        </StackPanel>
+
+        
+        <Grid Grid.Row="1"  Name="Coursegd">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <ProgressRing Width="50" Height="50" Visibility="Visible"  IsActive="False" x:Name="PR0" Canvas.ZIndex="10" VerticalAlignment="Top" >
+
+            </ProgressRing>
+            <ScrollViewer  >
+                <ListView Name="CourseGrid" 
+                          ItemsSource="{x:Bind courses1}"
+                          HorizontalAlignment="Left"
+                      VerticalAlignment="Stretch"
+                          Margin="0,0,0,0"
+                      SelectionChanged="CourseGrid_SelectionChanged"
+                      CanDrag="True"
+                         Loading="GridView_Loading" Loaded="GridView_Loaded"
+                      >
+                    <ListViewHeaderItem Content="Courses" Height="50" Width="Auto"></ListViewHeaderItem>
+                    <ListView.ItemTemplate  >
+                        <DataTemplate  >
+                            <local:MyUserControlCourses/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+              
+            </ScrollViewer>
+            <Rectangle Name="BTMline" Grid.Row="1" Width="1000" Grid.ColumnSpan="3" Fill="MediumPurple" Height="1.5" Margin="3" VerticalAlignment="Bottom"></Rectangle>
+        </Grid>
+
+
+        <Grid  Name="HKGrid"  Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" >
+            <TextBlock Width="70" Height="20" Text="无数据" Visibility="Collapsed" Name="INFOTB" VerticalAlignment="Top" Canvas.ZIndex="5" HorizontalAlignment="Center"></TextBlock>
+            <ProgressRing Width="50" Height="50" Visibility="Visible"  IsActive="False" x:Name="PR1" Canvas.ZIndex="10" VerticalAlignment="Top" >
+
+            </ProgressRing>
+            <ScrollViewer  >
+
+                <!-- <TextBlock Name="tryhomework" Text="HW" Visibility="Collapsed"></TextBlock>-->
+                <StackPanel>
+                    <ListView Name="HWGrid" 
+                          ItemsSource="{x:Bind ddl1}"
+                         SelectionChanged="HWGrid_SelectionChanged"
+                          Margin="0,0,0,0"
+                     CanDrag="True"
+                              
+                      >
+                        <ListView.ItemTemplate>
+                            <DataTemplate >
+                                <local:MyUserControlHomework/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <Rectangle Visibility='Collapsed' Width="1000" Grid.ColumnSpan="4" Fill="Gray" Height="1.5" Margin="12,1,1,1" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"></Rectangle>
+                </StackPanel>
+
+            </ScrollViewer>
+
+        </Grid>
+
+        <Grid Name="SmallLAYOUT" Grid.Column="0" Grid.Row="2" Margin="0,10,0,0">
+            
+        </Grid>
+        <Grid Name="Buttonplace" Grid.Column="0" Grid.Row="2">
+        </Grid>
+        <Grid Name="Buttonplace1" Grid.Column="1" Grid.Row="0">
+
+        </Grid>
+    </Grid>
+</Page>

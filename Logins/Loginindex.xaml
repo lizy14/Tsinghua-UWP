@@ -1,0 +1,223 @@
+﻿<Page
+    x:Class="TsinghuaUWP.Logins.Loginindex"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TsinghuaUWP.Logins"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Loaded="Page_Loaded"
+    >
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+       
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup>
+                <VisualState x:Name="HighLayout">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowHeight="0"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="Abt1.Height" Value="0"/>
+                        <Setter Target="Abt2.Height" Value="0"/>
+                        <Setter Target="TP1.Height" Value="0"/>
+                        <Setter Target="TP2.Height" Value="0"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Midlayout">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowHeight="450"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                       
+                        <Setter Target="Abt1.Height" Value="0"/>
+                        <Setter Target="Abt2.Height" Value="0"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Shortlayout">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowHeight="500"/>
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                           
+                        </VisualState.Setters>
+                    </VisualState>
+
+                    
+                </VisualStateGroup>
+
+            </VisualStateManager.VisualStateGroups>
+        <Grid >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="1*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="1*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="1*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="2*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <RelativePanel Grid.Row="0" Grid.ColumnSpan="2">
+                <TextBlock Name="Subttl" Text="To Make your Life Efficient" FontSize="18" Margin="20,5,5,5" FontFamily="Lucida Calligraphy"></TextBlock>
+                <Rectangle Width="270" Height="2" RelativePanel.Below="Subttl" Fill="Purple" Margin="20,0,0,10"/>
+            </RelativePanel>
+            <StackPanel Grid.Row="1">
+                <TextBlock Text="刷新课表" FontSize="24" Margin="20,0,0,0"></TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1">
+                <Button  Name="btnRefreshTimetable" Content="刷新课表" Click="btnRefreshTimetable_Click"/>
+                <Image x:Name="errorRefreshTimetable" HorizontalAlignment="Left" Height="32" Margin="208,0,0,0" VerticalAlignment="Top" Width="32" Source="Assets/error.png" Visibility="Collapsed"/>
+                <ProgressRing x:Name="progressRefreshTimetable" HorizontalAlignment="Left" Margin="208,0,0,0" VerticalAlignment="Top" Height="22" Width="22" RenderTransformOrigin="0.5,0.5">
+                    <ProgressRing.RenderTransform>
+                        <CompositeTransform TranslateX="5" TranslateY="5"/>
+                    </ProgressRing.RenderTransform>
+                </ProgressRing>
+
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="1">
+                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap" Margin="2">当您进行了选课、退课操作，您需要手动点击以上按钮。</TextBlock>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3">
+                <TextBlock FontSize="24" Margin="20,0,0,0">刷新作业</TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Row="3" Grid.Column="1">
+                <Button Content="刷新作业" Name="btnUpdate" Click="btnUpdate_Click"/>
+
+                <Image x:Name="errorUpdate" HorizontalAlignment="Left" Height="32" Margin="208,0,0,0" VerticalAlignment="Top" Width="32" Source="Assets/error.png" Visibility="Collapsed"/>
+                <ProgressRing x:Name="progressUpdate" HorizontalAlignment="Left" Margin="208,0,0,0" VerticalAlignment="Top" Height="22" Width="22" RenderTransformOrigin="0.5,0.5">
+                    <ProgressRing.RenderTransform>
+                        <CompositeTransform TranslateX="5" TranslateY="5"/>
+                    </ProgressRing.RenderTransform>
+                </ProgressRing>
+            </StackPanel>
+
+            <StackPanel Grid.Row="4" Grid.Column="1">
+                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap" Margin="2">当万恶的Prof布置了作业或者可爱的你提交了作业时需要按下以上按钮</TextBlock>
+            </StackPanel>
+
+            <StackPanel Grid.Row="5" >
+                <TextBlock FontSize="24" Margin="20,0,0,0">登录</TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Row="5" Grid.Column="1">
+                <Button Content="登录" Name="btnLogin" Click="btnLogin_Click"/>
+                <ProgressRing x:Name="progressLogin" HorizontalAlignment="Left" Margin="208,0,0,0" VerticalAlignment="Top" Height="22" Width="22" RenderTransformOrigin="0.5,0.5">
+                    <ProgressRing.RenderTransform>
+                        <CompositeTransform TranslateX="5" TranslateY="5"/>
+                    </ProgressRing.RenderTransform>
+                </ProgressRing>
+
+            </StackPanel>
+            <StackPanel Grid.Row="6" Grid.Column="1">
+                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap">Login or Logout</TextBlock>
+            </StackPanel>
+            
+            <Rectangle Name="BTMline" Grid.Row="6" Width="1000" Grid.ColumnSpan="3" Fill="MediumPurple" Height="1.5" Margin="3" ></Rectangle>
+            <StackPanel Grid.Row="7" >
+                <TextBlock FontSize="24" Margin="20,0,0,0" Name="TP1">Tips</TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Row="8" >
+                <TextBlock Name="Abt1" FontSize="24" Margin="20,0,0,0">About</TextBlock>
+            </StackPanel>
+            
+            <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Vertical">
+
+                <TextBlock FontSize="12" VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap"  HorizontalAlignment="Left" Name="TP2">
+                    作业截止提醒会显示在动态磁贴上,校历、课表、作业，请使用系统内置“日历”, 为了获得最佳体验，请您
+                    <LineBreak />
+                   1.  将''清华磁贴''固定到''开始''屏幕；
+                    <LineBreak />
+                   2.  将''日历''固定到''开始''屏幕；
+                    <LineBreak />
+                   3.  磁贴会显示日历和DDL等信息，如果没有显示, 请手动点击刷新课表和刷新作业。
+                    
+                </TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Vertical" >
+
+                <TextBlock FontSize="12" Name="Abt2"  VariableSizedWrapGrid.ColumnSpan="1" TextWrapping="Wrap" xml:space="preserve" HorizontalAlignment="Left">
+                    开发团队:  
+                    李肇阳, 软件学院;
+                    章家维, 物理系
+                    欢迎你的加入！
+                </TextBlock>
+                <HyperlinkButton Height="Auto" Width="Auto" Content="More: 清华磁贴帮助文档" NavigateUri="http://static.nullspace.cn/Tsinghua-UWP/"></HyperlinkButton>
+            </StackPanel>
+            
+            
+            <!---->
+            <FlipView Name="FlipSts" Height="Auto"  Grid.RowSpan="9" Grid.ColumnSpan="3" Background="White">
+
+                <FlipViewItem>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="4*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                             <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                       
+                            <Image Source="ms-appx:Assets/OutlookView.JPG" Height="Auto"  Margin="20"></Image>
+                    
+                       
+                        <TextBlock Grid.Row="1" Height="Auto" Width="Auto" HorizontalAlignment="Center" FontSize="36" TextWrapping="Wrap" TextAlignment="Center">
+                            自动同步课程、作业
+                        </TextBlock>
+                         <TextBlock Grid.Row="2" Height="Auto" Width="Auto" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center">
+                            向右滑动, 或点击右侧向右箭头, 如希望跳过, 点击左边任意按钮即可
+                        </TextBlock>
+                    </Grid>
+                </FlipViewItem>
+
+                <FlipViewItem>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="4*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        
+                         <Grid >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                             <Image Source="ms-appx:Assets/NewsView.JPG" Grid.Column="0" Height="Auto"  Margin="3"></Image>
+                             <Image Source="ms-appx:Assets/LearnView.JPG" Grid.Column="1" Height="Auto"  Margin="3"></Image>
+                             <Image Source="ms-appx:Assets/TVView.JPG" Grid.Column="2" Height="Auto"  Margin="3"></Image>
+                        </Grid>
+                        
+                        <TextBlock Grid.Row="1" Height="Auto" Width="Auto" HorizontalAlignment="Center" FontSize="36" TextWrapping="Wrap" TextAlignment="Center">
+                            清华新闻、网络学堂、高清电视
+                        </TextBlock>
+                        
+                    </Grid>
+                </FlipViewItem>
+                <FlipViewItem>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="4*"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                       
+                        <TextBlock Grid.Row="0" Height="Auto" Width="Auto" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="56" TextWrapping="Wrap">
+                            让我们开始吧
+                        </TextBlock>
+                        <Button Grid.Row="1" Name="StartButton" Click="StartButton_Click" Content="开启这段旅程" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Top"></Button>
+                    </Grid>
+                </FlipViewItem>
+
+
+            </FlipView>
+        </Grid>
+       
+    </Grid>
+</Page>

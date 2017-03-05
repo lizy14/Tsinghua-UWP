@@ -3,6 +3,8 @@ using System;
 using System.Diagnostics;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.System.Profile;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -16,9 +18,14 @@ namespace TsinghuaUWP {
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
+        /// 
+        internal static bool Islogin = false;
+
         public App() {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+
+           
         }
 
 

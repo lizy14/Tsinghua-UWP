@@ -11,16 +11,16 @@
     <AssemblyName>Tsinghua UWP</AssemblyName>
     <DefaultLanguage>zh-CN</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>
+    <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>Tsinghua UWP_StoreKey.pfx</PackageCertificateKeyFile>
-    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Never</AppxBundle>
     <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
-    <PackageCertificateThumbprint>D4E46E36BD31AA0079F45F415EBDB91D6EFCD60A</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>085067891331870536E5ACE5E61E4C07ABCF000D</PackageCertificateThumbprint>
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
@@ -95,29 +95,63 @@
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
     <None Include="project.json" />
+    <None Include="Tsinghua UWP_StoreKey.pfx" />
+    <None Include="Tsinghua UWP_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Courses\ContentDialogAnc.xaml.cs">
+      <DependentUpon>ContentDialogAnc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Courses\ContentDialogAncnew.xaml.cs">
+      <DependentUpon>ContentDialogAncnew.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Courses\Learn.xaml.cs">
+      <DependentUpon>Learn.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Courses\MyUserControlCourses.xaml.cs">
+      <DependentUpon>MyUserControlCourses.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Courses\MyUserControlHomework.xaml.cs">
+      <DependentUpon>MyUserControlHomework.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Logins\Loginindex.xaml.cs">
+      <DependentUpon>Loginindex.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Logins\PasswordDialog.xaml.cs">
+      <DependentUpon>PasswordDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PasswordDialog.xaml.cs">
-      <DependentUpon>PasswordDialog.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Start\Start.xaml.cs">
+      <DependentUpon>Start.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TsinghuaTVs\MyUserControlTV1.xaml.cs">
+      <DependentUpon>MyUserControlTV1.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TsinghuaTVs\TsinghuaTV.xaml.cs">
+      <DependentUpon>TsinghuaTV.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TsinghuaTVs\TV1.cs" />
+    <Compile Include="Webs\TsinghuaNews.xaml.cs">
+      <DependentUpon>TsinghuaNews.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="Tsinghua UWP_StoreKey.pfx" />
-    <None Include="Tsinghua UWP_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\error.png" />
+    <Content Include="Assets\LearnView.JPG" />
     <Content Include="Assets\LockScreenLogo.scale-400.png" />
+    <Content Include="Assets\NewsView.JPG" />
+    <Content Include="Assets\OutlookView.JPG" />
     <Content Include="Assets\SplashScreen.scale-100.png" />
     <Content Include="Assets\Square150x150Logo.scale-200.png" />
     <Content Include="Assets\Square310x310Logo.scale-200.png" />
@@ -125,6 +159,9 @@
     <Content Include="Assets\Square71x71Logo.scale-200.png" />
     <Content Include="Assets\StoreLogo.scale-400.png" />
     <None Include="Package.StoreAssociation.xml" />
+    <Content Include="Assets\TVView.JPG" />
+    <Content Include="Blank.html" />
+    <Content Include="Courses\HTMLPage1.html" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
@@ -145,14 +182,62 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Courses\ContentDialogAnc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Courses\ContentDialogAncnew.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Courses\Learn.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Courses\MyUserControlCourses.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Courses\MyUserControlHomework.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Logins\Loginindex.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Logins\PasswordDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PasswordDialog.xaml">
+    <Page Include="Start\Start.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="TsinghuaTVs\MyUserControlTV1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TsinghuaTVs\TsinghuaTV.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Webs\TsinghuaNews.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <SDKReference Include="WindowsMobile, Version=10.0.10240.0">
+      <Name>Windows Mobile Extensions for the UWP %28WindowsMobile, Version=10.0.10240.0%29</Name>
+    </SDKReference>
+    <SDKReference Include="WindowsMobile, Version=10.0.10586.0">
+      <Name>Windows Mobile Extensions for the UWP %28WindowsMobile, Version=10.0.10586.0%29</Name>
+    </SDKReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
