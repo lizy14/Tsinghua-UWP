@@ -38,12 +38,18 @@ namespace TsinghuaUWP {
             updateDeadlinesAsyc();
             updateTimetableAsync();
             Appointment.updateCalendar();
+            try {
+                await Appointment.updateLectures();
+            } catch { }
         }
 
         private async void update_without_credential() {
             try {
                 await Notification.update(calendarOnly: true);
                 await Appointment.updateCalendar();
+            } catch { }
+            try {
+                await Appointment.updateLectures();
             } catch { }
 
         }
