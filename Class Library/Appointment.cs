@@ -12,10 +12,12 @@ namespace TsinghuaUWP {
         private static string ddl_cal_name = "作业";
         private static string class_cal_name = "课程表";
         private static string cal_cal_name = "校历";
+        private static string lec_cal_name = "文素讲座";
 
         private static string ddl_storedKey = "appointmentCalendarForDeadlines";
         private static string class_storedKey = "appointmentCalendarForClasses";
         private static string cal_storedKey = "appointmentCalendarForTeachingWeeks";
+        private static string lec_storedKey = "appointmentCalendarForLectures";
 
         public static async Task deleteAllCalendars() {
             var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
@@ -25,11 +27,31 @@ namespace TsinghuaUWP {
             }
         }
 
+        public static async Task deleteAllAppointments(AppointmentCalendar cal) {
+            var aps = await cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
+            foreach (var a in aps) {
+                await cal.DeleteAppointmentAsync(a.LocalId);
+            }
+        }
+
+        static async Task<AppointmentCalendar> getAppointmentCalendar(string name, string key) {
+            var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
+            AppointmentCalendar cal = null;
+
+            if (DataAccess.getLocalSettings()[key] != null) {
+                cal = await store.GetAppointmentCalendarAsync(
+                    DataAccess.getLocalSettings()[key].ToString());
+            }
+
+            if (cal == null) {
+                cal = await store.CreateAppointmentCalendarAsync(name);
+                DataAccess.setLocalSettings(key, cal.LocalId);
+            }
+
+            return cal;
+        }
         public static async Task updateDeadlines() {
             Debug.WriteLine("[Appointment] deadlines begin");
-
-
-            var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
 
             try {
                 var deadlines = await DataAccess.getAllDeadlines();
@@ -37,16 +59,7 @@ namespace TsinghuaUWP {
                     throw new Exception();
 
                 //get Calendar object
-                AppointmentCalendar ddl_cal = null;
-                if (DataAccess.getLocalSettings()[ddl_storedKey] != null) {
-                    ddl_cal = await store.GetAppointmentCalendarAsync(
-                        DataAccess.getLocalSettings()[ddl_storedKey].ToString());
-                }
-
-                if (ddl_cal == null) {
-                    ddl_cal = await store.CreateAppointmentCalendarAsync(ddl_cal_name);
-                    DataAccess.setLocalSettings(ddl_storedKey, ddl_cal.LocalId);
-                }
+                AppointmentCalendar ddl_cal = await getAppointmentCalendar(ddl_cal_name, ddl_storedKey);
 
                 var aps = await ddl_cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
                 foreach (var ddl_ap in aps) {
@@ -100,7 +113,6 @@ namespace TsinghuaUWP {
             Debug.WriteLine("[Appointment] calendar begin");
 
             //TODO: possible duplication, lock?
-            var store = await AppointmentManager.RequestStoreAsync(AppointmentStoreAccessType.AppCalendarsReadWrite);
 
             var current_semester = await DataAccess.getSemester(getNextSemester: false);
             var next_semester = await DataAccess.getSemester(getNextSemester: true);
@@ -109,21 +121,9 @@ namespace TsinghuaUWP {
                 return;
 
             //get Calendar object
-            AppointmentCalendar cal = null;
-            if (DataAccess.getLocalSettings()[cal_storedKey] != null) {
-                cal = await store.GetAppointmentCalendarAsync(
-                    DataAccess.getLocalSettings()[cal_storedKey].ToString());
-            }
+            AppointmentCalendar cal = await getAppointmentCalendar(cal_cal_name, cal_storedKey);
 
-            if (cal == null) {
-                cal = await store.CreateAppointmentCalendarAsync(cal_cal_name);
-                DataAccess.setLocalSettings(cal_storedKey, cal.LocalId);
-            }
-
-            var aps = await cal.FindAppointmentsAsync(DateTime.Now.AddYears(-10), TimeSpan.FromDays(365 * 20));
-            foreach (var a in aps) {
-                await cal.DeleteAppointmentAsync(a.LocalId);
-            }
+            await deleteAllAppointments(cal);
 
             foreach (var ev in getAppointments(current_semester)) {
                 await cal.SaveAppointmentAsync(ev);
@@ -138,6 +138,25 @@ namespace TsinghuaUWP {
             semester_in_system_calendar = current_semester.semesterEname;
 
             Debug.WriteLine("[Appointment] calendar finish");
+        }
+
+        public static async Task updateLectures() { //always force remote
+            Debug.WriteLine("[Appointment] lecture begin");
+
+            //TODO: possible duplication, lock?
+
+            var lectures = await Remote.getHostedLectures();
+
+            //get Calendar object
+            AppointmentCalendar cal = await getAppointmentCalendar(lec_cal_name, lec_storedKey);
+
+            deleteAllAppointments(cal);
+
+            foreach (var lec in lectures) {
+                await cal.SaveAppointmentAsync(getAppointment(lec));
+            }
+
+            Debug.WriteLine("[Appointment] lecture finish");
         }
 
         public static async Task updateTimetable(bool forceRemote = false) {
@@ -178,27 +197,41 @@ namespace TsinghuaUWP {
             foreach (var ev in timetable)
                 list.Add(getAppointment(ev));
             list = mergeAppointments(list);
-            foreach(var e in list)
+            foreach (var e in list)
                 await cal.SaveAppointmentAsync(e);
 
             Debug.WriteLine("[Appointment] update finished");
         }
 
+
         private static Windows.ApplicationModel.Appointments.Appointment getAppointment(Event e) {
             var a = new Windows.ApplicationModel.Appointments.Appointment();
             a.Subject = e.nr;
             a.Location = e.dd;
-            
+
             a.StartTime = DateTime.Parse(e.nq + " " + e.kssj);
             a.Duration = DateTime.Parse(e.nq + " " + e.jssj) - a.StartTime;
             // 修正考试时间 12 小时制
-            if(e.fl == "考试") {
-                if(a.StartTime.Hour < 8) {
+            if (e.fl == "考试") {
+                if (a.StartTime.Hour < 8) {
                     a.StartTime += TimeSpan.FromHours(12);
                 }
                 a.Subject += "考试";
             }
             a.AllDay = false;
+            return a;
+        }
+
+        private static Windows.ApplicationModel.Appointments.Appointment getAppointment(Lecture l) {
+            var a = new Windows.ApplicationModel.Appointments.Appointment();
+            a.Subject = l.summary;
+            a.Location = l.location;
+            a.StartTime = DateTime.Parse(l.dtstart);
+            a.Duration = DateTime.Parse(l.dtend) - a.StartTime;
+            a.DetailsKind = AppointmentDetailsKind.PlainText;
+            a.Details = l.description;
+            a.AllDay = false;
+            a.BusyStatus = AppointmentBusyStatus.Free;
             return a;
         }
 
@@ -209,7 +242,7 @@ namespace TsinghuaUWP {
             a.Location = re.Replace(e.course, " ");
             a.StartTime = DateTime.Parse(e.ddl + " 23:59");
             a.AllDay = false;
-            a.BusyStatus = e.hasBeenFinished? AppointmentBusyStatus.Free: AppointmentBusyStatus.Tentative;
+            a.BusyStatus = e.hasBeenFinished ? AppointmentBusyStatus.Free : AppointmentBusyStatus.Tentative;
             if (e.hasBeenFinished)
                 a.Reminder = null;
             else

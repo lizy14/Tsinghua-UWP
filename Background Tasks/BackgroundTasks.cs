@@ -67,11 +67,21 @@ namespace BackgroundTasks {
 
                 if (goRemote) {
                     Debug.WriteLine("[UnifiedUpdateTask] remote");
-                    await DataAccess.getAllDeadlines(forceRemote: true); //hope this can finish in 30 seconds
+                    try {
+                        await DataAccess.getAllDeadlines(forceRemote: true); //hope this can finish in 30 seconds
+                    } catch (Exception) { }
                 }
 
-                await Notification.update();
-                await Appointment.updateDeadlines();
+                try{
+                    await Notification.update();
+                } catch (Exception) { }
+                try {
+                    await Appointment.updateDeadlines();
+                } catch (Exception) { }
+                try {
+                    if (goRemote) { await Appointment.updateLectures(); }
+                } catch (Exception) { }
+                
 
                 deferral.Complete();
 

@@ -20,7 +20,6 @@ namespace TsinghuaUWP {
 
 
         // exposes access to remote objects
-
         public static async Task<Timetable> getRemoteTimetable() {
             Debug.WriteLine("[getRemoteTimetable] start");
             await login();
@@ -146,6 +145,12 @@ namespace TsinghuaUWP {
 
         public static async Task<Semesters> getHostedSemesters() {
             return JSON.parse<Semesters>(await GET(hostedCalendarUrl));
+        }
+
+        public static async Task<List<Lecture>> getHostedLectures() {
+            var raw = await GET(hostedLectureUrl);
+            var parsed = JSON.parse<List<Lecture>>(raw);
+            return parsed;
         }
 
         public static async Task<Semesters> getRemoteSemesters() {
@@ -330,8 +335,8 @@ namespace TsinghuaUWP {
 
         private static string courseListUrl = "http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?language=cn";
         private static string hostedCalendarUrl = "http://static.nullspace.cn/thuCalendar.json";
-        public static string helpUrl = "http://static.nullspace.cn/thuUwpHelp.html";
-
+        private static string hostedLectureUrl = "http://vultr.nullspace.cn:8000/test.json";
+        private static string helpUrl = "http://static.nullspace.cn/thuUwpHelp.html";
         private static async Task<string> getHomeworkListPage(string courseId) {
             return await GET($"http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id={courseId}");
         }

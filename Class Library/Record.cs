@@ -12,6 +12,7 @@ namespace TsinghuaUWP {
         校历：Semesters, calendar
         课表：Timetable, AppointmentCalendar
         课表项：Event, Appointment
+        讲座：Lecture
 
          */
     public class Password {
@@ -253,6 +254,19 @@ namespace TsinghuaUWP {
         public string sfSjtz { get; set; }
         public string skjc { get; set; }
         public string sm { get; set; }
+    }
+
+    public class Lectures {
+        public Lecture[] Property1 { get; set; }
+    }
+
+    public class Lecture {
+        public string description { get; set; }
+        public string summary { get; set; }
+        public string location { get; set; }
+        public string dtstart { get; set; }
+        public string dtend { get; set; }
+        public long uid { get; set; }
     }
 
 }
