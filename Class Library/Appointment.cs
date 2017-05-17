@@ -150,7 +150,7 @@ namespace TsinghuaUWP {
             //get Calendar object
             AppointmentCalendar cal = await getAppointmentCalendar(lec_cal_name, lec_storedKey);
 
-            deleteAllAppointments(cal);
+            await deleteAllAppointments(cal);
 
             foreach (var lec in lectures) {
                 await cal.SaveAppointmentAsync(getAppointment(lec));
