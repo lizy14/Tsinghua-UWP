@@ -14,7 +14,7 @@
                 <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="0" TextWrapping="Wrap" VerticalAlignment="Top">
 							<Run Text="作业截止提醒会显示在动态磁贴上。"/>
 							<LineBreak/>
-							<Run Text="校历、课表、作业，请使用系统内置''日历''。"/>
+							<Run Text="校历、课表、作业、讲座，请通过系统内置''日历''查看"/>
 							<LineBreak/>
 							<Run/>
 							<LineBreak/>
@@ -27,6 +27,8 @@
 							<Run Text=" • 将''日历''固定到''开始''屏幕；"/>
 							<LineBreak/>
 							<Run Text=" • ''设置&gt;个性化&gt;锁屏界面&gt;显示详细状态的应用''，选择''日历''。"/>
+                            <LineBreak/>
+							<Run Text="如不想看到讲座信息，可在系统内置''日历''中取消勾选''清华磁贴&gt;讲座''。"/>
                 </TextBlock>
 
                 <RelativePanel Margin="0,20,0,20">
