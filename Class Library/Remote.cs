@@ -42,7 +42,6 @@ namespace TsinghuaUWP {
                 //throw new NeedCampusNetworkException();
 
                 outside_campus_network = true;
-
             }
 
 
@@ -66,21 +65,35 @@ namespace TsinghuaUWP {
                 Timetable timetable = new Timetable();
 
                 for (int i = -6; i <= 4; i += 2) {
-                    string page;
-                    try {
-                        page = await get_calendar_sslvpn_page(
-                            DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
-                            DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd")
-                            );
-                    } catch (Exception) {
-                        page = await get_calendar_sslvpn_page(
-                            DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
-                            DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd")
-                            );
-                    }
-                    var set_to_be_appended = parseTimetablePage(page);
-                    foreach (var _____ in set_to_be_appended) {
-                        timetable.Add(_____);
+                    var roles = new List<string> { "bks", "yjs" };
+                    foreach (var role in roles)
+                    {
+                        try
+                        {
+                            string page;
+                            try
+                            {
+                                page = await get_calendar_sslvpn_page(
+                                    DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
+                                    DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd"),
+                                    role
+                                    );
+                            }
+                            catch (Exception)
+                            {
+                                page = await get_calendar_sslvpn_page(
+                                    DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
+                                    DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd"),
+                                    role
+                                    );
+                            }
+                            var set_to_be_appended = parseTimetablePage(page);
+                            foreach (var _____ in set_to_be_appended)
+                            {
+                                timetable.Add(_____);
+                            }
+                        }
+                        catch (Exception) { }
                     }
                 }
 
@@ -94,21 +107,35 @@ namespace TsinghuaUWP {
 
                 Timetable timetable = new Timetable();
                 for (int i = -6; i <= 4; i += 2) {
-                    string page;
-                    try {
-                        page = await get_calendar_page(
-                            DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
-                            DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd")
-                            );
-                    } catch (Exception) {
-                        page = await get_calendar_page(
-                            DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
-                            DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd")
-                            );
-                    }
-                    var set_to_be_appended = parseTimetablePage(page);
-                    foreach (var _____ in set_to_be_appended) {
-                        timetable.Add(_____);
+                    var roles = new List<string> { "bks", "yjs" };
+                    foreach (var role in roles)
+                    {
+                        try
+                        {
+                            string page;
+                            try
+                            {
+                                page = await get_calendar_page(
+                                    DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
+                                    DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd"),
+                                    role
+                                    );
+                            }
+                            catch (Exception)
+                            {
+                                page = await get_calendar_page(
+                                    DateTime.Now.AddMonths(i).AddDays(1).ToString("yyyyMMdd"),
+                                    DateTime.Now.AddMonths(i + 2).ToString("yyyyMMdd"),
+                                    role
+                                    );
+                            }
+                            var set_to_be_appended = parseTimetablePage(page);
+                            foreach (var _____ in set_to_be_appended)
+                            {
+                                timetable.Add(_____);
+                            }
+                        }
+                        catch (Exception) { }
                     }
                 }
 
@@ -116,16 +143,17 @@ namespace TsinghuaUWP {
                 return timetable;
             }
         }
-        static async Task<string> get_calendar_page(string starting_date, string ending_date) {
-            Debug.WriteLine($"[get_calendar_page] {starting_date}-{ending_date}");
+        static async Task<string> get_calendar_page(string starting_date, string ending_date, string role) {
+            Debug.WriteLine($"[get_calendar_page] {role}, {starting_date}-{ending_date}");
             var stamp = (long)UnixTime().TotalMilliseconds;
             return await GET(
-                $"http://zhjw.cic.tsinghua.edu.cn/jxmh.do?m=bks_jxrl_all&p_start_date={starting_date}&p_end_date={ending_date}&jsoncallback=_&_={stamp}");
+                $"http://zhjw.cic.tsinghua.edu.cn/jxmh.do?m={role}_jxrl_all&p_start_date={starting_date}&p_end_date={ending_date}&jsoncallback=_&_={stamp}");
         }
-        static async Task<string> get_calendar_sslvpn_page(string starting_date, string ending_date) {
+        static async Task<string> get_calendar_sslvpn_page(string starting_date, string ending_date, string role) {
+            Debug.WriteLine($"[get_calendar_sslvpn_page] {role}, {starting_date}-{ending_date}");
             var stamp = (long)UnixTime().TotalMilliseconds;
             return await GET(
-                    $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn,CT=js+jxmh.do?m=bks_jxrl_all&p_start_date={starting_date}&p_end_date={ending_date}&jsoncallback=_&_={stamp}");
+                    $"https://sslvpn.tsinghua.edu.cn/,DanaInfo=zhjw.cic.tsinghua.edu.cn,CT=js+jxmh.do?m={role}_jxrl_all&p_start_date={starting_date}&p_end_date={ending_date}&jsoncallback=_&_={stamp}");
         }
 
         public static async Task<List<Deadline>> getRemoteHomeworkList(string courseId) {
@@ -513,6 +541,7 @@ namespace TsinghuaUWP {
 
         private static HttpResponseMessage httpResponse = new HttpResponseMessage();
         private static async Task<string> GET(string url) {
+            Debug.WriteLine(url);
             //getPage
             httpResponse = await m_httpClient.GetAsync(new Uri(url));
             httpResponse.EnsureSuccessStatusCode();
@@ -520,6 +549,7 @@ namespace TsinghuaUWP {
         }
 
         private static async Task<string> POST(string url, string form_string) {
+            Debug.WriteLine(url);
             HttpStringContent stringContent = new HttpStringContent(
                 form_string,
                 Windows.Storage.Streams.UnicodeEncoding.Utf8,
