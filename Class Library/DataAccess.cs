@@ -267,7 +267,7 @@ namespace TsinghuaUWP {
                     _remoteSemesters = await Remote.getRemoteSemesters();
                 } catch (Exception) { }
             }
-            if (_remoteSemesters == null) {
+            if (_remoteSemesters == null || _remoteSemesters.currentSemester == null) {
                 Debug.WriteLine("[getCalendar] remote fail, falling back to hosted");
                 _remoteSemesters = await Remote.getHostedSemesters();
             }
