@@ -158,7 +158,7 @@ $@"<toast>
 
         <binding template=""TileWide""
             branding=""name"">
-            <text hint-style=""body"" 
+            <text hint-style=""caption"" 
                 hint-wrap=""true"" 
                 hint-maxLines=""3"">{name}</text>
             <text hint-style=""caption"">{timeLeft}</text>            

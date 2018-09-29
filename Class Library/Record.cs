@@ -97,8 +97,7 @@ namespace TsinghuaUWP {
             if (daysLeft > 10) {
                 var d = Math.Round(daysLeft / 7);
                 timeLeft = "还有 " + d.ToString() + " 周";
-            }
-            if (daysLeft > 1) {
+            } else if (daysLeft > 1) {
                 var d = Math.Round(daysLeft);
                 timeLeft = "只剩 " + d.ToString() + " 天";
             } else if (daysLeft > 0) {

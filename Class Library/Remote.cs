@@ -484,11 +484,16 @@ namespace TsinghuaUWP {
 
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(page);
-                var links = htmlDoc.DocumentNode.Descendants("table")/*MAGIC*/.Last()/*MAGIC*/.Descendants("a")/*MAGIC*/.ToArray();
+                var tables = htmlDoc.DocumentNode.Descendants("table");
+                var links = tables/*MAGIC*/.Take(3).Last()/*MAGIC*/.Descendants("a")/*MAGIC*/.ToArray();
 
                 foreach (var link in links) {
                     string _name = link.InnerText.Trim();
                     string _url = link.Attributes["href"].Value;
+                    if (_url.Contains("teacher"))
+                    {
+                        continue;
+                    }
                     var match = Regex.Match(_name, "(.+?)\\((\\d+)\\)\\((.+?)\\)");
                     string _semester = match.Groups[3].Value;
                     _name = match.Groups[1].Value;
