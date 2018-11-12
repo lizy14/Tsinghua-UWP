@@ -6,6 +6,7 @@ using Windows.UI.Notifications;
 using Windows.Data.Xml.Dom;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace TsinghuaUWP {
     public class Notification {
@@ -62,13 +63,6 @@ namespace TsinghuaUWP {
                     setBadgeNumber(n);
 
                     foreach (var deadline in deadlines) {
-                        if (!deadline.isPast()
-                            && (tileCount + 1) < 5) {
-                            var tile = new TileNotification(getTileXmlForDeadline(deadline, semester));
-                            updater.Update(tile);
-                            tileCount++;
-                        }
-
                         if (!deadline.hasBeenFinished) {
                             if (!deadline.hasBeenToasted()) {
                                 deadline.mark_as_toasted();
@@ -77,21 +71,23 @@ namespace TsinghuaUWP {
                             }
                         }
                     }
+
+                    //tile 
+                    try
+                    {
+                        updater.Update(new TileNotification(getTileXmlForDeadlines(deadlines, semester)));
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine("[Notification] error dealing with calendar: " + e.Message);
+                        throw e;
+                    }
                 }
             } catch (Exception e) {
                 Debug.WriteLine("[Notification] error dealing with deadlines: " + e.Message);
                 throw e;
             }
 
-            //calendar
-            try {
-                if (tileCount < 5) {
-                    updater.Update(new TileNotification(getTileXmlForCalendar(semester)));
-                }
-            } catch (Exception e) {
-                Debug.WriteLine("[Notification] error dealing with calendar: " + e.Message);
-                throw e;
-            }
 
 
             Debug.WriteLine("[Notification] update finished");
@@ -100,7 +96,7 @@ namespace TsinghuaUWP {
         private static string getWeekday() {
             var now = DateTime.Now;
             string[] weekDayNames = { "日", "一", "二", "三", "四", "五", "六" };
-            var weekday = "星期" + weekDayNames[Convert.ToInt32(now.DayOfWeek)];
+            var weekday = "周" + weekDayNames[Convert.ToInt32(now.DayOfWeek)];
             return weekday;
         }
         private static XmlDocument getToastXmlForDeadline(Deadline deadline) {
@@ -130,51 +126,82 @@ $@"<toast>
             return toastXml;
         }
 
-        private static XmlDocument getTileXmlForDeadline(Deadline deadline, Semester semester) {
-
-            Regex re = new Regex("&[^;]+;");
-            string name = re.Replace(deadline.name, " ");
-            string course = re.Replace(deadline.course, " ");
-
-            string due = deadline.ddl;
-            string timeLeft = deadline.timeLeft();
+        private static XmlDocument getTileXmlForDeadlines(List<Deadline> deadlines, Semester semester) {
+            
+            string medium;
+            string wide;
+            string large;
+            if (deadlines.Count == 0) {
+                medium = @"
+            <text hint-style=""title""  hint-align=""center"">🎉</text>
+            <text hint-style=""body"" hint-align=""center"">Hooray!</text>
+            <text hint-style=""captionSubtle""  hint-align=""center"">暂无未交作业</text>
+";
+                wide = medium;
+                large = @"
+            <text hint-style=""bodySubtle"" hint-align=""center""/>
+            <text hint-style=""header"" hint-align=""center"">🎉</text>
+            <text hint-style=""subheader"" hint-align=""center"">Hooray!</text>
+            <text hint-style=""bodySubtle"" hint-align=""center"">暂无未交作业</text>
+";
+            }
+            else {
+                medium = $@"
+<text 
+    hint-wrap=""true"" 
+    hint-maxLines=""3"">{deadlines[0].name}</text>
+<text hint-style=""captionSubtle"">{deadlines[0].timeLeft()}</text>
+<text hint-style=""captionSubtle""
+    hint-wrap=""true"" 
+    hint-maxLines=""2"">{deadlines[0].course}</text>
+";
+                wide = "";
+                large = "";
+                bool first = true;
+                foreach(var deadline in deadlines)
+                {
+                        wide += $@"
+<text hint-style=""caption{(first? "": "Subtle")}"">{deadline.timeLeft().Replace("只剩", "").Replace("还有", "")} · {deadline.name} - {deadline.course}</text>
+";
+                    
+                    large += $@"
+<group>
+    <subgroup>
+            <text hint-style=""{(first? "body" : "caption")}"">{deadline.name}</text>
+            <text hint-style=""captionSubtle"">{deadline.timeLeft()} · {deadline.course}</text>
+            {(first? $@"<text hint-style=""captionSubtle"">截止于 {deadline.ddl} 23:59</text>" : "")}
+    </subgroup>
+</group>
+<text/>
+";
+                    first = false;
+                }
+            }
+            
+            string semesterName= Regex.Match(semester.semesterEname
+                    .Replace("Summer", "夏")
+                    .Replace("Spring", "春")
+                    .Replace("Autumn", "秋")
+                    , @"^(\d+-\d+)-(\w+)$").Groups[0].ToString();
 
             string xml = $@"
 <tile>
     <visual 
-        displayName=""校历第 {semester.getWeekName()} 周{getWeekday()}"">
+        displayName=""第 {semester.getWeekName()} 周{getWeekday()}, {semesterName}"">
 
         <binding template=""TileMedium""
-            branding=""none"">
-            <text 
-                hint-wrap=""true"" 
-                hint-maxLines=""3"">{name}</text>
-            <text hint-style=""caption"">{timeLeft}</text>                        
-            <text hint-style=""captionSubtle""
-                hint-wrap=""true"" 
-                hint-maxLines=""2"">{course}</text>
-            <text hint-style=""captionSubtle"">{due}</text>
+            branding=""name"">
+            {medium}
         </binding>
 
         <binding template=""TileWide""
-            branding=""name"">
-            <text hint-style=""caption"" 
-                hint-wrap=""true"" 
-                hint-maxLines=""3"">{name}</text>
-            <text hint-style=""caption"">{timeLeft}</text>            
-            <text hint-style=""captionSubtle"">{course}</text>
-            <text hint-style=""captionSubtle"">截止于 {due}</text>
-        </binding>
-
-        <binding template=""TileLarge"" 
             branding=""nameAndLogo"">
-            <text hint-style=""subtitle""
-                hint-wrap=""true"">{name}</text>
-            <text hint-style=""bodySubtle"" 
-                hint-wrap=""true"">{course}</text>
-            <text hint-style=""body"">{timeLeft}</text>
-            <text hint-style=""bodySubtle"">截止于 {due}</text>
-            
+            {wide}
+        </binding>
+
+        <binding template=""TileLarge""
+            branding=""nameAndLogo"">
+            {large}
         </binding>
 
     </visual>
@@ -187,58 +214,6 @@ $@"<toast>
             return doc;
         }
 
-        private static XmlDocument getTileXmlForCalendar(Semester sem) {
-            var now = DateTime.Now;
-
-            var weekday = getWeekday();
-
-            var shortdate = now.ToString("M 月 d 日");
-            var date = now.ToString("yyyy 年 M 月 d 日");
-
-            var nameGroup = Regex.Match(
-                sem.semesterEname
-                    .Replace("Summer", "夏季学期")
-                    .Replace("Spring", "春季学期")
-                    .Replace("Autumn", "秋季学期")
-                    , @"^(\d+-\d+)-(\w+)$").Groups;
-
-            var week = $"校历第{sem.getWeekName()}周";
-            var weekLong = $"校历第 {sem.getWeekName()} 周";
-
-            string xml = $@"
-<tile>
-    <visual 
-        branding=""nameAndLogo"">
-
-        <binding template=""TileMedium"">
-            <text hint-style=""body"">{week}</text>
-            <text hint-style=""captionSubtle"">{nameGroup[2]}</text>
-            <text hint-style=""caption"">{weekday}</text>
-            <text hint-style=""captionSubtle"">{shortdate}</text>
-        </binding>
-
-        <binding template=""TileWide"">
-            <text hint-style=""body"">{weekLong}</text>
-            <text hint-style=""captionSubtle"">{nameGroup[0]}</text>
-            <text hint-style=""caption"">{weekday}</text>
-            <text hint-style=""captionSubtle"">{date}</text>
-        </binding>
-
-        <binding template=""TileLarge"">
-            <text hint-style=""title"">{weekLong}</text>
-            <text hint-style=""bodySubtle"">{nameGroup[0]}</text>
-            <text hint-style=""body"">{weekday}</text>
-            <text hint-style=""bodySubtle"">{date}</text>
-        </binding>
-
-    </visual>
-</tile>";
-
-            // Load the string into an XmlDocument
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(xml);
-
-            return doc;
-        }
+        
     }
 }

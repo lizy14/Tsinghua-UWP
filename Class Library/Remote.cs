@@ -408,6 +408,7 @@ namespace TsinghuaUWP {
 
 
                 List<Deadline> deadlines = new List<Deadline>();
+                Regex re = new Regex("&[^;]+;");
                 for (int i = 4/*MAGIC*/; i < nodes.Length - 1/*MAGIC*/; i++) {
                     HtmlNode node = nodes[i];
 
@@ -425,9 +426,9 @@ namespace TsinghuaUWP {
                     var _id = Regex.Match(_href, @"[^_]id=(\d+)").Groups[1].Value;
 
                     deadlines.Add(new Deadline {
-                        name = _name,
+                        name = re.Replace(_name, " "),
                         ddl = _due,
-                        course = _course,
+                        course = re.Replace(_course, " "),
                         hasBeenFinished = _isFinished,
                         id = "@" + _id
                     });
@@ -445,6 +446,7 @@ namespace TsinghuaUWP {
 
             string _course = "";
             var root = JSON.parse<CourseAssignmentsRootobject>(page);
+            Regex re = new Regex("&[^;]+;");
             foreach (var item in root.resultList) {
                 var _isFinished = (item.courseHomeworkRecord.status != "0" /*MAGIC*/);
 
@@ -468,9 +470,9 @@ namespace TsinghuaUWP {
                 _name = WebUtility.HtmlDecode(_name);
 
                 deadlines.Add(new Deadline {
-                    name = _name,
+                    name = re.Replace(_name, " "),
                     ddl = _due,
-                    course = _course,
+                    course = re.Replace(_course, " "),
                     hasBeenFinished = _isFinished,
                     id = "_" + item.courseHomeworkInfo.homewkId
                 });
