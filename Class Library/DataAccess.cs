@@ -331,12 +331,16 @@ namespace TsinghuaUWP {
             foreach (var course in await getCourses(forceRemote)) {
                 Debug.WriteLine("[getAllDeadlines] Remote " + course.name);
                 var id = course.id;
-                List<Deadline> __deadlines;
-                if (course.isNew)
-                    __deadlines = await Remote.getRemoteHomeworkListNew(id);
-                else
-                    __deadlines = await Remote.getRemoteHomeworkList(id);
-                _deadlines = _deadlines.Concat(__deadlines).ToList();
+                try
+                {
+                    List<Deadline> __deadlines;
+                    if (course.isNew)
+                        __deadlines = await Remote.getRemoteHomeworkListNew(id);
+                    else
+                        __deadlines = await Remote.getRemoteHomeworkList(id);
+                    _deadlines = _deadlines.Concat(__deadlines).ToList();
+                }
+                catch { }
             }
 
 

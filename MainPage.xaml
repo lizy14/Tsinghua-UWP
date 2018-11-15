@@ -14,7 +14,11 @@
                 <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="0" TextWrapping="Wrap" VerticalAlignment="Top">
 							<Run Text="作业截止提醒会显示在动态磁贴上。"/>
 							<LineBreak/>
-							<Run Text="校历、课表、作业可通过系统内置''日历''查看。"/>
+							<Run Text="校历、课表、作业会显示在系统内置''日历''中。"/>
+							<LineBreak/>
+							<Run/>
+							<LineBreak/>
+							<Run Text="课程作业仅支持2001版网络学堂（learn）和2015版网络学堂（learn.cic）。通过2018版网络学堂（learn2018）布置的作业并不显示，请留意。"/>
 							<LineBreak/>
 							<Run/>
 							<LineBreak/>
@@ -34,7 +38,7 @@
                 </RelativePanel>
 
                 <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top">
-                    <Run Text="当您进行了选课、退课操作，您需要手动点击以下按钮。"/>
+                    <Run Text="当您进行了选课、退课操作，您需要手动刷新。"/>
                 </TextBlock>
 
                 <RelativePanel Margin="0,20,0,20">
@@ -49,7 +53,7 @@
 
                 </RelativePanel>
                 <TextBlock x:Name="textBlock1_Copy" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top">
-                    <Run Text="作业截止日期在后台自动更新。如果等不及（比如刚提交了一份作业，再也不想看见它），您可以手动点击以下按钮。"/>
+                    <Run Text="作业截止日期在后台自动更新。如果等不及（比如刚提交了一份作业，再也不想看见它），您可以手动刷新。"/>
                 </TextBlock>
                 <RelativePanel Margin="0,20,0,20">
 
