@@ -1,0 +1,98 @@
+img{
+	width: 50%;
+}
+div.intro-container {
+	min-height:110px;
+}
+div.avatar {
+	height:110px;
+	width:110px;
+	border-radius:55px;
+	display:block;
+	float:left;
+	background-image:url(http://static.nullspace.cn/wft-assignments/homepage/image/head.jpg);
+	margin-right:2em;
+}
+div.intro {
+	padding-left:1em;
+}
+@media screen and (max-width:480px) {
+	img{
+		width: 80%;
+	}
+	div.avatar {
+		display:inherit;
+		float:none;
+		margin:auto;
+	}
+	div.intro {
+		padding:0;
+	}
+}
+body {
+	font-family:consolas,courier,monospace;
+	background-color:#f1f1f1;
+}
+div.page-container {
+	border-top:2px solid #bbb;
+	background-color:white;
+	margin: 1em auto;
+	max-width: 1000px;
+}
+a {
+	text-decoration:none;
+}
+nav {
+	background:#222;
+	box-shadow:rgba(0,0,0,0.4) 0px 1px 2px;
+	color:white;
+	padding-left:6%;
+}
+hgroup {
+	padding:0 6%;
+}
+h1 {
+	font-size:x-large;
+	padding-top:3em;
+}
+h2 {
+	font-size:large;
+	padding-top:1em;
+}
+h2#subtitle {
+	color:#7a7a7a;
+	padding-top:0em;
+	font-size:medium;
+}
+nav a {
+	line-height:2em;
+	display:inline-block;
+	padding:0 1em;
+	color:#eee;
+}
+nav a:hover {
+	background:#f9f9f9;
+	color:#373737;
+}
+
+section {
+	border-bottom:1.5px solid #ddd;
+	padding-bottom:0.5em;
+	padding-left:2em;
+	padding-right:2em;
+	position:relative;
+}
+li.todo {
+	color:#666;
+	font-style:italic;
+}
+
+footer {
+	background:#f9f9f9;
+	border-top:1px solid #ddd;
+	color:#666;
+	font-size:12px;
+	line-height:2.2em;
+	padding:2.2em 0.5em;
+	text-align:center;
+}
