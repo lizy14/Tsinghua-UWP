@@ -135,11 +135,11 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Background Tasks\Background Tasks.csproj">
+    <ProjectReference Include="..\Background Tasks\Background Tasks.csproj">
       <Project>{d738d2a7-5b74-4063-b066-dce2b5a35599}</Project>
       <Name>Background Tasks</Name>
     </ProjectReference>
-    <ProjectReference Include="Class Library\Class Library.csproj">
+    <ProjectReference Include="..\Class Library\Class Library.csproj">
       <Project>{40054f12-52bd-4182-b1cc-8b68d9987b41}</Project>
       <Name>Class Library</Name>
     </ProjectReference>
