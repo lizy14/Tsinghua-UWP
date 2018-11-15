@@ -149,7 +149,6 @@ namespace TsinghuaUWP {
     // the following classes are generated from JSON by Visual Studio, 
     // for JSON parser only
     public class CourseAssignmentsRootobject {
-        public string message { get; set; }
         public Resultlist[] resultList { get; set; }
     }
 
@@ -159,67 +158,15 @@ namespace TsinghuaUWP {
     }
 
     public class Coursehomeworkrecord {
-        public int seqId { get; set; }
-        public string studentId { get; set; }
-        public string teacherId { get; set; }
-        public string homewkId { get; set; }
-        public long? regDate { get; set; }
-        public string homewkDetail { get; set; }
-        public Resourcesmappingbyhomewkaffix resourcesMappingByHomewkAffix { get; set; }
-        public object replyDetail { get; set; }
-        public object resourcesMappingByReplyAffix { get; set; }
-        public int? mark { get; set; }
-        public long? replyDate { get; set; }
-        public object iffine { get; set; }
         public string status { get; set; }
-        public string ifDelay { get; set; }
-        public string gradeUser { get; set; }
-        public int groupId { get; set; }
-        public object groupName { get; set; }
-    }
-
-    public class Resourcesmappingbyhomewkaffix {
-        public string fileId { get; set; }
-        public string resourcesId { get; set; }
-        public int diskId { get; set; }
-        public long regDate { get; set; }
-        public string fileName { get; set; }
-        public int browseNum { get; set; }
-        public int downloadNum { get; set; }
-        public string extension { get; set; }
-        public string fileSize { get; set; }
-        public string courseId { get; set; }
-        public object playUrl { get; set; }
-        public object downloadUrl { get; set; }
-        public int resourcesStatus { get; set; }
-        public string userCode { get; set; }
     }
 
     public class Coursehomeworkinfo {
         public int homewkId { get; set; }
-        public long? regDate { get; set; }
-        public long beginDate { get; set; }
         public long endDate { get; set; }
-        public int teachingWeekId { get; set; }
         public string title { get; set; }
         public string detail { get; set; }
-        public object homewkAffix { get; set; }
-        public object homewkAffixFilename { get; set; }
-        public object homewkIndex { get; set; }
-        public object answerDetail { get; set; }
-        public object answerLink { get; set; }
-        public object answerLinkFilename { get; set; }
-        public object answerDate { get; set; }
         public string courseId { get; set; }
-        public object homewkGroupNum { get; set; }
-        public string courseSource { get; set; }
-        public int noteId { get; set; }
-        public object courseKnowledge { get; set; }
-        public int weiJiao { get; set; }
-        public int yiJiao { get; set; }
-        public int yiYue { get; set; }
-        public int yiPi { get; set; }
-        public int jiaoed { get; set; }
     }
 
     public class SemestersRootObject {
