@@ -167,12 +167,10 @@ $@"<toast>
                     large += $@"
 <group>
     <subgroup>
-            <text hint-style=""{(first? "body" : "caption")}"">{deadline.name}</text>
-            <text hint-style=""captionSubtle"">{deadline.timeLeft()} · {deadline.course}</text>
-            {(first? $@"<text hint-style=""captionSubtle"">截止于 {deadline.ddl} 23:59</text>" : "")}
+            <text hint-style=""caption"">{deadline.timeLeft().Replace("只剩", "").Replace("还有", "")} · {deadline.name}</text>
+            <text hint-style=""captionSubtle"" hint-align=""right"">{deadline.course}</text>
     </subgroup>
 </group>
-<text/>
 ";
                     first = false;
                 }
