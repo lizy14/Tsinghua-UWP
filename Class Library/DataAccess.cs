@@ -101,7 +101,7 @@ namespace TsinghuaUWP {
             return future.Concat(past.Take(limit - futureCount)).ToList();
         }
 
-        public static async Task<List<Course>> getCourses(bool forceRemote = false) {
+        public static async Task<List<Course>> getCourses(bool forceRemote = false, string semester = "") {
             if (isDemo()) {
                 var list = new List<Course>();
                 list.Add(new Course {
@@ -115,6 +115,9 @@ namespace TsinghuaUWP {
                 });
 
                 return list;
+            }
+            if(semester == "") {
+                semester = (await getSemester()).id;
             }
 
             if (!forceRemote) {
@@ -135,7 +138,7 @@ namespace TsinghuaUWP {
 
 
             //fetch from remote
-            var _courses = await Remote.getRemoteCourseList();
+            var _courses = await Remote.getRemoteCourseList(semester);
             courses = _courses;
             writeCache(COURSES_FILENAME, JSON.stringify(_courses));
 
@@ -144,61 +147,122 @@ namespace TsinghuaUWP {
         }
 
         public static async Task<Timetable> getTimetable(bool forceRemote = false) {
-            if (isDemo()) {
+            {
+                if (isDemo()) {
+                    var table = new Timetable();
+
+                    var start = DateTime.Now.AddDays(-20);
+                    while (start.DayOfWeek != DayOfWeek.Monday)
+                        start = start.AddDays(-1);
+
+                    for (var i = 0; i < 10; i++) {
+                        table.Add(new Event {
+                            nr = "形式语言与自动机",
+                            dd = "六教 6A301",
+                            nq = start.AddDays(i * 7 + 2).ToString("yyyy-MM-dd"),
+                            kssj = "08:00",
+                            jssj = "09:35"
+                        });
+
+                        table.Add(new Event {
+                            nr = "高级数据结构",
+                            dd = "六教 6A301",
+                            nq = start.AddDays(i * 7 + 2).ToString("yyyy-MM-dd"),
+                            kssj = "09:50",
+                            jssj = "11:25"
+                        });
+
+                        table.Add(new Event {
+                            nr = "操作系统",
+                            dd = "六教 6A303",
+                            nq = start.AddDays(i * 7 + 3).ToString("yyyy-MM-dd"),
+                            kssj = "09:50",
+                            jssj = "11:25"
+                        });
+
+                        table.Add(new Event {
+                            nr = "概率论与数理统计",
+                            dd = "六教 6C102",
+                            nq = start.AddDays(i * 7 + 4).ToString("yyyy-MM-dd"),
+                            kssj = "15:20",
+                            jssj = "16:55"
+                        });
+
+                        table.Add(new Event {
+                            nr = "概率论与数理统计",
+                            dd = "一教 104",
+                            nq = start.AddDays(i * 7 + 1).ToString("yyyy-MM-dd"),
+                            kssj = "13:30",
+                            jssj = "15:05"
+                        });
+                    }
+                    return table;
+                }
+            }
+            {
+                //fetch from remote
+                string[] 大节开始时间 = {
+                "",
+                "8:00",
+                "9:50",
+                "13:30",
+                "15:20",
+                "17:05",
+                "19:20"
+            };
+                int[] 大节开始小节 = { 0, 1, 3, 6, 8, 10, 12 };
+                string[] 小节结束时间 = {
+                "",
+                "8:45",
+                "9:35",
+                "10:35",
+                "11:25",
+                "12:15",
+                "14:15",
+                "15:05",
+                "16:05",
+                "16:55",
+                "17:50",
+                "18:40",
+                "20:05",
+                "20:55",
+                "21:45"
+            };
+
                 var table = new Timetable();
 
-                var start = DateTime.Now.AddDays(-20);
-                while (start.DayOfWeek != DayOfWeek.Monday)
-                    start = start.AddDays(-1);
+                bool[] bools = { false, true };
+                foreach (bool getNextSemester in bools) {
 
-                for (var i = 0; i < 10; i++) {
-                    table.Add(new Event {
-                        nr = "形式语言与自动机",
-                        dd = "六教 6A301",
-                        nq = start.AddDays(i * 7 + 2).ToString("yyyy-MM-dd"),
-                        kssj = "08:00",
-                        jssj = "09:35"
-                    });
+                    var semester = await getSemester(forceRemote, getNextSemester);
+                    var start = DateTime.Parse(semester.startDate);
 
-                    table.Add(new Event {
-                        nr = "高级数据结构",
-                        dd = "六教 6A301",
-                        nq = start.AddDays(i * 7 + 2).ToString("yyyy-MM-dd"),
-                        kssj = "09:50",
-                        jssj = "11:25"
-                    });
-
-                    table.Add(new Event {
-                        nr = "操作系统",
-                        dd = "六教 6A303",
-                        nq = start.AddDays(i * 7 + 3).ToString("yyyy-MM-dd"),
-                        kssj = "09:50",
-                        jssj = "11:25"
-                    });
-
-                    table.Add(new Event {
-                        nr = "概率论与数理统计",
-                        dd = "六教 6C102",
-                        nq = start.AddDays(i * 7 + 4).ToString("yyyy-MM-dd"),
-                        kssj = "15:20",
-                        jssj = "16:55"
-                    });
-
-                    table.Add(new Event {
-                        nr = "概率论与数理统计",
-                        dd = "一教 104",
-                        nq = start.AddDays(i * 7 + 1).ToString("yyyy-MM-dd"),
-                        kssj = "13:30",
-                        jssj = "15:05"
-                    });
+                    foreach (var course in await getCourses(forceRemote, semester.id)) {
+                        Debug.WriteLine("[getAllDeadlines] Remote " + course.name);
+                        var id = course.id;
+                        try {
+                            var detail = await Remote.getRemoteCourseDetail(course.id);
+                            foreach (var segment in detail) {
+                                for (int weekOffset = 0; weekOffset < segment.skzc.Length; ++weekOffset) {
+                                    if (segment.skzc[weekOffset] == '1') {
+                                        table.Add(new Event {
+                                            nr = course.name,
+                                            dd = segment.skdd,
+                                            nq = start.AddDays(weekOffset * 7 + segment.skxq - 1).ToString("yyyy-MM-dd"),
+                                            kssj = 大节开始时间[segment.skjc],
+                                            jssj = 小节结束时间[大节开始小节[segment.skjc] + segment.skxs - 1]
+                                        });
+                                    }
+                                }
+                            }
+                        } catch { }
+                    }
                 }
+
+
+                Debug.WriteLine("[getTimetable] Returning remote");
                 return table;
             }
-
-            //fetch from remote
-            var _remoteTimetable = await Remote.getRemoteTimetable();
-            Debug.WriteLine("[getTimetable] Returning remote");
-            return _remoteTimetable;
         }
 
         public static async Task<Semester> getSemester(bool forceRemote = false, bool getNextSemester = false) {
@@ -255,6 +319,9 @@ namespace TsinghuaUWP {
                         return __semesters.nextSemester;
                     }
                     Debug.WriteLine("[getCalendar] Returning cache");
+                    if (getNextSemester) {
+                        return semesters.nextSemester;
+                    }
                     return __semesters.currentSemester;
                 }
             }
@@ -276,6 +343,9 @@ namespace TsinghuaUWP {
             writeCache(SEMESTERS_FILENAME, JSON.stringify(semesters));
 
             Debug.WriteLine("[getCalendar] Returning remote");
+            if (getNextSemester) {
+                return semesters.nextSemester;
+            }
             return semesters.currentSemester;
         }
 
@@ -331,16 +401,11 @@ namespace TsinghuaUWP {
             foreach (var course in await getCourses(forceRemote)) {
                 Debug.WriteLine("[getAllDeadlines] Remote " + course.name);
                 var id = course.id;
-                try
-                {
+                try {
                     List<Deadline> __deadlines;
-                    if (course.isNew)
-                        __deadlines = await Remote.getRemoteHomeworkListNew(id);
-                    else
-                        __deadlines = await Remote.getRemoteHomeworkList(id);
+                    __deadlines = await Remote.getRemoteHomeworkList(id);
                     _deadlines = _deadlines.Concat(__deadlines).ToList();
-                }
-                catch { }
+                } catch { }
             }
 
 

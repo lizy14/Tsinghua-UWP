@@ -95,9 +95,11 @@ namespace TsinghuaUWP {
 
                 foreach (var i in to_be_inserted) {
                     Debug.WriteLine("[updateDeadlines] inserting " + i.Subject);
+                    
                     if (i.StartTime - DateTime.Now < TimeSpan.FromHours(7)) {
+                        // WTF ??
                         Debug.WriteLine("[updateDeadlines] ignoring " + i.Subject);
-                        continue;
+                        // continue;
                     }
                     await ddl_cal.SaveAppointmentAsync(i);
                 }
@@ -138,25 +140,6 @@ namespace TsinghuaUWP {
             semester_in_system_calendar = current_semester.semesterEname;
 
             Debug.WriteLine("[Appointment] calendar finish");
-        }
-
-        public static async Task updateLectures() { //always force remote
-            Debug.WriteLine("[Appointment] lecture begin");
-
-            //TODO: possible duplication, lock?
-
-            var lectures = await Remote.getHostedLectures();
-
-            //get Calendar object
-            AppointmentCalendar cal = await getAppointmentCalendar(lec_cal_name, lec_storedKey);
-
-            await deleteAllAppointments(cal);
-
-            foreach (var lec in lectures) {
-                await cal.SaveAppointmentAsync(getAppointment(lec));
-            }
-
-            Debug.WriteLine("[Appointment] lecture finish");
         }
 
         public static async Task updateTimetable(bool forceRemote = false) {
@@ -211,27 +194,8 @@ namespace TsinghuaUWP {
 
             a.StartTime = DateTime.Parse(e.nq + " " + e.kssj);
             a.Duration = DateTime.Parse(e.nq + " " + e.jssj) - a.StartTime;
-            // 修正考试时间 12 小时制
-            if (e.fl == "考试") {
-                if (a.StartTime.Hour < 8) {
-                    a.StartTime += TimeSpan.FromHours(12);
-                }
-                a.Subject += "考试";
-            }
-            a.AllDay = false;
-            return a;
-        }
 
-        private static Windows.ApplicationModel.Appointments.Appointment getAppointment(Lecture l) {
-            var a = new Windows.ApplicationModel.Appointments.Appointment();
-            a.Subject = l.summary;
-            a.Location = l.location;
-            a.StartTime = DateTime.Parse(l.dtstart);
-            a.Duration = DateTime.Parse(l.dtend) - a.StartTime;
-            a.DetailsKind = AppointmentDetailsKind.PlainText;
-            a.Details = l.description;
             a.AllDay = false;
-            a.BusyStatus = AppointmentBusyStatus.Free;
             return a;
         }
 
@@ -240,7 +204,7 @@ namespace TsinghuaUWP {
             Regex re = new Regex("&[^;]+;");
             a.Subject = re.Replace(e.name, " ");
             a.Location = re.Replace(e.course, " ");
-            a.StartTime = DateTime.Parse(e.ddl + " 23:59");
+            a.StartTime = DateTime.Parse(e.ddl);
             a.AllDay = false;
             a.BusyStatus = e.hasBeenFinished ? AppointmentBusyStatus.Free : AppointmentBusyStatus.Tentative;
             if (e.hasBeenFinished)
