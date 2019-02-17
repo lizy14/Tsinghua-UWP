@@ -34,13 +34,8 @@ namespace TsinghuaUWP {
         }
 
         private async void update_with_credential() {
-
             updateDeadlinesAsyc();
-            updateTimetableAsync();
-            Appointment.updateCalendar();
-            try {
-                await Appointment.updateLectures();
-            } catch { }
+            // updateTimetableAsync(); // fix: 重复导入课程表
         }
 
         private async void update_without_credential() {
@@ -48,10 +43,6 @@ namespace TsinghuaUWP {
                 await Notification.update(calendarOnly: true);
                 await Appointment.updateCalendar();
             } catch { }
-            try {
-                await Appointment.updateLectures();
-            } catch { }
-
         }
 
         private async Task changeAccountAsync() {
@@ -151,6 +142,7 @@ namespace TsinghuaUWP {
         }
 
         private void btnRefreshTimetable_Click(object sender, RoutedEventArgs e) {
+            Appointment.updateCalendar();
             updateTimetableAsync();
         }
 

@@ -78,9 +78,6 @@ namespace BackgroundTasks {
                 try {
                     await Appointment.updateDeadlines();
                 } catch (Exception) { }
-                try {
-                    if (goRemote) { await Appointment.updateLectures(); }
-                } catch (Exception) { }
                 
 
                 deferral.Complete();
