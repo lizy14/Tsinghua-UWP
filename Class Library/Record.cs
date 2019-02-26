@@ -133,8 +133,9 @@ namespace TsinghuaUWP {
         public string semesterEname { get; set; }
 
         public string getWeekName() {
-            var semesterStart = DateTime.Parse(startDate);
-            var delta = DateTime.Now - semesterStart;
+            var start = DateTime.Parse(startDate);
+            for (; start.DayOfWeek != DayOfWeek.Monday; start = start.AddDays(1)) { }
+            var delta = DateTime.Now - start;
             var days = delta.TotalDays;
 
             /* 0 ~  6.9 -> 1
@@ -212,24 +213,21 @@ namespace TsinghuaUWP {
     }
 
     public class CourseDetail {
+        /*
         public string id { get; set; }
         public string wlkcid { get; set; }
 
         public string xnxq { get; set; }
         public string kch { get; set; }
         public string kxh { get; set; }
+        */
 
         public string skzc { get; set; }
         public int skxq { get; set; }
         public int skjc { get; set; }
         public int skxs { get; set; }
 
-        public string zcms { get; set; }
-
         public string skdd { get; set; }
-        
-        public string jxlh { get; set; }
-        public string jash { get; set; }
         
     }
 

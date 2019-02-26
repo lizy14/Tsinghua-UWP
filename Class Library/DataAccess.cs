@@ -236,6 +236,7 @@ namespace TsinghuaUWP {
 
                     var semester = await getSemester(forceRemote, getNextSemester);
                     var start = DateTime.Parse(semester.startDate);
+                    for(; start.DayOfWeek != DayOfWeek.Monday; start = start.AddDays(1)) { }
 
                     foreach (var course in await getCourses(forceRemote, semester.id)) {
                         Debug.WriteLine("[getAllDeadlines] Remote " + course.name);
