@@ -25,13 +25,83 @@ namespace TsinghuaUWP {
 
 
             var page = await GET($"http://learn2018.tsinghua.edu.cn/b/kc/v_wlkc_xk_sjddb/detail?id={courseId}");
-            var parsed = JSON.parse<CourseDetail[]>(page);
-
+            var strs = JSON.parse<string[]>(page);
+            var result = new List<CourseDetail> { };
+            foreach (var str in strs) {
+                var groups = Regex.Match(str, "星期([一二三四五六日])第(\\d)节\\((.+)\\)，(.+)").Groups;
+                var segment = new CourseDetail { };
+                switch (groups[1].Value) {
+                    case "一": segment.skxq = 1; break;
+                    case "二": segment.skxq = 2; break;
+                    case "三": segment.skxq = 3; break;
+                    case "四": segment.skxq = 4; break;
+                    case "五": segment.skxq = 5; break;
+                    case "六": segment.skxq = 6; break;
+                    case "日": segment.skxq = 7; break;
+                }
+                segment.skjc = int.Parse(groups[2].Value);
+                segment.skzc = parseWeekString(groups[3].Value);
+                segment.skdd = groups[4].Value;
+                segment.skxs = 2;
+                result.Add(segment);
+            }
+            
             Debug.WriteLine("[getRemoteTimetable] returning direct");
-            return parsed.ToList();
+            return result;
         }
     
+        private static string parseWeekString(string weekString) {
+            // reference: https://github.com/TennyZhuang/CamusAPI/blob/master/app/thulib/curriculum.js
+            var result = new List<int> { };
+            switch (weekString) {
+                case "全周":
+                    result.AddRange(range(1, 16));
+                    break;
+                case "前八周":
+                    result.AddRange(range(1, 8));
+                    break;
+                case "后八周":
+                    result.AddRange(range(9, 16));
+                    break;
+                case "单周":
+                    result.AddRange(range(1, 16, 2));
+                    break;
+                case "双周":
+                    result.AddRange(range(2, 16, 2));
+                    break;
+                default:
+                    var slices = Regex.Split(weekString, "[ ]*[,，][ ]*|周");
+                    foreach (var slice in slices) {
+                        int start = -1;
+                        int end = -1;
+                        if (slice == "") {
+                        } else if (slice.Contains("-") == false) {
+                            result.Add(int.Parse(slice));
+                        } else {
+                            var splits = slice.Split('-');
+                            result.AddRange(range(int.Parse(splits[0]), int.Parse(splits[1])));
+                        }
+                    }
+                    break;
+            }
+            var str = new List<string> { };
+            foreach (var i in range(1, 16)) {
+                str.Add("0");
+            }
+            foreach (var w in result) {
+                str[w - 1] = "1";
+            }
+            return string.Join("", str);
+        }
 
+        private static List<int> range(int start, int end, int step = 1) {
+            // inclusive
+            var result = new List<int> { };
+            for (var i = start; i <= end; ++i) {
+                result.Add(i);
+            }
+            return result;
+        }
 
         public static async Task<List<Deadline>> getRemoteHomeworkList(string courseId) {
             await login();
