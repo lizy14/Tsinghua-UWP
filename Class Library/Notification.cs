@@ -158,8 +158,13 @@ $@"<toast>
                 wide = "";
                 large = "";
                 bool first = true;
+                int counter = 0;
                 foreach(var deadline in deadlines)
                 {
+                    counter++;
+                    if (counter > 5){
+                        break;
+                    }
                         wide += $@"
 <text hint-style=""caption{(first? "": "Subtle")}"">{deadline.timeLeft().Replace("只剩", "").Replace("还有", "")} · {deadline.name} - {deadline.course}</text>
 ";

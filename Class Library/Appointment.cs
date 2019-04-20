@@ -207,7 +207,7 @@ namespace TsinghuaUWP {
             a.StartTime = DateTime.Parse(e.ddl);
             a.AllDay = false;
             a.BusyStatus = e.hasBeenFinished ? AppointmentBusyStatus.Free : AppointmentBusyStatus.Tentative;
-            if (e.hasBeenFinished)
+            if (e.hasBeenFinished || a.StartTime.AddHours(-6) < DateTime.Now)
                 a.Reminder = null;
             else
                 a.Reminder = TimeSpan.FromHours(6);
