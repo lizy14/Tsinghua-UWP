@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace TsinghuaUWP {
     public class Notification {
-
+        
         static private void setBadgeNumber(int num) {
 
             // Get the blank badge XML payload for a badge number
@@ -99,6 +99,10 @@ namespace TsinghuaUWP {
             var weekday = "周" + weekDayNames[Convert.ToInt32(now.DayOfWeek)];
             return weekday;
         }
+        private static string escape(string text) {
+            return text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;");
+        }
+
         private static XmlDocument getToastXmlForDeadline(Deadline deadline) {
 
             // TODO: all values need to be XML escaped
@@ -111,8 +115,8 @@ namespace TsinghuaUWP {
             string toastVisual = $@"
 <visual>
   <binding template='ToastGeneric'>
-    <text>{name}</text>
-    <text>新出现 ddl: {deadline.ddl}, {course}</text>
+    <text>{escape(name)}</text>
+    <text>新出现 ddl: {deadline.ddl}, {escape(course)}</text>
 </binding>
 </visual>";
 
@@ -149,11 +153,11 @@ $@"<toast>
                 medium = $@"
 <text 
     hint-wrap=""true"" 
-    hint-maxLines=""3"">{deadlines[0].name}</text>
+    hint-maxLines=""3"">{escape(deadlines[0].name)}</text>
 <text hint-style=""captionSubtle"">{deadlines[0].timeLeft()}</text>
 <text hint-style=""captionSubtle""
     hint-wrap=""true"" 
-    hint-maxLines=""2"">{deadlines[0].course}</text>
+    hint-maxLines=""2"">{escape(deadlines[0].course)}</text>
 ";
                 wide = "";
                 large = "";
@@ -166,14 +170,14 @@ $@"<toast>
                         break;
                     }
                         wide += $@"
-<text hint-style=""caption{(first? "": "Subtle")}"">{deadline.timeLeft().Replace("只剩", "").Replace("还有", "")} · {deadline.name} - {deadline.course}</text>
+<text hint-style=""caption{(first? "": "Subtle")}"">{deadline.timeLeft().Replace("只剩", "").Replace("还有", "")} · {escape(deadline.name)} - {escape(deadline.course)}</text>
 ";
                     
                     large += $@"
 <group>
     <subgroup>
-            <text hint-style=""caption"">{deadline.timeLeft().Replace("只剩", "").Replace("还有", "")} · {deadline.name}</text>
-            <text hint-style=""captionSubtle"" hint-align=""right"">{deadline.course}</text>
+            <text hint-style=""caption"">{deadline.timeLeft().Replace("只剩", "").Replace("还有", "")} · {escape(deadline.name)}</text>
+            <text hint-style=""captionSubtle"" hint-align=""right"">{escape(deadline.course)}</text>
     </subgroup>
 </group>
 ";
