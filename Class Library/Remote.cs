@@ -132,6 +132,7 @@ namespace TsinghuaUWP {
                     startDate = _remoteCalendar.result.kssj,
                     endDate = _remoteCalendar.result.jssj
                 },
+                /*
                 nextSemester = new Semester {
                     id = _remoteCalendar.resultList[0].id,
                     semesterEname = Regex.Replace(Regex.Replace(Regex.Replace(_remoteCalendar.resultList[0].id, "-1$", "-Autumn"), "-2$", "-Spring"), "-3$", "-Summer"),
@@ -139,6 +140,7 @@ namespace TsinghuaUWP {
                     startDate = _remoteCalendar.resultList[0].kssj,
                     endDate = _remoteCalendar.resultList[0].jssj
                 },
+                */
             };
         }
 
