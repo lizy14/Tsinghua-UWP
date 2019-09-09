@@ -131,7 +131,7 @@ namespace TsinghuaUWP {
                 await cal.SaveAppointmentAsync(ev);
             }
 
-            if (next_semester.id != current_semester.id) {
+            if (next_semester != null && next_semester.id != current_semester.id) {
                 foreach (var ev in getAppointments(next_semester)) {
                     await cal.SaveAppointmentAsync(ev);
                 }

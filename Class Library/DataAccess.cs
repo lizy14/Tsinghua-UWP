@@ -231,7 +231,7 @@ namespace TsinghuaUWP {
 
                 var table = new Timetable();
 
-                bool[] bools = { false, true };
+                bool[] bools = { false /*, true*/ };
                 foreach (bool getNextSemester in bools) {
 
                     var semester = await getSemester(forceRemote, getNextSemester);
