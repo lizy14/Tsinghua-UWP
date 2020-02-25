@@ -241,6 +241,8 @@
     <Language Code="no-no" InMinimumRequirementSet="true" />
     <Language Code="nso" InMinimumRequirementSet="true" />
     <Language Code="nso-za" InMinimumRequirementSet="true" />
+    <Language Code="om" InMinimumRequirementSet="false" />
+    <Language Code="om-et" InMinimumRequirementSet="false" />
     <Language Code="or" InMinimumRequirementSet="true" />
     <Language Code="or-in" InMinimumRequirementSet="true" />
     <Language Code="pa" InMinimumRequirementSet="true" />
@@ -368,18 +370,18 @@
   <PackageInfoList LandingUrl="https://developer.microsoft.com/dashboard/Application?appId=9NBLGGH4TWV4">
     <PackageInfo>
       <OsMinVersion>0.0.0.0</OsMinVersion>
-      <PackageArchitecture>X64</PackageArchitecture>
-      <PackageMaxArchitectureVersion>1.3.3.0</PackageMaxArchitectureVersion>
-    </PackageInfo>
-    <PackageInfo>
-      <OsMinVersion>0.0.0.0</OsMinVersion>
       <PackageArchitecture>Arm</PackageArchitecture>
-      <PackageMaxArchitectureVersion>1.3.3.0</PackageMaxArchitectureVersion>
+      <PackageMaxArchitectureVersion>1.3.4.0</PackageMaxArchitectureVersion>
     </PackageInfo>
     <PackageInfo>
       <OsMinVersion>0.0.0.0</OsMinVersion>
       <PackageArchitecture>X86</PackageArchitecture>
-      <PackageMaxArchitectureVersion>1.3.3.0</PackageMaxArchitectureVersion>
+      <PackageMaxArchitectureVersion>1.3.4.0</PackageMaxArchitectureVersion>
+    </PackageInfo>
+    <PackageInfo>
+      <OsMinVersion>0.0.0.0</OsMinVersion>
+      <PackageArchitecture>X64</PackageArchitecture>
+      <PackageMaxArchitectureVersion>1.3.4.0</PackageMaxArchitectureVersion>
     </PackageInfo>
   </PackageInfoList>
 </StoreAssociation>
