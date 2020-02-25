@@ -124,6 +124,9 @@ namespace TsinghuaUWP {
             await login();
             await 十１ｓ();
             var _remoteCalendar = parseSemestersPage(await getSemesterPage());
+            if (_remoteCalendar.result.xnxq.Equals("2019-2020-2")) {
+                _remoteCalendar.result.kssj = "2020-02-17"; // 修复网络学堂错误
+            }
             return new Semesters {
                 currentSemester = new Semester {
                     id = _remoteCalendar.result.id,
