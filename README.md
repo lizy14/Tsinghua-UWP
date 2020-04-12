@@ -1,4 +1,9 @@
+# ⚠
+
+__作者即将毕业，预计不久后将停止维护本项目。正在招募维护者，欢迎有意向的同学联系 lizy14@tsinghua.org.cn__
+
 # Tsinghua-UWP
+
 清华磁贴 for UWP：校历、课表、作业提醒
 
 已上架 Microsoft 商店：[清华磁贴](https://www.microsoft.com/p/%E6%B8%85%E5%8D%8E%E7%A3%81%E8%B4%B4/9nblggh4twv4)
@@ -15,3 +20,7 @@
 ## 友情链接
 基于本项目的其他项目
 * [InsTsinghua](https://www.microsoft.com/p/instsinghua/9p1pc1h282gs)
+
+相关项目
+* [learnX](https://github.com/robertying/learnX)
+* [TsinghuaNet](https://github.com/OpportunityLiu/TsinghuaNet)
