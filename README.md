@@ -4,7 +4,7 @@ __作者即将毕业，预计不久后将停止维护本项目。正在招募维
 
 # Tsinghua-UWP
 
-清华磁贴 for UWP：校历、课表、作业提醒
+清华磁贴 for Universal Windows：校历、课表、作业提醒
 
 已上架 Microsoft 商店：[清华磁贴](https://www.microsoft.com/p/%E6%B8%85%E5%8D%8E%E7%A3%81%E8%B4%B4/9nblggh4twv4)
 
@@ -19,8 +19,10 @@ __作者即将毕业，预计不久后将停止维护本项目。正在招募维
 
 ## 友情链接
 基于本项目的其他项目
-* [InsTsinghua](https://www.microsoft.com/p/instsinghua/9p1pc1h282gs)
+* [InsTsinghua](https://www.microsoft.com/p/instsinghua/9p1pc1h282gs)：Universal Windows，网络学堂、邮箱、教室、演出、新闻等
 
 相关项目
-* [learnX](https://github.com/robertying/learnX)
-* [TsinghuaNet](https://github.com/OpportunityLiu/TsinghuaNet)
+* [learnX](https://github.com/robertying/learnX)：iOS/macOS/Android (React Native)，网络学堂
+* [TsinghuaNet](https://github.com/OpportunityLiu/TsinghuaNet)：Universal Windows，校园网
+* [Learn Helper](https://github.com/xxr3376/Learn-Project)：Chrome/Firefox/Edge 浏览器拓展，网络学堂
+* [THUInfo](https://github.com/unidy2002/thuinfo)：iOS/Android (React Native)，网络学堂、成绩、教室、校园卡、宿舍充电等
