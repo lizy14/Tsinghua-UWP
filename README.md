@@ -1,6 +1,4 @@
-# ⚠
-
-__作者即将毕业，预计不久后将停止维护本项目。正在招募维护者，欢迎有意向的同学联系 lizy14@tsinghua.org.cn__
+__⚠作者现已毕业，难以继续维护本项目。如有同学有意参与，请联系 lizy14@tsinghua.org.cn__
 
 # Tsinghua-UWP
 
@@ -8,7 +6,7 @@ __作者即将毕业，预计不久后将停止维护本项目。正在招募维
 
 已上架 Microsoft 商店：[清华磁贴](https://www.microsoft.com/p/%E6%B8%85%E5%8D%8E%E7%A3%81%E8%B4%B4/9nblggh4twv4)
 
-![动态磁贴截图](https://static.nullspace.cn/thuUwpImages/tilenew.png)
+![动态磁贴截图](https://github.com/lizy14/Tsinghua-UWP/blob/master/Release%20Notes/screenshots/tile-large.png?raw=true)
 
 ## 项目组织
 大二时的练手之作，代码相当杂乱（捂脸）。也就 Class Library 工程里的 Remote 类还算有点复用的价值：
