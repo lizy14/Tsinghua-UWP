@@ -1,5 +1,3 @@
-__⚠作者现已毕业，难以继续维护本项目。如有同学有意参与，请联系 lizy14@tsinghua.org.cn__
-
 # Tsinghua-UWP
 
 清华磁贴 for Universal Windows：校历、课表、作业提醒
